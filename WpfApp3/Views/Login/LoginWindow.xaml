@@ -52,7 +52,7 @@
             </Style.Triggers>
         </Style>
 
-        <!-- TextBox look (no double border) -->
+        <!-- TextBox Look  -->
         <Style TargetType="TextBox">
             <Setter Property="Height" Value="44"/>
             <Setter Property="Padding" Value="14,10"/>
