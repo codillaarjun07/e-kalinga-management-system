@@ -1,0 +1,682 @@
+﻿<UserControl x:Class="WpfApp3.Views.Users.UsersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:WpfApp3.ViewModels.Users"
+             xmlns:conv="clr-namespace:WpfApp3.Views.Allotment"
+             Background="#F3F5F9">
+
+    <UserControl.DataContext>
+        <vm:UsersViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:EqualsToBoolConverter x:Key="EqualsToBoolConverter"/>
+
+        <!-- Icon-like square buttons -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="#2E3A59"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Primary button -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#2E3A59"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pagination button base -->
+        <Style x:Key="PageButton" TargetType="Button">
+            <Setter Property="MinWidth" Value="34"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="8" Background="{TemplateBinding Background}" Padding="10,4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#EEF2FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small table action icon button -->
+        <Style x:Key="RowActionButton" TargetType="Button">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <!-- Reveal pill -->
+        <Style x:Key="RevealPillButton" TargetType="Button">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="MinWidth" Value="90"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#2E3A59"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="14"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Centering -->
+        <Style x:Key="CenteredCellStyle" TargetType="DataGridCell">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="6,0"/>
+        </Style>
+
+        <Style x:Key="CenteredTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Rounded Save button template -->
+        <Style x:Key="RoundedPrimarySave" TargetType="Button">
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Background" Value="#2E3A59"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="12" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Rounded Danger button template -->
+        <Style x:Key="RoundedDangerConfirm" TargetType="Button">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#FF0000"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="12" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- PAGE CONTENT -->
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Search + buttons + Add -->
+            <Grid Grid.Row="1" Margin="0,16,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="360"/>
+                    <ColumnDefinition Width="52"/>
+                    <ColumnDefinition Width="52"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border CornerRadius="12" Background="White" Padding="12,8">
+                    <Grid>
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Foreground="#2E3A59"
+                                 FontSize="13"/>
+
+                        <TextBlock Text="Search Here"
+                                   Foreground="#A3AEC2"
+                                   FontSize="13"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SearchText}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+
+                <Button Grid.Column="1" Style="{StaticResource IconButton}" Margin="10,0,0,0" Content="🔍"/>
+
+                <Button Grid.Column="2"
+                        Style="{StaticResource IconButton}"
+                        Margin="10,0,0,0"
+                        Background="#EEF2FF"
+                        Foreground="#2E3A59"
+                        Content="≡"/>
+
+                <Button Grid.Column="4"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding AddUserCommand}"
+                        Content="＋  Add User"/>
+            </Grid>
+
+            <!-- Found text -->
+            <TextBlock Grid.Row="2"
+                       Text="{Binding FoundText}"
+                       Foreground="#6B778C"
+                       FontSize="12"
+                       Margin="2,0,0,10"/>
+
+            <!-- Table -->
+            <Border Grid.Row="3"
+                    CornerRadius="18"
+                    Background="White"
+                    Padding="10"
+                    Margin="0,6,0,0">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.06"/>
+                </Border.Effect>
+
+                <DataGrid ItemsSource="{Binding Items}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="None"
+                          RowHeaderWidth="0"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          FontSize="12"
+                          Foreground="#2E3A59"
+                          ColumnHeaderHeight="42"
+                          RowHeight="48"
+                          IsReadOnly="True"
+                            CanUserResizeRows="False"
+                            CanUserReorderColumns="False"
+                            CanUserSortColumns="False"
+                          IsHitTestVisible="True"
+                            SelectionUnit="Cell"
+                            SelectionMode="Single"
+                          >
+
+                    <DataGrid.Resources>
+
+                        <!-- Column headers -->
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Foreground" Value="#6B86D6"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="BorderBrush" Value="#EEF2FF"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="8,0"/>
+                        </Style>
+
+                        <!-- Row: NO hover highlight, NO selection highlight -->
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="#EEF2FF"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="SnapsToDevicePixels" Value="True"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridRow">
+                                        <Border Background="Transparent"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                                            <DataGridCellsPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <!-- Cell: NO hover highlight, NO selection highlight, NO focus border -->
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="6,0"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="Transparent"
+                            SnapsToDevicePixels="True">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <!-- checkbox -->
+                        <DataGridTemplateColumn Width="40">
+                            <DataGridTemplateColumn.Header>
+                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </DataGridTemplateColumn.Header>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsSelected}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="ID"
+                                            Binding="{Binding Id}"
+                                            Width="60"
+                                            CellStyle="{StaticResource CenteredCellStyle}"
+                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+
+                        <DataGridTextColumn Header="First Name"
+                                            Binding="{Binding FirstName}"
+                                            Width="140"
+                                            CellStyle="{StaticResource CenteredCellStyle}"
+                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+
+                        <DataGridTextColumn Header="Last Name"
+                                            Binding="{Binding LastName}"
+                                            Width="140"
+                                            CellStyle="{StaticResource CenteredCellStyle}"
+                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+
+                        <DataGridTextColumn Header="Office"
+                                            Binding="{Binding Office}"
+                                            Width="140"
+                                            CellStyle="{StaticResource CenteredCellStyle}"
+                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+
+                        <DataGridTextColumn Header="Role"
+                                            Binding="{Binding Role}"
+                                            Width="120"
+                                            CellStyle="{StaticResource CenteredCellStyle}"
+                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+
+                        <DataGridTextColumn Header="Username"
+                                            Binding="{Binding Username}"
+                                            Width="140"
+                                            CellStyle="{StaticResource CenteredCellStyle}"
+                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+
+                        <!-- Password column: shows PasswordDisplay + Reveal/Hide -->
+                        <DataGridTemplateColumn Header="Password" Width="220">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                                        <!-- masked/revealed text -->
+                                        <TextBlock Text="{Binding PasswordDisplay}"
+                           Foreground="#2E3A59"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+
+                                        <!-- Reveal/Hide button -->
+                                        <Button Command="{Binding DataContext.ToggleRevealCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                        CommandParameter="{Binding}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource RevealPillButton}">
+                                                    <Setter Property="Content" Value="Reveal"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPasswordRevealed}" Value="True">
+                                                            <Setter Property="Content" Value="Hide"/>
+                                                            <Setter Property="BorderBrush" Value="#6B86D6"/>
+                                                            <Setter Property="Foreground" Value="#6B86D6"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- actions -->
+                        <DataGridTemplateColumn Width="90" Header="">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                        <Button Style="{StaticResource RowActionButton}"
+                                                Content="✎"
+                                                Margin="0,0,10,0"
+                                                Foreground="#2E3A59"
+                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
+
+                                        <Button Style="{StaticResource RowActionButton}"
+                                                Content="🗑"
+                                                Foreground="#E11D48"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Pagination -->
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+                <Button Content="Previous" Style="{StaticResource PageButton}" Command="{Binding PreviousPageCommand}"/>
+
+                <ItemsControl ItemsSource="{Binding PageNumbers}" Margin="6,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding}"
+                                    Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource PageButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Value="True">
+                                                <DataTrigger.Binding>
+                                                    <MultiBinding Converter="{StaticResource EqualsToBoolConverter}">
+                                                        <Binding/>
+                                                        <Binding Path="DataContext.CurrentPage"
+                                                                 RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                                    </MultiBinding>
+                                                </DataTrigger.Binding>
+                                                <Setter Property="Background" Value="#2E3A59"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Button Content="Next" Style="{StaticResource PageButton}" Command="{Binding NextPageCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ADD / EDIT MODAL OVERLAY -->
+        <Grid Panel.ZIndex="999"
+              Visibility="{Binding IsFormOpen, Converter={StaticResource BoolToVis}}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+
+            <!-- dim -->
+            <Border Background="#80000000"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"/>
+
+            <!-- click outside closes (NO hover/focus visuals) -->
+            <Border Background="Transparent"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    MouseLeftButtonDown="OverlayBackdrop_MouseLeftButtonDown"/>
+
+            <Border Width="900"
+                    CornerRadius="18"
+                    Background="White"
+                    Padding="28"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="{Binding FormTitle}"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   Foreground="#2E3A59"/>
+
+                        <Button Grid.Column="1"
+                                Content="✕"
+                                Width="34" Height="34"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                Cursor="Hand"
+                                Command="{Binding CloseFormCommand}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="32"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="First Name" Foreground="#2E3A59" Margin="0,0,0,8"/>
+                            <TextBox Text="{Binding FirstNameInput, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="40"
+                                     Padding="14,0"
+                                     BorderBrush="#E5ECFA"
+                                     Background="White"
+                                     VerticalContentAlignment="Center"/>
+
+                            <TextBlock Text="Office" Foreground="#2E3A59" Margin="0,18,0,8"/>
+                            <ComboBox ItemsSource="{Binding Offices}"
+                                      SelectedItem="{Binding OfficeInput}"
+                                      Height="40"
+                                      Padding="10,0"
+                                      BorderBrush="#E5ECFA"
+                                      Background="White"/>
+
+                            <TextBlock Text="Username" Foreground="#2E3A59" Margin="0,18,0,8"/>
+                            <TextBox Text="{Binding UsernameInput, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="40"
+                                     Padding="14,0"
+                                     BorderBrush="#E5ECFA"
+                                     Background="White"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Right -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Last Name" Foreground="#2E3A59" Margin="0,0,0,8"/>
+                            <TextBox Text="{Binding LastNameInput, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="40"
+                                     Padding="14,0"
+                                     BorderBrush="#E5ECFA"
+                                     Background="White"
+                                     VerticalContentAlignment="Center"/>
+
+                            <TextBlock Text="Role" Foreground="#2E3A59" Margin="0,18,0,8"/>
+                            <ComboBox ItemsSource="{Binding Roles}"
+                                      SelectedItem="{Binding RoleInput}"
+                                      Height="40"
+                                      Padding="10,0"
+                                      BorderBrush="#E5ECFA"
+                                      Background="White"/>
+
+                            <TextBlock Text="Password" Foreground="#2E3A59" Margin="0,18,0,8"/>
+                            <TextBox Text="{Binding PasswordInput, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="40"
+                                     Padding="14,0"
+                                     BorderBrush="#E5ECFA"
+                                     Background="White"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="2" Margin="0,28,0,0">
+                        <Button Content="Save"
+                                Style="{StaticResource RoundedPrimarySave}"
+                                Command="{Binding SaveFormCommand}"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- DELETE MODAL OVERLAY -->
+        <Grid Panel.ZIndex="1000"
+              Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVis}}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+
+            <!-- dim -->
+            <Border Background="#80000000"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"/>
+
+            <!-- click outside closes (NO hover/focus visuals) -->
+            <Border Background="Transparent"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    MouseLeftButtonDown="OverlayBackdrop_MouseLeftButtonDown"/>
+
+            <Border Width="520"
+                    CornerRadius="18"
+                    Background="White"
+                    Padding="22"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Delete User"
+                                   Foreground="#E11D48"
+                                   FontSize="20"
+                                   FontWeight="Bold"/>
+
+                        <Button Grid.Column="1"
+                                Content="✕"
+                                Width="28" Height="28"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                Cursor="Hand"
+                                Command="{Binding CancelDeleteCommand}"/>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding DeleteMessage}"
+                               Margin="0,14,0,0"
+                               Foreground="#2E3A59"
+                               TextWrapping="Wrap"/>
+
+                    <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,18,0,0">
+                        <Button Content="Cancel"
+                                Width="140"
+                                Height="40"
+                                Background="Transparent"
+                                Foreground="#2E3A59"
+                                BorderBrush="Transparent"
+                                FontWeight="SemiBold"
+                                Cursor="Hand"
+                                Command="{Binding CancelDeleteCommand}"/>
+
+                        <Button Content="Confirm"
+                                Style="{StaticResource RoundedDangerConfirm}"
+                                Margin="18,0,0,0"
+                                Command="{Binding ConfirmDeleteCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Ekalinga.Setup/Ekalinga.Setup.vdproj" Type="Installer">
+    <Build Solution="Release|*" />
+  </Project>
+  <Project Path="WpfApp3/WpfApp3.csproj" />
+</Solution>
