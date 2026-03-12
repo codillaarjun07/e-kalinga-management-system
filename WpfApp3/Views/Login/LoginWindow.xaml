@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:WpfApp3.ViewModels.Login"
         Title="E-Kalinga Management System"
-        Width="420" Height="720"
-        MinWidth="420" MinHeight="720"
+        Width="420"
+        Height="760"
+        MinWidth="420"
+        MinHeight="760"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#F3F5F9"
@@ -21,14 +23,13 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <!-- Colors -->
+
         <SolidColorBrush x:Key="AppBg" Color="#F3F5F9"/>
         <SolidColorBrush x:Key="Primary" Color="#1E3A8A"/>
         <SolidColorBrush x:Key="Text" Color="#111827"/>
         <SolidColorBrush x:Key="Muted" Color="#64748B"/>
         <SolidColorBrush x:Key="Border" Color="#D7DEEA"/>
 
-        <!-- Input wrapper (focus ring + hover) -->
         <Style x:Key="InputChrome" TargetType="Border">
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
@@ -43,7 +44,10 @@
                     <Setter Property="BorderBrush" Value="{StaticResource Primary}"/>
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect Color="#1E3A8A" BlurRadius="14" ShadowDepth="0" Opacity="0.18"/>
+                            <DropShadowEffect Color="#1E3A8A"
+                                              BlurRadius="14"
+                                              ShadowDepth="0"
+                                              Opacity="0.18"/>
                         </Setter.Value>
                     </Setter>
                 </Trigger>
@@ -53,7 +57,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- TextBox Look  -->
         <Style TargetType="TextBox">
             <Setter Property="Height" Value="44"/>
             <Setter Property="Padding" Value="14,10"/>
@@ -64,7 +67,6 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
-        <!-- PasswordBox look (no double border) -->
         <Style TargetType="PasswordBox">
             <Setter Property="Height" Value="44"/>
             <Setter Property="Padding" Value="14,10"/>
@@ -74,7 +76,6 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
 
-        <!-- Modern primary button (hover/pressed) -->
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Height" Value="48"/>
             <Setter Property="Background" Value="#2E3A59"/>
@@ -89,7 +90,8 @@
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="12">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -112,9 +114,45 @@
             </Setter>
         </Style>
 
-        <!-- ✅ Eye Toggle (clean overlay icon + smooth animation; WPF-safe) -->
+        <Style x:Key="GearButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D7DEEA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <TextBlock Text="⚙"
+                                       FontSize="18"
+                                       Foreground="#2E3A59"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F8FAFC"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#BFC9DA"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="1"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <!-- ✅ Eye Toggle (OPEN when checked = show, CLOSED when unchecked = hide) -->
         <Style x:Key="EyeToggle" TargetType="ToggleButton">
             <Setter Property="Width" Value="34"/>
             <Setter Property="Height" Value="34"/>
@@ -127,102 +165,91 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="Bd"
-                        Background="{TemplateBinding Background}"
-                        CornerRadius="10"
-                        RenderTransformOrigin="0.5,0.5">
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                RenderTransformOrigin="0.5,0.5">
                             <Border.RenderTransform>
                                 <ScaleTransform ScaleX="1" ScaleY="1"/>
                             </Border.RenderTransform>
 
                             <Viewbox Width="20" Height="20" Stretch="Uniform">
                                 <Grid Width="24" Height="24">
-
-                                    <!-- CLOSED EYE (HIDE) -->
                                     <Grid x:Name="IconClosed" Opacity="1">
-                                        <!-- eyelid -->
                                         <Path Stroke="{TemplateBinding Foreground}"
-                                      StrokeThickness="2"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Fill="Transparent"
-                                      Data="M4,12 C7.5,16 16.5,16 20,12"/>
-
-                                        <!-- lashes (more visible like your 3rd photo) -->
-                                        <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Data="M7.4,11.2 L6.0,9.4"/>
-                                        <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Data="M12,10.8 L12,8.8"/>
-                                        <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Data="M16.6,11.2 L18.0,9.4"/>
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              Fill="Transparent"
+                                              Data="M4,12 C7.5,16 16.5,16 20,12"/>
+                                        <Path Stroke="{TemplateBinding Foreground}"
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              Data="M7.4,11.2 L6.0,9.4"/>
+                                        <Path Stroke="{TemplateBinding Foreground}"
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              Data="M12,10.8 L12,8.8"/>
+                                        <Path Stroke="{TemplateBinding Foreground}"
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              Data="M16.6,11.2 L18.0,9.4"/>
                                     </Grid>
 
-                                    <!-- OPEN EYE (SHOW) -->
                                     <Grid x:Name="IconOpen" Opacity="0">
-                                        <!-- eye outline -->
                                         <Path Stroke="{TemplateBinding Foreground}"
-                                      StrokeThickness="2"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Fill="Transparent"
-                                      Data="M2,12
-                                            C4.8,7.2 8.6,5 12,5
-                                            C15.4,5 19.2,7.2 22,12
-                                            C19.2,16.8 15.4,19 12,19
-                                            C8.6,19 4.8,16.8 2,12 Z"/>
-
-                                        <!-- pupil -->
-                                        <Ellipse Width="6.5" Height="6.5"
-                                         Stroke="{TemplateBinding Foreground}"
-                                         StrokeThickness="2"
-                                         Fill="Transparent"
-                                         HorizontalAlignment="Center"
-                                         VerticalAlignment="Center"/>
-
-                                        <!-- top lashes -->
-                                        <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Data="M7.2,7.2 L6.0,5.6"/>
-                                        <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Data="M12,6.6 L12,4.8"/>
-                                        <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Data="M16.8,7.2 L18.0,5.6"/>
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              Fill="Transparent"
+                                              Data="M2,12 C4.8,7.2 8.6,5 12,5 C15.4,5 19.2,7.2 22,12 C19.2,16.8 15.4,19 12,19 C8.6,19 4.8,16.8 2,12 Z"/>
+                                        <Ellipse Width="6.5"
+                                                 Height="6.5"
+                                                 Stroke="{TemplateBinding Foreground}"
+                                                 StrokeThickness="2"
+                                                 Fill="Transparent"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                                        <Path Stroke="{TemplateBinding Foreground}"
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              Data="M7.2,7.2 L6.0,5.6"/>
+                                        <Path Stroke="{TemplateBinding Foreground}"
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              Data="M12,6.6 L12,4.8"/>
+                                        <Path Stroke="{TemplateBinding Foreground}"
+                                              StrokeThickness="2"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              Data="M16.8,7.2 L18.0,5.6"/>
                                     </Grid>
-
                                 </Grid>
                             </Viewbox>
                         </Border>
 
                         <ControlTemplate.Triggers>
-                            <!-- Hover -->
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="#F1F5F9"/>
                                 <Setter Property="Foreground" Value="{StaticResource Primary}"/>
                             </Trigger>
-
-                            <!-- Press -->
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd"
-                                Property="RenderTransform">
+                                <Setter TargetName="Bd" Property="RenderTransform">
                                     <Setter.Value>
                                         <ScaleTransform ScaleX="0.96" ScaleY="0.96"/>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
-
-                            <!-- ✅ Checked = SHOW password => OPEN eye -->
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="IconOpen" Property="Opacity" Value="1"/>
                                 <Setter TargetName="IconClosed" Property="Opacity" Value="0"/>
                             </Trigger>
-
-                            <!-- ✅ Unchecked = HIDE password => CLOSED eye -->
                             <Trigger Property="IsChecked" Value="False">
                                 <Setter TargetName="IconOpen" Property="Opacity" Value="0"/>
                                 <Setter TargetName="IconClosed" Property="Opacity" Value="1"/>
@@ -236,246 +263,264 @@
 
     <Grid Background="{StaticResource AppBg}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="150" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
 
-        <!-- TOP AREA -->
-        <Grid Grid.Row="0">
-            <Border 
-                    Background="#FFFFFF"
-                    
-                    BorderBrush="#110F172A"
-                    >
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="30" ShadowDepth="10" Opacity="0.18"/>
-                </Border.Effect>
+        <Border Grid.Row="0"
+                Background="White"
+                
+                >
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30"
+                                  ShadowDepth="10"
+                                  Opacity="0.18"/>
+            </Border.Effect>
 
-                <Grid Margin="26">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="64"/>
-                    </Grid.RowDefinitions>
+            <Grid Margin="26">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <!-- HEADER -->
-                    <StackPanel Grid.Row="0"
-                                HorizontalAlignment="Center"
-                                Margin="0,2,0,18">
-                        <Border Background="Transparent" Padding="2" Margin="0,0,0,10">
-                            <Image Width="210"
-       Height="110"
-       Stretch="Uniform"
-       RenderOptions.BitmapScalingMode="HighQuality"
-       Source="/Views/Login/ekaling.png"/>
+                <!-- top bar -->
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        </Border>
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding ConnectionTypeLabel}"
+                               Foreground="#475569"
+                               FontWeight="SemiBold"
+                               FontSize="13"
+                               VerticalAlignment="Center"
+                               Margin="2,0,0,0"/>
 
-                        <TextBlock Text="E-Kalinga"
-                                   TextAlignment="Center"
-                                   Foreground="{StaticResource Primary}"
-                                   FontWeight="Bold"
-                                   FontSize="26"
-                                   Margin="0,0,0,2"/>
-
-                        <TextBlock Text="Management System"
-                                   TextAlignment="Center"
-                                   Foreground="{StaticResource Primary}"
-                                   FontWeight="SemiBold"
-                                   FontSize="16"
-                                   Opacity="0.95"/>
-                    </StackPanel>
-
-                    <!-- FORM -->
-                    <StackPanel Grid.Row="1" VerticalAlignment="Top">
-                        <!-- Username -->
-                        <TextBlock Text="Username"
-                                   Foreground="{StaticResource Muted}"
-                                   FontWeight="SemiBold"
-                                   FontSize="12"
-                                   Margin="0,0,0,6"/>
-
-                        <Border Style="{StaticResource InputChrome}">
-                            <Grid>
-                                <TextBox x:Name="UsernameBox"
-                                         Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
-
-                                <TextBlock Text="Enter your username"
-                                           Margin="14,0,14,0"
-                                           Foreground="#94A3B8"
-                                           VerticalAlignment="Center"
-                                           IsHitTestVisible="False">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding Text, ElementName=UsernameBox}" Value=""/>
-                                                        <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=UsernameBox}" Value="False"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </Border>
-
-                        <Rectangle Height="14" Fill="Transparent"/>
-
-                        <!-- Password -->
-                        <TextBlock Text="Password"
-                                   Foreground="{StaticResource Muted}"
-                                   FontWeight="SemiBold"
-                                   FontSize="12"
-                                   Margin="0,0,0,6"/>
-
-                        <Border Style="{StaticResource InputChrome}">
-                            <Grid>
-                                <!-- Hidden password -->
-                                <PasswordBox x:Name="PwdBox"
-                                             Tag="0"
-                                             Padding="14,10,48,10"
-                                             PasswordChanged="PasswordBox_OnPasswordChanged">
-                                    <PasswordBox.Style>
-                                        <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </PasswordBox.Style>
-                                </PasswordBox>
-
-                                <!-- Visible password -->
-                                <TextBox x:Name="PwdText"
-                                         Padding="14,10,48,10"
-                                         TextChanged="PasswordText_OnTextChanged">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-
-                                <!-- Placeholder (hidden mode) -->
-                                <TextBlock Text="Enter your password"
-                                           Margin="14,0,48,0"
-                                           Foreground="#94A3B8"
-                                           VerticalAlignment="Center"
-                                           IsHitTestVisible="False">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="False"/>
-                                                        <Condition Binding="{Binding Tag, ElementName=PwdBox}" Value="0"/>
-                                                        <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=PwdBox}" Value="False"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-
-                                <!-- Placeholder (show mode) -->
-                                <TextBlock Text="Enter your password"
-                                           Margin="14,0,48,0"
-                                           Foreground="#94A3B8"
-                                           VerticalAlignment="Center"
-                                           IsHitTestVisible="False">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="True"/>
-                                                        <Condition Binding="{Binding Text, ElementName=PwdText}" Value=""/>
-                                                        <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=PwdText}" Value="False"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-
-                                <!-- Eye button overlay -->
-                                <ToggleButton x:Name="PwdToggle"
-                                              Style="{StaticResource EyeToggle}"
-                                              HorizontalAlignment="Right"
-                                              VerticalAlignment="Center"
-                                              Margin="0,0,6,0"
-                                              Panel.ZIndex="5"
-                                              Checked="PwdToggle_OnChecked"
-                                              Unchecked="PwdToggle_OnUnchecked"
-                                              ToolTip="Show / Hide password"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Error / hint area -->
-                        <Grid Margin="0,12,0,0" MinHeight="44">
-                            <TextBlock Text="{Binding ErrorMessage}"
-                                       Foreground="#C0392B"
-                                       FontSize="12"
-                                       TextWrapping="Wrap"
-                                       VerticalAlignment="Center"
-                                       Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}"/>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- BUTTON -->
-                    <Grid Grid.Row="2">
-                        <Button Command="{Binding LoginCommand}"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Center">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-                                    <Setter Property="Content" Value="Log in"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                                            <Setter Property="Content" Value="Signing in..."/>
-                                            <Setter Property="IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-                    </Grid>
+                    <Button Grid.Column="1"
+                            Style="{StaticResource GearButtonStyle}"
+                            Command="{Binding OpenConnectionSettingsCommand}"
+                            ToolTip="Connection Settings"/>
                 </Grid>
-            </Border>
-        </Grid>
 
-        <!-- BOTTOM BANNER -->
-        <Border Grid.Row="1" Background="#1F2A44">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="18,0">
+                <!-- header -->
+                <StackPanel Grid.Row="1"
+                            HorizontalAlignment="Center"
+                            Margin="0,10,0,24">
+                    <Border Background="Transparent"
+                            Padding="2"
+                            Margin="0,0,0,12">
+                        <Image Width="210"
+                               Height="110"
+                               Stretch="Uniform"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Source="/Views/Login/ekaling.png"/>
+                    </Border>
+
+                    <TextBlock Text="E-Kalinga"
+                               TextAlignment="Center"
+                               Foreground="{StaticResource Primary}"
+                               FontWeight="Bold"
+                               FontSize="26"
+                               Margin="0,0,0,2"/>
+
+                    <TextBlock Text="Management System"
+                               TextAlignment="Center"
+                               Foreground="{StaticResource Primary}"
+                               FontWeight="SemiBold"
+                               FontSize="16"
+                               Opacity="0.95"/>
+                </StackPanel>
+
+                <!-- form -->
+                <StackPanel Grid.Row="2"
+                            VerticalAlignment="Top">
+                    <TextBlock Text="Username"
+                               Foreground="{StaticResource Muted}"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Margin="0,0,0,6"/>
+
+                    <Border Style="{StaticResource InputChrome}">
+                        <Grid>
+                            <TextBox x:Name="UsernameBox"
+                                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <TextBlock Text="Enter your username"
+                                       Margin="14,0,14,0"
+                                       Foreground="#94A3B8"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Text, ElementName=UsernameBox}" Value=""/>
+                                                    <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=UsernameBox}" Value="False"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <Rectangle Height="14" Fill="Transparent"/>
+
+                    <TextBlock Text="Password"
+                               Foreground="{StaticResource Muted}"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Margin="0,0,0,6"/>
+
+                    <Border Style="{StaticResource InputChrome}">
+                        <Grid>
+                            <PasswordBox x:Name="PwdBox"
+                                         Tag="0"
+                                         Padding="14,10,48,10"
+                                         PasswordChanged="PasswordBox_OnPasswordChanged">
+                                <PasswordBox.Style>
+                                    <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </PasswordBox.Style>
+                            </PasswordBox>
+
+                            <TextBox x:Name="PwdText"
+                                     Padding="14,10,48,10"
+                                     TextChanged="PasswordText_OnTextChanged">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+
+                            <TextBlock Text="Enter your password"
+                                       Margin="14,0,48,0"
+                                       Foreground="#94A3B8"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="False"/>
+                                                    <Condition Binding="{Binding Tag, ElementName=PwdBox}" Value="0"/>
+                                                    <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=PwdBox}" Value="False"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBlock Text="Enter your password"
+                                       Margin="14,0,48,0"
+                                       Foreground="#94A3B8"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding IsChecked, ElementName=PwdToggle}" Value="True"/>
+                                                    <Condition Binding="{Binding Text, ElementName=PwdText}" Value=""/>
+                                                    <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=PwdText}" Value="False"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <ToggleButton x:Name="PwdToggle"
+                                          Style="{StaticResource EyeToggle}"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,6,0"
+                                          Panel.ZIndex="5"
+                                          Checked="PwdToggle_OnChecked"
+                                          Unchecked="PwdToggle_OnUnchecked"
+                                          ToolTip="Show / Hide password"/>
+                        </Grid>
+                    </Border>
+
+                    <Grid Margin="0,14,0,0"
+                          MinHeight="44">
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="#C0392B"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- login button -->
+                <Grid Grid.Row="3" Margin="0,10,0,0">
+                    <Button Command="{Binding LoginCommand}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                                <Setter Property="Content" Value="Log in"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                        <Setter Property="Content" Value="Signing in..."/>
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- bigger footer -->
+        <Border Grid.Row="1"
+                Background="#1F2A44">
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Margin="18,0">
                 <TextBlock Text="Local Government Unit of Sulop"
                            Foreground="White"
                            FontWeight="SemiBold"
-                           FontSize="13"
+                           FontSize="15"
                            TextAlignment="Center"/>
                 <TextBlock Text="Municipality of Sulop, Davao del Sur"
                            Foreground="#D6DDF0"
-                           FontSize="12"
+                           FontSize="13"
                            TextAlignment="Center"
-                           Margin="0,6,0,0"/>
+                           Margin="0,8,0,0"/>
             </StackPanel>
         </Border>
 
-        <!-- Loading Overlay -->
+        <!-- loading overlay -->
         <Grid Panel.ZIndex="30"
               Background="#66000000"
               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
@@ -486,40 +531,21 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                 <StackPanel>
-                    <ProgressBar IsIndeterminate="True" Height="6" Margin="0,0,0,14"/>
+                    <ProgressBar IsIndeterminate="True"
+                                 Height="6"
+                                 Margin="0,0,0,14"/>
                     <TextBlock Text="Signing in..."
                                FontSize="15"
                                FontWeight="SemiBold"
-                               Foreground="#2E3A59"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Text="Please wait while we fetch your account."
-                               Margin="0,8,0,0"
-                               FontSize="12"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,4"/>
+                    <TextBlock Text="Please wait while we verify your account."
                                Foreground="#64748B"
-                               TextAlignment="Center"
-                               TextWrapping="Wrap"/>
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"/>
                 </StackPanel>
             </Border>
         </Grid>
-
-        <!-- Error Toast -->
-        <Border Panel.ZIndex="40"
-                Width="340"
-                Padding="14,12"
-                CornerRadius="14"
-                Background="{Binding ToastBackground}"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="0,18,18,0"
-                Visibility="{Binding IsToastVisible, Converter={StaticResource BoolToVis}}">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.22"/>
-            </Border.Effect>
-            <TextBlock Text="{Binding ToastMessage}"
-                       Foreground="White"
-                       FontWeight="SemiBold"
-                       FontSize="12"
-                       TextWrapping="Wrap"/>
-        </Border>
     </Grid>
 </Window>

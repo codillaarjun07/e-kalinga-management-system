@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using WpfApp3.Services;
+using WpfApp3.Views;
 
 namespace WpfApp3.ViewModels.Login
 {
@@ -30,7 +31,9 @@ namespace WpfApp3.ViewModels.Login
 
         public LoginViewModel()
         {
+            LoadConnectionType();
             LoginCommand = new AsyncRelayCommand(LoginAsync, CanLogin);
+
         }
 
         private bool CanLogin() => !IsLoading;
@@ -39,6 +42,30 @@ namespace WpfApp3.ViewModels.Login
         {
             if (LoginCommand is AsyncRelayCommand asyncCommand)
                 asyncCommand.NotifyCanExecuteChanged();
+        }
+
+        [ObservableProperty] private string connectionTypeLabel = "Server Connection";
+
+        private void LoadConnectionType()
+        {
+            try
+            {
+                var s = ConnectionSettingsService.Load();
+                var mode = string.IsNullOrWhiteSpace(s.Mode) ? "Server" : s.Mode;
+                ConnectionTypeLabel = mode == "Local" ? "Local Connection" : "Server Connection";
+            }
+            catch
+            {
+                ConnectionTypeLabel = "Server Connection";
+            }
+        }
+
+        [RelayCommand]
+        private void OpenConnectionSettings()
+        {
+            var win = new ConnectionSettingsWindow();
+            win.ShowDialog();
+            LoadConnectionType();
         }
 
         private async Task LoginAsync()

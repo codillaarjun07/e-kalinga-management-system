@@ -1,0 +1,304 @@
+﻿<Window x:Class="WpfApp3.Views.ConnectionSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:WpfApp3.ViewModels"
+        mc:Ignorable="d"
+        Title="Connection Settings"
+        Height="784"
+        Width="420"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F3F5F9">
+
+    <Window.DataContext>
+        <vm:ConnectionSettingsViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <Style x:Key="CardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            
+            <Setter Property="Padding" Value="26"/>
+            <Setter Property="BorderBrush" Value="#EEF2FF"/>
+           
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.10"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D9E2F2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="InputPasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D9E2F2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Background" Value="#2E3A59"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="BorderBrush" Value="#D9E2F2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="ModeButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd"
+                                Padding="18,10"
+                                Background="White"
+                                BorderBrush="#D9E2F2"
+                                BorderThickness="1"
+                                CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2E3A59"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#2E3A59"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Border Style="{StaticResource CardBorderStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Width="44"
+                            Height="44"
+                            Background="White"
+                            BorderBrush="#D9E2F2"
+                            BorderThickness="1"
+                            Command="{Binding BackCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                            Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="12">
+                                    <TextBlock Text="←"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="#2E3A59"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="Connection Settings"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="#223A8F"/>
+                        <TextBlock Text="Configure local or server database connection"
+                                   Margin="0,6,0,0"
+                                   FontSize="12"
+                                   Foreground="#64748B"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Mode -->
+                <StackPanel Grid.Row="2">
+                    <TextBlock Text="Connection Type" Style="{StaticResource FieldLabelStyle}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Local"
+                                     GroupName="ModeGroup"
+                                     Style="{StaticResource ModeButtonStyle}"
+                                     IsChecked="{Binding IsLocal, Mode=OneWay}"
+                                     Command="{Binding}"
+                                     Checked="LocalMode_Checked"/>
+                        <RadioButton Content="Server"
+                                     GroupName="ModeGroup"
+                                     Style="{StaticResource ModeButtonStyle}"
+                                     IsChecked="{Binding IsServer, Mode=OneWay}"
+                                     Checked="ServerMode_Checked"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Fields -->
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="140"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0">
+                        <TextBlock Text="Host" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2">
+                        <TextBlock Text="Port" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="3">
+                        <TextBlock Text="Database Name" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Database, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
+                        <TextBlock Text="Username" Style="{StaticResource FieldLabelStyle}"/>
+                        <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="6" Grid.ColumnSpan="3">
+                        <TextBlock Text="Password" Style="{StaticResource FieldLabelStyle}"/>
+                        <PasswordBox x:Name="PasswordInput"
+                                     Style="{StaticResource InputPasswordBoxStyle}"
+                                     PasswordChanged="PasswordInput_PasswordChanged"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Footer -->
+                <StackPanel Grid.Row="6">
+                    <CheckBox Content="Use SSL"
+                              IsChecked="{Binding UseSsl}"
+                              Foreground="#475569"
+                              FontSize="13"
+                              Margin="0,0,0,16"/>
+
+                    <TextBlock Text="{Binding TestResultMessage}"
+                               Foreground="{Binding TestResultBrush}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Margin="2,0,0,14"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Test DB Connection"
+                                Command="{Binding TestConnectionCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"/>
+
+                        <Button Grid.Column="2"
+                                Content="Save Settings"
+                                Command="{Binding SaveCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                Style="{StaticResource PrimaryButtonStyle}"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
