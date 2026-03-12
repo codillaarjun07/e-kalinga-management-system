@@ -2,61 +2,50 @@
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using WpfApp3.Models;
 using WpfApp3.Services;
-using System.ComponentModel;
-using System.Windows;
 
 namespace WpfApp3.ViewModels.Allotment
 {
     public partial class AllotmentViewModel : ObservableObject
     {
-        // ✅ LAZY repo so Designer won't crash trying to read EkalingaDb
         private readonly Lazy<AllotmentsRepository> _repo = new(() => new AllotmentsRepository());
         private AllotmentsRepository Repo => _repo.Value;
 
+        private readonly Lazy<SettingsRepository> _settingsRepo = new(() => new SettingsRepository());
+        private SettingsRepository SettingsRepo => _settingsRepo.Value;
+
         private readonly System.Collections.Generic.List<AllotmentRecord> _all = new();
 
-        // table/search/paging
+        private const string DepartmentsTable = "departments";
+        private const string SourcesOfFundTable = "source_of_funds";
+
         [ObservableProperty] private string searchText = "";
         [ObservableProperty] private int currentPage = 1;
+        [ObservableProperty] private bool isLoading;
 
-        public int PageSize { get; } = 8;
-
-        public ObservableCollection<AllotmentRecord> Items { get; } = new();
-        public ObservableCollection<int> PageNumbers { get; } = new();
-
-        public int TotalRecords => Filtered().Count;
-        public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalRecords / (double)PageSize));
-        public string FoundText => $"Found {TotalRecords} records";
-
-        // ===== MODALS STATE =====
         [ObservableProperty] private bool isFormOpen;
         [ObservableProperty] private bool isDeleteOpen;
 
         [ObservableProperty] private string formTitle = "Add Allotment";
-
-        private int? _editingId;
-        private int? _deleteId;
-
         [ObservableProperty] private string deleteMessage = "";
 
-        // ===== FORM FIELDS =====
         [ObservableProperty] private string projectNameInput = "";
         [ObservableProperty] private string companyInput = "";
         [ObservableProperty] private string? departmentInput;
         [ObservableProperty] private string? sourceOfFundInput;
         [ObservableProperty] private string beneficiariesInput = "";
 
-        // NEW: budget inputs
-        [ObservableProperty] private string? budgetTypeInput = "Money"; // Money | InKind
-        [ObservableProperty] private string budgetAmountInput = "";     // money
-        [ObservableProperty] private string budgetQtyInput = "";        // in-kind
-        [ObservableProperty] private string budgetUnitInput = "";       // in-kind
+        [ObservableProperty] private string? budgetTypeInput = "Money";
+        [ObservableProperty] private string budgetAmountInput = "";
+        [ObservableProperty] private string budgetQtyInput = "";
+        [ObservableProperty] private string budgetUnitInput = "";
 
-        // ===== VALIDATION =====
         [ObservableProperty] private bool canSave;
 
         [ObservableProperty] private string projectNameError = "";
@@ -83,63 +72,106 @@ namespace WpfApp3.ViewModels.Allotment
         [ObservableProperty] private string budgetUnitError = "";
         [ObservableProperty] private bool hasBudgetUnitError;
 
-        private readonly Lazy<SettingsRepository> _settingsRepo = new(() => new SettingsRepository());
-        private SettingsRepository SettingsRepo => _settingsRepo.Value;
+        private int? _editingId;
+        private int? _deleteId;
 
-        private const string DepartmentsTable = "departments";
-        private const string SourcesOfFundTable = "source_of_funds";
+        public int PageSize { get; } = 8;
 
-        // dropdown options from settings tables
+        public ObservableCollection<AllotmentRecord> Items { get; } = new();
+        public ObservableCollection<int> PageNumbers { get; } = new();
         public ObservableCollection<string> Departments { get; } = new();
         public ObservableCollection<string> SourcesOfFund { get; } = new();
 
         public ObservableCollection<string> BudgetTypes { get; } = new()
         {
-            "Money", "InKind"
+            "Money",
+            "InKind"
         };
+
+        public int TotalRecords => Filtered().Count;
+        public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalRecords / (double)PageSize));
+        public string FoundText => $"Found {TotalRecords} records";
 
         public AllotmentViewModel()
         {
-            // ✅ IMPORTANT: do nothing in Visual Studio Designer
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
-                // keep UI working in designer without DB
                 ValidateForm();
                 Apply();
                 return;
             }
 
+            ValidateForm();
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await LoadAllotmentsAsync();
+        }
+
+        private async Task LoadAllotmentsAsync()
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
             try
             {
-                Repo.EnsureTable();
-                LoadSettingsOptions();
-                ReloadFromDb();
+                var result = await Task.Run(() =>
+                {
+                    Repo.EnsureTable();
+
+                    var departments = SettingsRepo.GetAll(DepartmentsTable)
+                        .Where(x => x.IsActive && !string.IsNullOrWhiteSpace(x.Name))
+                        .Select(x => x.Name.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                        .ToList();
+
+                    var sources = SettingsRepo.GetAll(SourcesOfFundTable)
+                        .Where(x => x.IsActive && !string.IsNullOrWhiteSpace(x.Name))
+                        .Select(x => x.Name.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                        .ToList();
+
+                    var records = Repo.GetAll();
+
+                    return new
+                    {
+                        Departments = departments,
+                        Sources = sources,
+                        Records = records
+                    };
+                });
+
+                Departments.Clear();
+                foreach (var item in result.Departments)
+                    Departments.Add(item);
+
+                SourcesOfFund.Clear();
+                foreach (var item in result.Sources)
+                    SourcesOfFund.Add(item);
+
+                _all.Clear();
+                _all.AddRange(result.Records);
+
+                CurrentPage = 1;
+                Apply();
             }
             catch
             {
-                // If DB/config is not available, just show empty list (prevents crash)
+                Departments.Clear();
+                SourcesOfFund.Clear();
                 _all.Clear();
+                Apply();
             }
-
-            Apply();
-            ValidateForm();
-        }
-
-        private void ReloadFromDb()
-        {
-            _all.Clear();
-            _all.AddRange(Repo.GetAll());
-        }
-
-        partial void OnSearchTextChanged(string value)
-        {
-            CurrentPage = 1;
-            Apply();
-        }
-
-        partial void OnCurrentPageChanged(int value)
-        {
-            Apply();
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private void LoadSettingsOptions()
@@ -168,13 +200,22 @@ namespace WpfApp3.ViewModels.Allotment
                 SourcesOfFund.Add(item);
         }
 
-        // validate on any form change
+        partial void OnSearchTextChanged(string value)
+        {
+            CurrentPage = 1;
+            Apply();
+        }
+
+        partial void OnCurrentPageChanged(int value)
+        {
+            Apply();
+        }
+
         partial void OnProjectNameInputChanged(string value) => ValidateForm();
         partial void OnCompanyInputChanged(string value) => ValidateForm();
         partial void OnDepartmentInputChanged(string? value) => ValidateForm();
         partial void OnSourceOfFundInputChanged(string? value) => ValidateForm();
         partial void OnBeneficiariesInputChanged(string value) => ValidateForm();
-
         partial void OnBudgetTypeInputChanged(string? value) => ValidateForm();
         partial void OnBudgetAmountInputChanged(string value) => ValidateForm();
         partial void OnBudgetQtyInputChanged(string value) => ValidateForm();
@@ -210,7 +251,8 @@ namespace WpfApp3.ViewModels.Allotment
             }
 
             PageNumbers.Clear();
-            for (int i = 1; i <= TotalPages; i++) PageNumbers.Add(i);
+            for (int i = 1; i <= TotalPages; i++)
+                PageNumbers.Add(i);
 
             OnPropertyChanged(nameof(TotalRecords));
             OnPropertyChanged(nameof(TotalPages));
@@ -224,25 +266,39 @@ namespace WpfApp3.ViewModels.Allotment
             DepartmentError = ""; HasDepartmentError = false;
             SourceOfFundError = ""; HasSourceOfFundError = false;
             BeneficiariesError = ""; HasBeneficiariesError = false;
-
             BudgetAmountError = ""; HasBudgetAmountError = false;
             BudgetQtyError = ""; HasBudgetQtyError = false;
             BudgetUnitError = ""; HasBudgetUnitError = false;
 
             if (string.IsNullOrWhiteSpace(ProjectNameInput))
-            { ProjectNameError = "Project name is required."; HasProjectNameError = true; }
+            {
+                ProjectNameError = "Project name is required.";
+                HasProjectNameError = true;
+            }
 
             if (string.IsNullOrWhiteSpace(CompanyInput))
-            { CompanyError = "Company is required."; HasCompanyError = true; }
+            {
+                CompanyError = "Company is required.";
+                HasCompanyError = true;
+            }
 
             if (string.IsNullOrWhiteSpace(DepartmentInput))
-            { DepartmentError = "Department is required."; HasDepartmentError = true; }
+            {
+                DepartmentError = "Department is required.";
+                HasDepartmentError = true;
+            }
 
             if (string.IsNullOrWhiteSpace(SourceOfFundInput))
-            { SourceOfFundError = "Source of fund is required."; HasSourceOfFundError = true; }
+            {
+                SourceOfFundError = "Source of fund is required.";
+                HasSourceOfFundError = true;
+            }
 
             if (!int.TryParse((BeneficiariesInput ?? "").Trim(), out var ben) || ben <= 0)
-            { BeneficiariesError = "No. of beneficiaries must be a valid number (> 0)."; HasBeneficiariesError = true; }
+            {
+                BeneficiariesError = "No. of beneficiaries must be a valid number (> 0).";
+                HasBeneficiariesError = true;
+            }
 
             var type = (BudgetTypeInput ?? "Money").Trim();
             type = type.Equals("InKind", StringComparison.OrdinalIgnoreCase) ? "InKind" : "Money";
@@ -277,12 +333,11 @@ namespace WpfApp3.ViewModels.Allotment
                   HasBeneficiariesError || HasBudgetAmountError || HasBudgetQtyError || HasBudgetUnitError);
         }
 
-        // ===== COMMANDS =====
-
         [RelayCommand]
         private void AddAllotment()
         {
             LoadSettingsOptions();
+
             _editingId = null;
             FormTitle = "Add Allotment";
 
@@ -304,7 +359,8 @@ namespace WpfApp3.ViewModels.Allotment
         [RelayCommand]
         private void Edit(AllotmentRecord? row)
         {
-            if (row is null) return;
+            if (row is null)
+                return;
 
             LoadSettingsOptions();
 
@@ -333,10 +389,11 @@ namespace WpfApp3.ViewModels.Allotment
         }
 
         [RelayCommand]
-        private void SaveForm()
+        private async Task SaveForm()
         {
             ValidateForm();
-            if (!CanSave) return;
+            if (!CanSave)
+                return;
 
             var ben = int.Parse((BeneficiariesInput ?? "0").Trim());
 
@@ -379,25 +436,37 @@ namespace WpfApp3.ViewModels.Allotment
                 BudgetUnit = unit
             };
 
-            if (_editingId is null)
+            IsLoading = true;
+            try
             {
-                var newId = Repo.Insert(rec);
-                rec.Id = newId;
+                await Task.Run(() =>
+                {
+                    if (_editingId is null)
+                    {
+                        var newId = Repo.Insert(rec);
+                        rec.Id = newId;
+                    }
+                    else
+                    {
+                        Repo.Update(rec);
+                    }
+                });
+
+                IsFormOpen = false;
             }
-            else
+            finally
             {
-                Repo.Update(rec);
+                IsLoading = false;
             }
 
-            IsFormOpen = false;
-            ReloadFromDb();
-            Apply();
+            await LoadAllotmentsAsync();
         }
 
         [RelayCommand]
         private void Delete(AllotmentRecord? row)
         {
-            if (row is null) return;
+            if (row is null)
+                return;
 
             _deleteId = row.Id;
             DeleteMessage = $"Are you sure you want to delete allotment, {row.ProjectName}? This action cannot be undone.";
@@ -412,21 +481,51 @@ namespace WpfApp3.ViewModels.Allotment
         }
 
         [RelayCommand]
-        private void ConfirmDelete()
+        private async Task ConfirmDelete()
         {
-            if (_deleteId is not null)
-                Repo.Delete(_deleteId.Value);
+            if (_deleteId is null)
+                return;
 
-            IsDeleteOpen = false;
-            _deleteId = null;
+            IsLoading = true;
+            try
+            {
+                await Task.Run(() => Repo.Delete(_deleteId.Value));
 
-            ReloadFromDb();
-            Apply();
+                IsDeleteOpen = false;
+                _deleteId = null;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+
+            await LoadAllotmentsAsync();
         }
 
-        // paging
-        [RelayCommand] private void PreviousPage() { if (CurrentPage > 1) CurrentPage--; }
-        [RelayCommand] private void NextPage() { if (CurrentPage < TotalPages) CurrentPage++; }
-        [RelayCommand] private void GoToPage(int page) { CurrentPage = page; }
+        [RelayCommand]
+        private async Task Refresh()
+        {
+            await LoadAllotmentsAsync();
+        }
+
+        [RelayCommand]
+        private void PreviousPage()
+        {
+            if (CurrentPage > 1)
+                CurrentPage--;
+        }
+
+        [RelayCommand]
+        private void NextPage()
+        {
+            if (CurrentPage < TotalPages)
+                CurrentPage++;
+        }
+
+        [RelayCommand]
+        private void GoToPage(int page)
+        {
+            CurrentPage = page;
+        }
     }
 }

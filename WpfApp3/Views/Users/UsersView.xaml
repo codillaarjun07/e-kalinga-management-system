@@ -698,5 +698,37 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <!-- LOADING OVERLAY -->
+        <Grid Panel.ZIndex="1001"
+              Background="#66FFFFFF"
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <Border Width="260"
+                    Padding="20"
+                    CornerRadius="18"
+                    Background="White"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Loading users..."
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="#2E3A59"
+                               HorizontalAlignment="Center"/>
+
+                    <ProgressBar IsIndeterminate="True"
+                                 Height="8"
+                                 Margin="0,16,0,0"
+                                 Foreground="#4F46E5"
+                                 Background="#E9EEF7"/>
+
+                    <TextBlock Text="Please wait while data is being fetched."
+                               FontSize="12"
+                               Foreground="#8A94A6"
+                               Margin="0,12,0,0"
+                               TextAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

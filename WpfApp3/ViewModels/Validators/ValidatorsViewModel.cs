@@ -4,13 +4,14 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using WpfApp3.Models;
 using WpfApp3.Services;
-using System.Globalization;
-
 
 namespace WpfApp3.ViewModels.Validators
 {
@@ -34,36 +35,36 @@ namespace WpfApp3.ViewModels.Validators
         private readonly SettingsRepository _settingsRepo = new();
         private const string ClassificationTable = "classifications";
 
-        public ObservableCollection<ReleaseHistoryItem> ReleaseHistory { get; } = new();
+        private readonly List<ValidatorRecord> _externalPeople = new();
+        private List<ValidatorRecord> _notYetBase = new();
+        private readonly Dictionary<string, List<ValidatorRecord>> _validatedByStatus = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Endorsed"] = new List<ValidatorRecord>(),
+            ["Pending"] = new List<ValidatorRecord>(),
+            ["Rejected"] = new List<ValidatorRecord>()
+        };
 
+        public ObservableCollection<ReleaseHistoryItem> ReleaseHistory { get; } = new();
         public bool HasReleaseHistory => ReleaseHistory.Count > 0;
 
-        // This represents the EXTERNAL DATABASE source (replace later with real external DB pull)
-        private readonly List<ValidatorRecord> _externalPeople = new();
-
-        // ===== Tabs =====
         [ObservableProperty] private ValidatorsMainTab activeMainTab = ValidatorsMainTab.NotYetValidated;
         [ObservableProperty] private ValidatorsStatusTab activeStatusTab = ValidatorsStatusTab.Endorsed;
 
-        // ===== Search =====
         [ObservableProperty] private string searchNotYetText = "";
         [ObservableProperty] private string searchValidatedText = "";
 
-        // ===== Lists shown in UI =====
         public ObservableCollection<ValidatorRecord> NotYetItems { get; } = new();
         public ObservableCollection<ValidatorRecord> ValidatedItems { get; } = new();
 
-        // ===== Selection =====
         [ObservableProperty] private ValidatorRecord? selectedPerson;
 
-        // ===== Modals =====
         [ObservableProperty] private bool isValidateModalOpen = false;
         [ObservableProperty] private bool isProfileModalOpen = false;
         [ObservableProperty] private bool isSaveConfirmOpen = false;
+        [ObservableProperty] private bool isLoading = false;
 
-        [ObservableProperty] private string validateSelectedStatus = ""; // Endorsed/Pending/Rejected
+        [ObservableProperty] private string validateSelectedStatus = "";
 
-        // ✅ Add Profile state
         private bool _isAddingProfile;
         public bool IsAddingProfile
         {
@@ -71,29 +72,227 @@ namespace WpfApp3.ViewModels.Validators
             set => SetProperty(ref _isAddingProfile, value);
         }
 
-        // ===== UI text =====
         public string NotYetFoundText => $"Found {NotYetItems.Count} records";
         public string ValidatedFoundText => $"Found {ValidatedItems.Count} records";
 
-        // ===== Dropdown Sources =====
         public ObservableCollection<string> GenderOptions { get; } = new() { "Male", "Female" };
-
         public ObservableCollection<string> ClassificationOptions { get; } = new();
-
         public ObservableCollection<string> ValidateStatusOptions { get; } = new() { "Endorsed", "Pending", "Rejected" };
 
         public ValidatorsViewModel()
         {
-            _repo.EnsureTable();
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                _repo.EnsureTable();
+                LoadClassificationOptions();
+                SeedExternalPeople();
+                BuildCaches(
+                    _repo.GetByBeneficiaryIds(_externalPeople.Select(x => x.BeneficiaryId)),
+                    _repo.GetByStatus("Not Validated") ?? new List<ValidatorRecord>(),
+                    _repo.GetByStatus("Endorsed") ?? new List<ValidatorRecord>(),
+                    _repo.GetByStatus("Pending") ?? new List<ValidatorRecord>(),
+                    _repo.GetByStatus("Rejected") ?? new List<ValidatorRecord>());
+                ApplyAllFilters();
+                SelectedPerson = NotYetItems.FirstOrDefault() ?? ValidatedItems.FirstOrDefault();
+                return;
+            }
 
-            LoadClassificationOptions();
+            _ = InitializeAsync();
+        }
 
-            SeedExternalPeople(); // replace later with actual external DB pull
+        private async Task InitializeAsync()
+        {
+            await RefreshDataAsync();
+        }
 
-            LoadNotYet();
-            LoadValidated();
+        private async Task RefreshDataAsync(string? preferredBeneficiaryId = null)
+        {
+            if (IsLoading)
+                return;
 
-            SelectedPerson = NotYetItems.FirstOrDefault() ?? ValidatedItems.FirstOrDefault();
+            IsLoading = true;
+
+            try
+            {
+                var result = await Task.Run(() =>
+                {
+                    _repo.EnsureTable();
+
+                    var classifications = _settingsRepo.GetAll(ClassificationTable)
+                        .Where(x => x.IsActive && !string.IsNullOrWhiteSpace(x.Name))
+                        .Select(x => x.Name.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                        .ToList();
+
+                    if (classifications.Count == 0)
+                        classifications.Add("None");
+
+                    SeedExternalPeople();
+
+                    var savedByIds = _repo.GetByBeneficiaryIds(_externalPeople.Select(x => x.BeneficiaryId));
+                    var notValidated = _repo.GetByStatus("Not Validated") ?? new List<ValidatorRecord>();
+                    var endorsed = _repo.GetByStatus("Endorsed") ?? new List<ValidatorRecord>();
+                    var pending = _repo.GetByStatus("Pending") ?? new List<ValidatorRecord>();
+                    var rejected = _repo.GetByStatus("Rejected") ?? new List<ValidatorRecord>();
+
+                    return new RefreshSnapshot
+                    {
+                        Classifications = classifications,
+                        SavedByIds = savedByIds,
+                        NotValidated = notValidated,
+                        Endorsed = endorsed,
+                        Pending = pending,
+                        Rejected = rejected
+                    };
+                });
+
+                ClassificationOptions.Clear();
+                foreach (var item in result.Classifications)
+                    ClassificationOptions.Add(item);
+
+                BuildCaches(result.SavedByIds, result.NotValidated, result.Endorsed, result.Pending, result.Rejected);
+                ApplyAllFilters();
+                RestoreSelection(preferredBeneficiaryId);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private void BuildCaches(
+            Dictionary<string, ValidatorRecord> savedByIds,
+            List<ValidatorRecord> notValidated,
+            List<ValidatorRecord> endorsed,
+            List<ValidatorRecord> pending,
+            List<ValidatorRecord> rejected)
+        {
+            var merged = new List<ValidatorRecord>();
+
+            foreach (var ext in _externalPeople)
+            {
+                if (savedByIds.TryGetValue(ext.BeneficiaryId, out var dbRow))
+                {
+                    var st = CanonicalStatus(dbRow.Status);
+                    if (IsValidatedStatus(st))
+                        continue;
+
+                    merged.Add(dbRow);
+                }
+                else
+                {
+                    merged.Add(ext);
+                }
+            }
+
+            var extIds = new HashSet<string>(
+                _externalPeople.Select(x => x.BeneficiaryId),
+                StringComparer.OrdinalIgnoreCase);
+
+            var mergedIds = new HashSet<string>(
+                merged.Where(x => !string.IsNullOrWhiteSpace(x.BeneficiaryId)).Select(x => x.BeneficiaryId),
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (var dbRow in notValidated)
+            {
+                if (!string.IsNullOrWhiteSpace(dbRow.BeneficiaryId)
+                    && !extIds.Contains(dbRow.BeneficiaryId)
+                    && !mergedIds.Contains(dbRow.BeneficiaryId))
+                {
+                    merged.Add(dbRow);
+                    mergedIds.Add(dbRow.BeneficiaryId);
+                }
+            }
+
+            _notYetBase = merged;
+            _validatedByStatus["Endorsed"] = endorsed;
+            _validatedByStatus["Pending"] = pending;
+            _validatedByStatus["Rejected"] = rejected;
+        }
+
+        private void ApplyAllFilters()
+        {
+            ApplyNotYetFilter();
+            ApplyValidatedFilter();
+        }
+
+        private void ApplyNotYetFilter()
+        {
+            NotYetItems.Clear();
+
+            IEnumerable<ValidatorRecord> q = _notYetBase;
+            var s = (SearchNotYetText ?? "").Trim();
+
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                q = q.Where(x =>
+                    (x.FirstName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                    (x.LastName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                    (x.BeneficiaryId ?? "").Contains(s, StringComparison.OrdinalIgnoreCase));
+            }
+
+            foreach (var item in q)
+                NotYetItems.Add(item);
+
+            OnPropertyChanged(nameof(NotYetFoundText));
+        }
+
+        private void ApplyValidatedFilter()
+        {
+            ValidatedItems.Clear();
+
+            var status = CurrentValidatedStatus();
+            IEnumerable<ValidatorRecord> q = _validatedByStatus.TryGetValue(status, out var rows)
+                ? rows
+                : Enumerable.Empty<ValidatorRecord>();
+
+            var s = (SearchValidatedText ?? "").Trim();
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                q = q.Where(x =>
+                    (x.FirstName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                    (x.LastName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                    (x.BeneficiaryId ?? "").Contains(s, StringComparison.OrdinalIgnoreCase));
+            }
+
+            foreach (var item in q)
+                ValidatedItems.Add(item);
+
+            OnPropertyChanged(nameof(ValidatedFoundText));
+        }
+
+        private void RestoreSelection(string? preferredBeneficiaryId = null)
+        {
+            var targetId = !string.IsNullOrWhiteSpace(preferredBeneficiaryId)
+                ? preferredBeneficiaryId
+                : SelectedPerson?.BeneficiaryId;
+
+            var selected = FindVisibleRecordByBeneficiaryId(targetId);
+            if (selected is not null)
+            {
+                SelectedPerson = selected;
+                return;
+            }
+
+            SelectedPerson = ActiveMainTab == ValidatorsMainTab.NotYetValidated
+                ? NotYetItems.FirstOrDefault() ?? ValidatedItems.FirstOrDefault()
+                : ValidatedItems.FirstOrDefault() ?? NotYetItems.FirstOrDefault();
+        }
+
+        private ValidatorRecord? FindVisibleRecordByBeneficiaryId(string? beneficiaryId)
+        {
+            if (string.IsNullOrWhiteSpace(beneficiaryId))
+                return null;
+
+            return NotYetItems.FirstOrDefault(x => string.Equals(x.BeneficiaryId, beneficiaryId, StringComparison.OrdinalIgnoreCase))
+                ?? ValidatedItems.FirstOrDefault(x => string.Equals(x.BeneficiaryId, beneficiaryId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        [RelayCommand]
+        private async Task RefreshAsync()
+        {
+            await RefreshDataAsync();
         }
 
         [RelayCommand]
@@ -108,7 +307,6 @@ namespace WpfApp3.ViewModels.Validators
         {
             _externalPeople.Clear();
 
-            // External DB dummy list (left side)
             _externalPeople.AddRange(new[]
             {
                 NewExternal(101,"BENE-000101","CR-900101","Arjun","M.","Codilla","Male","25 January 1990","PWD","San Jose","San Jose, California, USA"),
@@ -119,18 +317,18 @@ namespace WpfApp3.ViewModels.Validators
                 NewExternal(106,"BENE-000106","CR-900106","Kristine","P.","Navarro","Female","21 July 1994","PWD","Iloilo City","Iloilo City, Philippines"),
                 NewExternal(107,"BENE-000107","CR-900107","Mark","T.","Flores","Male","10 October 1993","Vendor","Cagayan de Oro","Cagayan de Oro, Philippines"),
                 NewExternal(108,"BENE-000108","CR-900108","Lea","G.","Mendoza","Female","14 February 1995","Farmer","Legazpi","Legazpi, Philippines"),
-                NewExternal(109, "BENE-000109", "CR-900109", "Joshua", "K.", "Ramos", "Male",   "18 August 1987", "Fisherfolk",     "Navotas City",        "Navotas City, Metro Manila, Philippines"),
-                NewExternal(110, "BENE-000110", "CR-900110", "Andrea", "M.", "Villanueva", "Female","02 February 1998", "Student",       "Makati City",         "Makati City, Metro Manila, Philippines"),
-NewExternal(111, "BENE-000111", "CR-900111", "Rafael", "D.", "Lim", "Male",    "27 November 1984", "OFW",            "Pasig City",          "Pasig City, Metro Manila, Philippines"),
-NewExternal(112, "BENE-000112", "CR-900112", "Shaina", "C.", "Del Rosario", "Female","05 May 1990",  "Single Parent",  "Taguig City",         "Taguig City, Metro Manila, Philippines"),
-NewExternal(113, "BENE-000113", "CR-900113", "Noel",   "B.", "Aquino", "Male",  "11 January 1979", "Senior Citizen", "Manila",              "Manila, Metro Manila, Philippines"),
-NewExternal(114, "BENE-000114", "CR-900114", "Patricia","E.","Castro", "Female","19 September 1993","PWD",            "Caloocan City",       "Caloocan City, Metro Manila, Philippines"),
-NewExternal(115, "BENE-000115", "CR-900115", "Harold", "S.", "Gonzales", "Male","30 June 1995",     "Vendor",         "Bacolod City",        "Bacolod City, Negros Occidental, Philippines"),
-NewExternal(116, "BENE-000116", "CR-900116", "Jenica", "T.", "Soriano", "Female","07 July 1991",    "Farmer",         "Malaybalay City",     "Malaybalay City, Bukidnon, Philippines"),
-NewExternal(117, "BENE-000117", "CR-900117", "Dennis", "A.", "Pineda", "Male", "22 October 1989",  "Indigenous",     "Kidapawan City",      "Kidapawan City, Cotabato, Philippines"),
-NewExternal(118, "BENE-000118", "CR-900118", "Aileen", "R.", "Salazar", "Female","13 March 1997",   "Unemployed",     "Zamboanga City",      "Zamboanga City, Zamboanga Peninsula, Philippines"),
-NewExternal(119, "BENE-000119", "CR-900119", "Gerald", "N.", "Uy", "Male",     "04 April 1992",    "None",           "General Santos City", "General Santos City, South Cotabato, Philippines"),
-NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female","16 December 1986","Healthcare",     "Tacloban City",       "Tacloban City, Leyte, Philippines"),
+                NewExternal(109,"BENE-000109","CR-900109","Joshua","K.","Ramos","Male","18 August 1987","Fisherfolk","Navotas City","Navotas City, Metro Manila, Philippines"),
+                NewExternal(110,"BENE-000110","CR-900110","Andrea","M.","Villanueva","Female","02 February 1998","Student","Makati City","Makati City, Metro Manila, Philippines"),
+                NewExternal(111,"BENE-000111","CR-900111","Rafael","D.","Lim","Male","27 November 1984","OFW","Pasig City","Pasig City, Metro Manila, Philippines"),
+                NewExternal(112,"BENE-000112","CR-900112","Shaina","C.","Del Rosario","Female","05 May 1990","Single Parent","Taguig City","Taguig City, Metro Manila, Philippines"),
+                NewExternal(113,"BENE-000113","CR-900113","Noel","B.","Aquino","Male","11 January 1979","Senior Citizen","Manila","Manila, Metro Manila, Philippines"),
+                NewExternal(114,"BENE-000114","CR-900114","Patricia","E.","Castro","Female","19 September 1993","PWD","Caloocan City","Caloocan City, Metro Manila, Philippines"),
+                NewExternal(115,"BENE-000115","CR-900115","Harold","S.","Gonzales","Male","30 June 1995","Vendor","Bacolod City","Bacolod City, Negros Occidental, Philippines"),
+                NewExternal(116,"BENE-000116","CR-900116","Jenica","T.","Soriano","Female","07 July 1991","Farmer","Malaybalay City","Malaybalay City, Bukidnon, Philippines"),
+                NewExternal(117,"BENE-000117","CR-900117","Dennis","A.","Pineda","Male","22 October 1989","Indigenous","Kidapawan City","Kidapawan City, Cotabato, Philippines"),
+                NewExternal(118,"BENE-000118","CR-900118","Aileen","R.","Salazar","Female","13 March 1997","Unemployed","Zamboanga City","Zamboanga City, Zamboanga Peninsula, Philippines"),
+                NewExternal(119,"BENE-000119","CR-900119","Gerald","N.","Uy","Male","04 April 1992","None","General Santos City","General Santos City, South Cotabato, Philippines"),
+                NewExternal(120,"BENE-000120","CR-900120","Clarisse","P.","Bautista","Female","16 December 1986","Healthcare","Tacloban City","Tacloban City, Leyte, Philippines"),
             });
         }
 
@@ -149,7 +347,7 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
         {
             return new ValidatorRecord
             {
-                Id = sourceId, // external id
+                Id = sourceId,
                 BeneficiaryId = beneId,
                 CivilRegistryId = civilId,
                 FirstName = fn,
@@ -160,7 +358,7 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
                 Classification = classification,
                 Barangay = barangay,
                 PresentAddress = address,
-                Status = "" // external has no status
+                Status = ""
             };
         }
 
@@ -210,113 +408,11 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             };
         }
 
-        private void LoadNotYet()
-        {
-            NotYetItems.Clear();
-
-            // Pull any saved rows from OUR DB for these external beneficiary IDs
-            var saved = _repo.GetByBeneficiaryIds(_externalPeople.Select(x => x.BeneficiaryId));
-
-            // Merge:
-            // - if already validated in DB => do NOT show in Not Yet Validated
-            // - if saved as Not Validated => show DB version (includes saved edits)
-            // - if not in DB => show external version
-            var merged = new List<ValidatorRecord>();
-
-            foreach (var ext in _externalPeople)
-            {
-                if (saved.TryGetValue(ext.BeneficiaryId, out var dbRow))
-                {
-                    var st = CanonicalStatus(dbRow.Status);
-                    if (IsValidatedStatus(st))
-                        continue;
-
-                    merged.Add(dbRow); // Not Validated rows show here
-                }
-                else
-                {
-                    merged.Add(ext);
-                }
-            }
-
-            // ✅ IMPORTANT FIX:
-            // Include DB "Not Validated" rows that are NOT in the external list
-            // (this is what makes newly added profiles appear after reload)
-            var extIds = new HashSet<string>(
-                _externalPeople.Select(x => x.BeneficiaryId),
-                StringComparer.OrdinalIgnoreCase);
-
-            var mergedIds = new HashSet<string>(
-                merged.Select(x => x.BeneficiaryId),
-                StringComparer.OrdinalIgnoreCase);
-
-            var dbNotValidated = _repo.GetByStatus("Not Validated") ?? new List<ValidatorRecord>();
-            foreach (var dbRow in dbNotValidated)
-            {
-                if (!string.IsNullOrWhiteSpace(dbRow.BeneficiaryId)
-                    && !extIds.Contains(dbRow.BeneficiaryId)
-                    && !mergedIds.Contains(dbRow.BeneficiaryId))
-                {
-                    merged.Add(dbRow);
-                    mergedIds.Add(dbRow.BeneficiaryId);
-                }
-            }
-
-            var q = merged.AsEnumerable();
-            var s = (SearchNotYetText ?? "").Trim();
-
-            if (!string.IsNullOrWhiteSpace(s))
-            {
-                q = q.Where(x =>
-                    (x.FirstName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                    (x.LastName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                    (x.BeneficiaryId ?? "").Contains(s, StringComparison.OrdinalIgnoreCase));
-            }
-
-            foreach (var item in q) NotYetItems.Add(item);
-            OnPropertyChanged(nameof(NotYetFoundText));
-        }
-
-        private void LoadValidated()
-        {
-            ValidatedItems.Clear();
-
-            var status = CurrentValidatedStatus();
-            var rows = _repo.GetByStatus(status) ?? new List<ValidatorRecord>();
-
-            var q = rows.AsEnumerable();
-            var s = (SearchValidatedText ?? "").Trim();
-
-            if (!string.IsNullOrWhiteSpace(s))
-            {
-                q = q.Where(x =>
-                    (x.FirstName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                    (x.LastName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                    (x.BeneficiaryId ?? "").Contains(s, StringComparison.OrdinalIgnoreCase));
-            }
-
-            foreach (var item in q) ValidatedItems.Add(item);
-            OnPropertyChanged(nameof(ValidatedFoundText));
-        }
-
-        // ========= Commands that match your XAML =========
-
         [RelayCommand]
         private void SetMainTab(ValidatorsMainTab tab)
         {
             ActiveMainTab = tab;
-
-            if (ActiveMainTab == ValidatorsMainTab.NotYetValidated)
-            {
-                LoadNotYet();
-                SelectedPerson = NotYetItems.FirstOrDefault();
-            }
-            else
-            {
-                LoadValidated();
-                SelectedPerson = ValidatedItems.FirstOrDefault();
-            }
-
+            RestoreSelection();
             IsAddingProfile = false;
         }
 
@@ -324,18 +420,25 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
         private void SetStatusTab(ValidatorsStatusTab tab)
         {
             ActiveStatusTab = tab;
-            LoadValidated();
-            SelectedPerson = ValidatedItems.FirstOrDefault();
-
+            ApplyValidatedFilter();
+            RestoreSelection();
             IsAddingProfile = false;
         }
 
-        [RelayCommand] private void SearchNotYet() => LoadNotYet();
-        [RelayCommand] private void SearchValidated() => LoadValidated();
+        [RelayCommand]
+        private void SearchNotYet()
+        {
+            ApplyNotYetFilter();
+            RestoreSelection();
+        }
 
-        // ===== Profile image upload/remove =====
+        [RelayCommand]
+        private void SearchValidated()
+        {
+            ApplyValidatedFilter();
+            RestoreSelection();
+        }
 
-        // ✅ Profile image upload
         [RelayCommand]
         private void UploadProfileImage()
         {
@@ -374,20 +477,13 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             person.ProfileImage = null;
         }
 
-        // ✅ ADD PROFILE (new)
         [RelayCommand]
         private void AddProfile()
         {
-            // Ensure we are in Not Yet Validated tab
             ActiveMainTab = ValidatorsMainTab.NotYetValidated;
-
-            // Clear search so the new record won't be hidden
             SearchNotYetText = "";
+            ApplyNotYetFilter();
 
-            // reload list first (so we insert into the current view)
-            LoadNotYet();
-
-            // Generate new ids
             var next = GetNextBeneNumber();
             var beneId = $"BENE-{next:000000}";
             var civilId = $"CR-{next:000000}";
@@ -411,7 +507,6 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
 
             NotYetItems.Insert(0, fresh);
             SelectedPerson = fresh;
-
             IsAddingProfile = true;
             OnPropertyChanged(nameof(NotYetFoundText));
         }
@@ -422,7 +517,7 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             if (person is null) return;
             SelectedPerson = person;
 
-            LoadReleaseHistoryForSelected();   // ✅ add this
+            LoadReleaseHistoryForSelected();
 
             IsProfileModalOpen = true;
             IsAddingProfile = false;
@@ -436,7 +531,6 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             OnPropertyChanged(nameof(HasReleaseHistory));
         }
 
-        // ===== Save profile confirm modal =====
         [RelayCommand]
         private void OpenSaveConfirm()
         {
@@ -444,42 +538,33 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             IsSaveConfirmOpen = true;
         }
 
-        [RelayCommand] private void CloseSaveConfirm() => IsSaveConfirmOpen = false;
+        [RelayCommand]
+        private void CloseSaveConfirm()
+        {
+            IsSaveConfirmOpen = false;
+        }
 
         [RelayCommand]
-        private void ConfirmSaveProfile()
+        private async Task ConfirmSaveProfile()
         {
             var person = SelectedPerson;
             if (person is null) return;
 
-            // Save Profile rule:
-            // - if already validated => keep current validated status
-            // - else => set to Not Validated
             var current = CanonicalStatus(person.Status);
             var statusToSave = IsValidatedStatus(current) ? current : "Not Validated";
 
-            _repo.Upsert(person, statusToSave);
+            await Task.Run(() =>
+            {
+                _repo.Upsert(person, statusToSave);
+            });
+
             person.Status = statusToSave;
-
             IsSaveConfirmOpen = false;
-
-            var bene = person.BeneficiaryId;
-
-            // refresh lists so overlay stays correct
-            LoadNotYet();
-            LoadValidated();
-
-            // keep selection on the saved row if present
-            SelectedPerson =
-                NotYetItems.FirstOrDefault(x => string.Equals(x.BeneficiaryId, bene, StringComparison.OrdinalIgnoreCase))
-                ?? ValidatedItems.FirstOrDefault(x => string.Equals(x.BeneficiaryId, bene, StringComparison.OrdinalIgnoreCase))
-                ?? NotYetItems.FirstOrDefault()
-                ?? ValidatedItems.FirstOrDefault();
-
             IsAddingProfile = false;
+
+            await RefreshDataAsync(person.BeneficiaryId);
         }
 
-        // ===== Validate modal =====
         [RelayCommand]
         private void OpenValidateModal(ValidatorRecord? person)
         {
@@ -494,10 +579,14 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             IsValidateModalOpen = true;
         }
 
-        [RelayCommand] private void CloseValidateModal() => IsValidateModalOpen = false;
+        [RelayCommand]
+        private void CloseValidateModal()
+        {
+            IsValidateModalOpen = false;
+        }
 
         [RelayCommand]
-        private void ConfirmValidate()
+        private async Task ConfirmValidate()
         {
             var person = SelectedPerson;
             if (person is null) return;
@@ -505,11 +594,13 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             var newStatus = CanonicalStatus(ValidateSelectedStatus);
             if (!IsValidatedStatus(newStatus)) return;
 
-            // write to DB
             person.Status = newStatus;
-            _repo.Upsert(person, newStatus);
 
-            // switch to Validated tab + correct status pill
+            await Task.Run(() =>
+            {
+                _repo.Upsert(person, newStatus);
+            });
+
             ActiveMainTab = ValidatorsMainTab.Validated;
             ActiveStatusTab = newStatus switch
             {
@@ -518,35 +609,25 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
                 _ => ValidatorsStatusTab.Endorsed
             };
 
-            // refresh lists
-            LoadNotYet();
-            LoadValidated();
-
-            // keep selection on the newly validated row if present
-            SelectedPerson =
-                ValidatedItems.FirstOrDefault(x => string.Equals(x.BeneficiaryId, person.BeneficiaryId, StringComparison.OrdinalIgnoreCase))
-                ?? ValidatedItems.FirstOrDefault();
-
             IsValidateModalOpen = false;
             IsAddingProfile = false;
-        }
 
-        // ===== Helpers =====
+            await RefreshDataAsync(person.BeneficiaryId);
+        }
 
         private int GetNextBeneNumber()
         {
-            // Start from external max
             var max = _externalPeople.Count == 0 ? 0 : _externalPeople.Max(x => ExtractDigits(x.BeneficiaryId));
 
-            // Include DB rows across statuses to avoid duplicates
-            foreach (var st in new[] { "Not Validated", "Endorsed", "Pending", "Rejected" })
+            if (_notYetBase.Count > 0)
+                max = Math.Max(max, _notYetBase.Max(x => ExtractDigits(x.BeneficiaryId)));
+
+            foreach (var list in _validatedByStatus.Values)
             {
-                var rows = _repo.GetByStatus(st) ?? new List<ValidatorRecord>();
-                if (rows.Count > 0)
-                    max = Math.Max(max, rows.Max(x => ExtractDigits(x.BeneficiaryId)));
+                if (list.Count > 0)
+                    max = Math.Max(max, list.Max(x => ExtractDigits(x.BeneficiaryId)));
             }
 
-            // Fallback
             if (max <= 0) max = 100000;
 
             return max + 1;
@@ -567,7 +648,6 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             var p = SelectedPerson;
             if (p is null) return;
 
-            // must exist in beneficiaries table to have releases
             var internalId = _repo.GetInternalIdByBeneficiaryId(p.BeneficiaryId);
             if (internalId is null) return;
 
@@ -598,12 +678,21 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             OnPropertyChanged(nameof(HasReleaseHistory));
         }
 
+        private sealed class RefreshSnapshot
+        {
+            public List<string> Classifications { get; set; } = new();
+            public Dictionary<string, ValidatorRecord> SavedByIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+            public List<ValidatorRecord> NotValidated { get; set; } = new();
+            public List<ValidatorRecord> Endorsed { get; set; } = new();
+            public List<ValidatorRecord> Pending { get; set; } = new();
+            public List<ValidatorRecord> Rejected { get; set; } = new();
+        }
+
         public sealed class ReleaseHistoryItem
         {
             public int AllotmentId { get; set; }
             public DateTime ReleasedAt { get; set; }
             public string ShareText { get; set; } = "";
-
             public bool IsLast { get; set; }
 
             public string ReleasedAtText =>

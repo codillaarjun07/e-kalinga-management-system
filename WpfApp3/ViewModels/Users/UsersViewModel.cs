@@ -22,6 +22,7 @@ namespace WpfApp3.ViewModels.Users
 
         [ObservableProperty] private string searchText = "";
         [ObservableProperty] private int currentPage = 1;
+        [ObservableProperty] private bool isLoading;
 
         [ObservableProperty] private bool isToastVisible;
         [ObservableProperty] private string toastMessage = "";
@@ -62,9 +63,7 @@ namespace WpfApp3.ViewModels.Users
 
         public UsersViewModel()
         {
-            LoadLookupOptions();
-            LoadFromDb();
-            Apply();
+            _ = InitializeAsync();
         }
 
         public bool IsSuperAdmin =>
@@ -107,76 +106,55 @@ namespace WpfApp3.ViewModels.Users
                 StringComparison.OrdinalIgnoreCase);
         }
 
-        private async void ShowToast(string msg, string kind)
+        private async Task InitializeAsync()
         {
-            _toastCts?.Cancel();
-            _toastCts = new CancellationTokenSource();
-            var token = _toastCts.Token;
+            await RefreshDataAsync();
+        }
 
-            ToastMessage = msg;
-            ToastBackground = kind switch
-            {
-                "success" => "#16A34A",
-                "error" => "#E11D48",
-                "warning" => "#F59E0B",
-                _ => "#2E3A59"
-            };
-
-            IsToastVisible = true;
-
+        private async Task RefreshDataAsync()
+        {
             try
             {
-                await Task.Delay(2200, token);
-                IsToastVisible = false;
-            }
-            catch
-            {
-            }
-        }
+                IsLoading = true;
 
-        private bool EnsureSuperAdminOrToast(string actionText)
-        {
-            if (IsSuperAdmin) return true;
+                var departments = await Task.Run(() => _repo.GetDepartments().ToList());
+                var roles = await Task.Run(() => _repo.GetRoles().ToList());
+                var rows = await Task.Run(() => _repo.GetAll().ToList());
 
-            ShowToast($"You cannot {actionText} because you are not superadmin.", "warning");
-            return false;
-        }
+                Offices.Clear();
+                foreach (var office in departments)
+                    Offices.Add(office);
 
-        private void LoadLookupOptions()
-        {
-            Offices.Clear();
-            foreach (var office in _repo.GetDepartments())
-                Offices.Add(office);
+                Roles.Clear();
+                foreach (var role in roles)
+                    Roles.Add(role);
 
-            Roles.Clear();
-            foreach (var role in _repo.GetRoles())
-                Roles.Add(role);
-        }
-
-        private void LoadFromDb()
-        {
-            _all.Clear();
-
-            var rows = _repo.GetAll();
-            foreach (var r in rows)
-            {
-                _all.Add(new UserRecord
+                _all.Clear();
+                foreach (var r in rows)
                 {
-                    Id = r.Id,
-                    FirstName = r.FirstName,
-                    LastName = r.LastName,
-                    Office = r.Office ?? "",
-                    Role = r.Role,
-                    Username = r.Username,
-                    ProfilePicture = r.ProfilePicture,
-                    IsCurrentSessionUser = string.Equals(
-                        r.Username?.Trim(),
-                        SessionService.Username?.Trim(),
-                        StringComparison.OrdinalIgnoreCase)
-                });
-            }
+                    _all.Add(new UserRecord
+                    {
+                        Id = r.Id,
+                        FirstName = r.FirstName,
+                        LastName = r.LastName,
+                        Office = r.Office ?? "",
+                        Role = r.Role,
+                        Username = r.Username,
+                        ProfilePicture = r.ProfilePicture,
+                        IsCurrentSessionUser = string.Equals(
+                            r.Username?.Trim(),
+                            SessionService.Username?.Trim(),
+                            StringComparison.OrdinalIgnoreCase)
+                    });
+                }
 
-            CurrentPage = 1;
+                CurrentPage = 1;
+                Apply();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         partial void OnSearchTextChanged(string value)
@@ -316,7 +294,7 @@ namespace WpfApp3.ViewModels.Users
         private void CloseForm() => IsFormOpen = false;
 
         [RelayCommand]
-        private void SaveForm()
+        private async Task SaveForm()
         {
             if (!EnsureSuperAdminOrToast("save user changes"))
                 return;
@@ -336,8 +314,11 @@ namespace WpfApp3.ViewModels.Users
 
             try
             {
+                IsLoading = true;
+
                 var ignoreId = _editingTarget?.Id;
-                if (_repo.UsernameExists(user, ignoreId))
+                var usernameExists = await Task.Run(() => _repo.UsernameExists(user, ignoreId));
+                if (usernameExists)
                 {
                     ShowToast("Username already exists.", "warning");
                     return;
@@ -351,12 +332,13 @@ namespace WpfApp3.ViewModels.Users
                         return;
                     }
 
-                    _repo.Create(first, last, office, role, user, pass, ProfilePictureInput);
+                    await Task.Run(() => _repo.Create(first, last, office, role, user, pass, ProfilePictureInput));
                 }
                 else
                 {
-                    _repo.Update(
-                        _editingTarget.Id,
+                    var editingId = _editingTarget.Id;
+                    await Task.Run(() => _repo.Update(
+                        editingId,
                         first,
                         last,
                         office,
@@ -364,18 +346,20 @@ namespace WpfApp3.ViewModels.Users
                         user,
                         string.IsNullOrWhiteSpace(pass) ? null : pass,
                         ProfilePictureInput
-                    );
+                    ));
                 }
 
-                LoadLookupOptions();
-                LoadFromDb();
-                Apply();
+                await RefreshDataAsync();
                 IsFormOpen = false;
                 ShowToast("User saved successfully.", "success");
             }
             catch
             {
                 ShowToast("Failed to save user.", "error");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
@@ -406,7 +390,7 @@ namespace WpfApp3.ViewModels.Users
         }
 
         [RelayCommand]
-        private void ConfirmDelete()
+        private async Task ConfirmDelete()
         {
             if (!EnsureSuperAdminOrToast("delete a user"))
                 return;
@@ -421,12 +405,15 @@ namespace WpfApp3.ViewModels.Users
 
             try
             {
-                if (_deleteTarget is not null)
-                    _repo.Delete(_deleteTarget.Id);
+                IsLoading = true;
 
-                LoadLookupOptions();
-                LoadFromDb();
-                Apply();
+                if (_deleteTarget is not null)
+                {
+                    var deleteId = _deleteTarget.Id;
+                    await Task.Run(() => _repo.Delete(deleteId));
+                }
+
+                await RefreshDataAsync();
 
                 IsDeleteOpen = false;
                 _deleteTarget = null;
@@ -437,10 +424,55 @@ namespace WpfApp3.ViewModels.Users
             {
                 ShowToast("Failed to delete user.", "error");
             }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task Refresh()
+        {
+            await RefreshDataAsync();
         }
 
         [RelayCommand] private void PreviousPage() { if (CurrentPage > 1) CurrentPage--; }
         [RelayCommand] private void NextPage() { if (CurrentPage < TotalPages) CurrentPage++; }
         [RelayCommand] private void GoToPage(int page) { CurrentPage = page; }
+
+        private async void ShowToast(string msg, string kind)
+        {
+            _toastCts?.Cancel();
+            _toastCts = new CancellationTokenSource();
+            var token = _toastCts.Token;
+
+            ToastMessage = msg;
+            ToastBackground = kind switch
+            {
+                "success" => "#16A34A",
+                "error" => "#E11D48",
+                "warning" => "#F59E0B",
+                _ => "#2E3A59"
+            };
+
+            IsToastVisible = true;
+
+            try
+            {
+                await Task.Delay(2200, token);
+                IsToastVisible = false;
+            }
+            catch
+            {
+            }
+        }
+
+        private bool EnsureSuperAdminOrToast(string actionText)
+        {
+            if (IsSuperAdmin) return true;
+
+            ShowToast($"You cannot {actionText} because you are not superadmin.", "warning");
+            return false;
+        }
     }
 }

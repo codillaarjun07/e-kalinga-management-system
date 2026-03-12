@@ -8,6 +8,10 @@
         <vm:DashboardViewModel/>
     </UserControl.DataContext>
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
     <Grid Background="#F3F5F9">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,8 +19,8 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
-      Margin="8,-60,80,6"
-      Panel.ZIndex="20">
+              Margin="8,-60,80,6"
+              Panel.ZIndex="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -25,31 +29,31 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="1"
-            Content="Refresh"
-            Command="{Binding RefreshCommand}"
-            Background="#FFFFFF"
-            Foreground="#2E3A59"
-            Padding="14,8"
-            MinWidth="92"
-            Height="40"
-            VerticalAlignment="Top"
-            BorderBrush="#E7ECF5"
-            BorderThickness="1"
-            FontWeight="SemiBold"
-            FontSize="13"
-            Cursor="Hand">
+                    Content="Refresh"
+                    Command="{Binding RefreshCommand}"
+                    Background="#FFFFFF"
+                    Foreground="#2E3A59"
+                    Padding="14,8"
+                    MinWidth="92"
+                    Height="40"
+                    VerticalAlignment="Top"
+                    BorderBrush="#E7ECF5"
+                    BorderThickness="1"
+                    FontWeight="SemiBold"
+                    FontSize="13"
+                    Cursor="Hand">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="12"
-                                    Padding="{TemplateBinding Padding}">
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="12"
+                                            Padding="{TemplateBinding Padding}">
                                         <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
+                                                          VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -59,28 +63,28 @@
             </Button>
 
             <Button Grid.Column="3"
-            Content="Export PDF"
-            Command="{Binding ExportPdfCommand}"
-            Background="#4F46E5"
-            Foreground="White"
-            Padding="14,8"
-            MinWidth="116"
-            Height="40"
-            VerticalAlignment="Top"
-            BorderThickness="0"
-            FontWeight="SemiBold"
-            FontSize="13"
-            Cursor="Hand">
+                    Content="Export PDF"
+                    Command="{Binding ExportPdfCommand}"
+                    Background="#4F46E5"
+                    Foreground="White"
+                    Padding="14,8"
+                    MinWidth="116"
+                    Height="40"
+                    VerticalAlignment="Top"
+                    BorderThickness="0"
+                    FontWeight="SemiBold"
+                    FontSize="13"
+                    Cursor="Hand">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
-                                    CornerRadius="12"
-                                    Padding="{TemplateBinding Padding}">
+                                            CornerRadius="12"
+                                            Padding="{TemplateBinding Padding}">
                                         <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
+                                                          VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -90,197 +94,232 @@
             </Button>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,0,0,8">
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,0,0,8">
 
-                <!-- KPI tiles -->
-                <UniformGrid Columns="4" Margin="0,0,0,18">
-                    <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <!-- KPI tiles -->
+                    <UniformGrid Columns="4" Margin="0,0,0,18">
+                        <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <Border Width="56" Height="56" CornerRadius="28" Background="#E7FAF6" VerticalAlignment="Center">
-                                <TextBlock Text="₱" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Border>
+                                <Border Width="56" Height="56" CornerRadius="28" Background="#E7FAF6" VerticalAlignment="Center">
+                                    <TextBlock Text="₱" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
 
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Total Allotment Amount" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding TotalAllotmentAmount}" Foreground="#2E3A59" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Total Allotment Amount" Foreground="#8A94A6" FontSize="12"/>
+                                    <TextBlock Text="{Binding TotalAllotmentAmount}" Foreground="#2E3A59" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
 
-                    <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                        <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <Border Width="56" Height="56" CornerRadius="28" Background="#EEF2FF" VerticalAlignment="Center">
-                                <TextBlock Text="👥" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Border>
+                                <Border Width="56" Height="56" CornerRadius="28" Background="#EEF2FF" VerticalAlignment="Center">
+                                    <TextBlock Text="👥" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
 
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Number of Beneficiaries" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding BeneficiariesCount}" Foreground="#2E3A59" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Number of Beneficiaries" Foreground="#8A94A6" FontSize="12"/>
+                                    <TextBlock Text="{Binding BeneficiariesCount}" Foreground="#2E3A59" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
 
-                    <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                        <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <Border Width="56" Height="56" CornerRadius="28" Background="#FFF3E6" VerticalAlignment="Center">
-                                <TextBlock Text="🛠" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Border>
+                                <Border Width="56" Height="56" CornerRadius="28" Background="#FFF3E6" VerticalAlignment="Center">
+                                    <TextBlock Text="🛠" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
 
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Number of Projects" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding ProjectsCount}" Foreground="#2E3A59" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Number of Projects" Foreground="#8A94A6" FontSize="12"/>
+                                    <TextBlock Text="{Binding ProjectsCount}" Foreground="#2E3A59" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
 
-                    <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                        <Border CornerRadius="18" Background="White" Margin="8" Padding="18">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <Border Width="56" Height="56" CornerRadius="28" Background="#FDECEC" VerticalAlignment="Center">
-                                <TextBlock Text="✓" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Border>
+                                <Border Width="56" Height="56" CornerRadius="28" Background="#FDECEC" VerticalAlignment="Center">
+                                    <TextBlock Text="✓" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
 
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Release Status" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding StatusSummary}" Foreground="#2E3A59" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </UniformGrid>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Release Status" Foreground="#8A94A6" FontSize="12"/>
+                                    <TextBlock Text="{Binding StatusSummary}" Foreground="#2E3A59" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </UniformGrid>
 
-                <!-- Charts -->
-                <Grid Margin="8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="320"/>
-                        <RowDefinition Height="320"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="440"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Charts -->
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="320"/>
+                            <RowDefinition Height="320"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="440"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Pie -->
-                    <Border Grid.Row="0" Grid.Column="0" CornerRadius="18" Background="White" Padding="18" Margin="0,0,14,14">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
+                        <!-- Pie -->
+                        <Border Grid.Row="0" Grid.Column="0" CornerRadius="18" Background="White" Padding="18" Margin="0,0,14,14">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Text="Beneficiary Classification"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#2E3A59"/>
+                                <TextBlock Text="Beneficiary Classification"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="#2E3A59"/>
 
-                            <lvc:PieChart Grid.Row="1"
-                                          Series="{Binding BeneficiariesPieSeries}"
-                                          DataTooltip="{x:Null}"
-                                          LegendLocation="Right"
-                                          HoverPushOut="8"/>
-                        </Grid>
-                    </Border>
+                                <lvc:PieChart Grid.Row="1"
+                                              Series="{Binding BeneficiariesPieSeries}"
+                                              DataTooltip="{x:Null}"
+                                              LegendLocation="Right"
+                                              HoverPushOut="8"/>
+                            </Grid>
+                        </Border>
 
-                    <!-- Yearly -->
-                    <Border Grid.Row="0" Grid.Column="1" CornerRadius="18" Background="White" Padding="18" Margin="0,0,0,14">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
+                        <!-- Yearly -->
+                        <Border Grid.Row="0" Grid.Column="1" CornerRadius="18" Background="White" Padding="18" Margin="0,0,0,14">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Text="Yearly Total Money Allotment"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#2E3A59"/>
+                                <TextBlock Text="Yearly Total Money Allotment"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="#2E3A59"/>
 
-                            <lvc:CartesianChart Grid.Row="1"
-                                                Series="{Binding YearlyAllotmentSeries}"
-                                                LegendLocation="None"
-                                                Background="Transparent">
-                                <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Labels="{Binding YearlyLabels}"
-                                              Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
-                                </lvc:CartesianChart.AxisX>
-                                <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis LabelFormatter="{Binding MoneyFormatter}"/>
-                                </lvc:CartesianChart.AxisY>
-                            </lvc:CartesianChart>
-                        </Grid>
-                    </Border>
+                                <lvc:CartesianChart Grid.Row="1"
+                                                    Series="{Binding YearlyAllotmentSeries}"
+                                                    LegendLocation="None"
+                                                    Background="Transparent">
+                                    <lvc:CartesianChart.AxisX>
+                                        <lvc:Axis Labels="{Binding YearlyLabels}"
+                                                  Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
+                                    </lvc:CartesianChart.AxisX>
+                                    <lvc:CartesianChart.AxisY>
+                                        <lvc:Axis LabelFormatter="{Binding MoneyFormatter}"/>
+                                    </lvc:CartesianChart.AxisY>
+                                </lvc:CartesianChart>
+                            </Grid>
+                        </Border>
 
-                    <!-- Monthly area -->
-                    <Border Grid.Row="1" Grid.ColumnSpan="2" CornerRadius="18" Background="White" Padding="18">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
-                        </Border.Effect>
+                        <!-- Monthly area -->
+                        <Border Grid.Row="1" Grid.ColumnSpan="2" CornerRadius="18" Background="White" Padding="18">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08"/>
+                            </Border.Effect>
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Text="Projects Created Per Month"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#2E3A59"/>
+                                <TextBlock Text="Projects Created Per Month"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="#2E3A59"/>
 
-                            <lvc:CartesianChart Grid.Row="1"
-                                                Series="{Binding ProjectHistorySeries}"
-                                                LegendLocation="None"
-                                                Background="Transparent">
-                                <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Labels="{Binding MonthLabels}"
-                                              Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
-                                </lvc:CartesianChart.AxisX>
-                                <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis LabelFormatter="{Binding CountFormatter}"/>
-                                </lvc:CartesianChart.AxisY>
-                            </lvc:CartesianChart>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </StackPanel>
-        </ScrollViewer>
+                                <lvc:CartesianChart Grid.Row="1"
+                                                    Series="{Binding ProjectHistorySeries}"
+                                                    LegendLocation="None"
+                                                    Background="Transparent">
+                                    <lvc:CartesianChart.AxisX>
+                                        <lvc:Axis Labels="{Binding MonthLabels}"
+                                                  Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
+                                    </lvc:CartesianChart.AxisX>
+                                    <lvc:CartesianChart.AxisY>
+                                        <lvc:Axis LabelFormatter="{Binding CountFormatter}"/>
+                                    </lvc:CartesianChart.AxisY>
+                                </lvc:CartesianChart>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Loading Overlay -->
+            <Grid Panel.ZIndex="50"
+                  Background="#66FFFFFF"
+                  Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                <Border Width="260"
+                        Padding="20"
+                        CornerRadius="18"
+                        Background="White"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="Loading dashboard..."
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="#2E3A59"
+                                   HorizontalAlignment="Center"/>
+
+                        <ProgressBar IsIndeterminate="True"
+                                     Height="8"
+                                     Margin="0,16,0,0"
+                                     Foreground="#4F46E5"
+                                     Background="#E9EEF7"/>
+
+                        <TextBlock Text="Please wait while data is being fetched."
+                                   FontSize="12"
+                                   Foreground="#8A94A6"
+                                   Margin="0,12,0,0"
+                                   TextAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

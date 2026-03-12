@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.ComponentModel;
+using System.Windows;
 using WpfApp3.Models;
 using WpfApp3.Services;
 
@@ -34,6 +36,7 @@ namespace WpfApp3.ViewModels.Beneficiaries
 
         [ObservableProperty] private string searchText = "";
         [ObservableProperty] private int currentPage = 1;
+        [ObservableProperty] private bool isLoading;
 
         public int PageSize { get; } = 8;
 
@@ -105,6 +108,22 @@ namespace WpfApp3.ViewModels.Beneficiaries
 
         public BeneficiariesViewModel()
         {
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                ClassificationOptions.Add("All");
+                ClassificationOptions.Add("PWD");
+                ClassificationOptions.Add("Senior Citizen");
+                ClassificationOptions.Add("Indigenous");
+                ClassificationOptions.Add("Farmer");
+                ClassificationOptions.Add("Vendor");
+                ClassificationOptions.Add("None");
+
+                SelectedClassification = "All";
+                _ready = true;
+                Apply();
+                return;
+            }
+
             // classification filter options
             ClassificationOptions.Add("All");
             ClassificationOptions.Add("PWD");
@@ -115,12 +134,14 @@ namespace WpfApp3.ViewModels.Beneficiaries
             ClassificationOptions.Add("None");
 
             SelectedClassification = "All";
-            LoadProjectsFromDb();
             _ready = true;
 
-            // default to first project
-            SelectedProject = Projects.FirstOrDefault();
-            ReloadEverything();
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await LoadDataAsync(selectFirstProject: true);
         }
 
         partial void OnSelectedClassificationChanged(string? value)
@@ -137,42 +158,86 @@ namespace WpfApp3.ViewModels.Beneficiaries
         {
             if (!_ready) return;
             CurrentPage = 1;
-            ReloadEverything();
+            _ = ReloadEverythingAsync();
         }
 
         partial void OnAddSearchTextChanged(string value)
         {
-            BuildAddList();
             AddCurrentPage = 1;
-            ApplyAddPaging();
-        } 
-
-        private void LoadProjectsFromDb()
-        {
-            Projects.Clear();
-
-            var list = _allotmentRepo.GetAllProjects();
-            foreach (var p in list)
-                Projects.Add(p);
+            _ = RefreshAddListAsync();
         }
 
-        private void ReloadEverything()
+        private async Task RefreshAddListAsync()
         {
-            LoadAssignedFromDb();
+            await BuildAddListAsync();
+            ApplyAddPaging();
+        }
+
+        private async Task LoadDataAsync(bool selectFirstProject = false)
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
+            try
+            {
+                var projects = await Task.Run(() => _allotmentRepo.GetAllProjects());
+
+                Projects.Clear();
+                foreach (var p in projects)
+                    Projects.Add(p);
+
+                if (selectFirstProject || SelectedProject is null || Projects.All(x => x.Id != SelectedProject.Id))
+                    SelectedProject = Projects.FirstOrDefault();
+
+                await ReloadEverythingCoreAsync();
+            }
+            catch
+            {
+                Projects.Clear();
+                _assignedCache.Clear();
+                AddItems.Clear();
+                AddPagedItems.Clear();
+                AddPageNumbers.Clear();
+                Apply();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task ReloadEverythingAsync()
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
+            try
+            {
+                await ReloadEverythingCoreAsync();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task ReloadEverythingCoreAsync()
+        {
+            var selectedProjectId = SelectedProject?.Id;
+
+            var assigned = selectedProjectId is null
+                ? new List<BeneficiaryRecord>()
+                : await Task.Run(() => _assignRepo.GetAssignedEndorsed(selectedProjectId.Value));
+
+            _assignedCache = assigned;
             Apply();
-            BuildAddList();
+            await BuildAddListAsync();
 
             OnPropertyChanged(nameof(TotalBudgetText));
-        }
-
-        private void LoadAssignedFromDb()
-        {
-            _assignedCache.Clear();
-
-            if (SelectedProject is null) return;
-
-            // ✅ Assigned + only Endorsed (enforced in SQL join)
-            _assignedCache = _assignRepo.GetAssignedEndorsed(SelectedProject.Id);
         }
 
         private List<BeneficiaryRecord> Filtered()
@@ -208,7 +273,7 @@ namespace WpfApp3.ViewModels.Beneficiaries
                     (x.Barangay ?? "").ToLowerInvariant().Contains(q) ||
                     (x.Classification ?? "").ToLowerInvariant().Contains(q) ||
                     (x.Gender ?? "").ToLowerInvariant().Contains(q));
-                    ;
+                ;
             }
 
             return src.ToList();
@@ -236,17 +301,23 @@ namespace WpfApp3.ViewModels.Beneficiaries
         }
 
         // -------- Add Beneficiaries (modal) --------
-        private void BuildAddList()
+        private async Task BuildAddListAsync()
         {
             AddItems.Clear();
             IsAddAllSelected = false;
 
-            if (SelectedProject is null) return;
+            if (SelectedProject is null)
+            {
+                OnPropertyChanged(nameof(AddSelectedCount));
+                OnPropertyChanged(nameof(AddButtonText));
+                OnPropertyChanged(nameof(AddFoundText));
+                return;
+            }
 
             var q = (AddSearchText ?? "").Trim().ToLowerInvariant();
 
             // ✅ Endorsed beneficiaries NOT yet assigned to this project
-            var src = _assignRepo.GetAvailableEndorsedNotAssigned(SelectedProject.Id, q);
+            var src = await Task.Run(() => _assignRepo.GetAvailableEndorsedNotAssigned(SelectedProject.Id, q));
 
             foreach (var r in src)
             {
@@ -294,29 +365,36 @@ namespace WpfApp3.ViewModels.Beneficiaries
         [RelayCommand] private void CloseProjectDetails() => IsProjectDetailsOpen = false;
 
         [RelayCommand]
-        private void OpenAddBeneficiaries()
+        private async Task OpenAddBeneficiaries()
         {
             AddSearchText = "";
-            BuildAddList();
-            IsAddBeneficiariesOpen = true;
             AddCurrentPage = 1;
-            ApplyAddPaging();
+            await RefreshAddListAsync();
+            IsAddBeneficiariesOpen = true;
         }
 
         [RelayCommand] private void CloseAddBeneficiaries() => IsAddBeneficiariesOpen = false;
 
         [RelayCommand]
-        private void ConfirmAddSelected()
+        private async Task ConfirmAddSelected()
         {
-            if (SelectedProject is null) return;
+            if (SelectedProject is null || IsLoading) return;
 
             var picked = AddItems.Where(x => x.IsSelected).Select(x => x.Id).ToList();
             if (picked.Count == 0) return;
 
-            _assignRepo.AddAssignments(SelectedProject.Id, picked);
+            IsLoading = true;
+            try
+            {
+                await Task.Run(() => _assignRepo.AddAssignments(SelectedProject.Id, picked));
 
-            IsAddBeneficiariesOpen = false;
-            ReloadEverything();
+                IsAddBeneficiariesOpen = false;
+                await ReloadEverythingCoreAsync();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         // Edit share
@@ -347,48 +425,56 @@ namespace WpfApp3.ViewModels.Beneficiaries
         [RelayCommand] private void CloseEditShare() => IsEditShareOpen = false;
 
         [RelayCommand]
-        private void ConfirmEditShare()
+        private async Task ConfirmEditShare()
         {
-            if (SelectedProject is null || _editTarget is null) return;
+            if (SelectedProject is null || _editTarget is null || IsLoading) return;
 
             ClearShareErrors();
 
-            if (SelectedProject.BudgetType == "Money")
+            IsLoading = true;
+            try
             {
-                var raw = (ShareAmountInput ?? "").Replace(",", "").Trim();
-                if (!decimal.TryParse(raw, NumberStyles.Number, CultureInfo.InvariantCulture, out var amt) || amt <= 0)
+                if (SelectedProject.BudgetType == "Money")
                 {
-                    ShareAmountError = "Share amount must be a valid number (> 0).";
-                    HasShareAmountError = true;
-                    return;
+                    var raw = (ShareAmountInput ?? "").Replace(",", "").Trim();
+                    if (!decimal.TryParse(raw, NumberStyles.Number, CultureInfo.InvariantCulture, out var amt) || amt <= 0)
+                    {
+                        ShareAmountError = "Share amount must be a valid number (> 0).";
+                        HasShareAmountError = true;
+                        return;
+                    }
+
+                    await Task.Run(() => _assignRepo.UpdateShareMoney(SelectedProject.Id, _editTarget.Id, amt));
+                }
+                else
+                {
+                    if (!int.TryParse((ShareQtyInput ?? "").Trim(), out var qty) || qty <= 0)
+                    {
+                        ShareInKindError = "Quantity must be a valid number (> 0) and unit is required.";
+                        HasShareInKindError = true;
+                        return;
+                    }
+
+                    var unit = (ShareUnitInput ?? "").Trim();
+                    if (string.IsNullOrWhiteSpace(unit))
+                    {
+                        ShareInKindError = "Quantity must be a valid number (> 0) and unit is required.";
+                        HasShareInKindError = true;
+                        return;
+                    }
+
+                    await Task.Run(() => _assignRepo.UpdateShareInKind(SelectedProject.Id, _editTarget.Id, qty, unit));
                 }
 
-                _assignRepo.UpdateShareMoney(SelectedProject.Id, _editTarget.Id, amt);
+                IsEditShareOpen = false;
+                _editTarget = null;
+
+                await ReloadEverythingCoreAsync();
             }
-            else
+            finally
             {
-                if (!int.TryParse((ShareQtyInput ?? "").Trim(), out var qty) || qty <= 0)
-                {
-                    ShareInKindError = "Quantity must be a valid number (> 0) and unit is required.";
-                    HasShareInKindError = true;
-                    return;
-                }
-
-                var unit = (ShareUnitInput ?? "").Trim();
-                if (string.IsNullOrWhiteSpace(unit))
-                {
-                    ShareInKindError = "Quantity must be a valid number (> 0) and unit is required.";
-                    HasShareInKindError = true;
-                    return;
-                }
-
-                _assignRepo.UpdateShareInKind(SelectedProject.Id, _editTarget.Id, qty, unit);
+                IsLoading = false;
             }
-
-            IsEditShareOpen = false;
-            _editTarget = null;
-
-            ReloadEverything();
         }
 
         private void ClearShareErrors()
@@ -419,16 +505,24 @@ namespace WpfApp3.ViewModels.Beneficiaries
         }
 
         [RelayCommand]
-        private void ConfirmRemove()
+        private async Task ConfirmRemove()
         {
-            if (SelectedProject is null || _removeTarget is null) return;
+            if (SelectedProject is null || _removeTarget is null || IsLoading) return;
 
-            _assignRepo.RemoveAssignment(SelectedProject.Id, _removeTarget.Id);
+            IsLoading = true;
+            try
+            {
+                await Task.Run(() => _assignRepo.RemoveAssignment(SelectedProject.Id, _removeTarget.Id));
 
-            IsRemoveOpen = false;
-            _removeTarget = null;
+                IsRemoveOpen = false;
+                _removeTarget = null;
 
-            ReloadEverything();
+                await ReloadEverythingCoreAsync();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private IEnumerable<BeneficiaryRecord> AddFiltered()

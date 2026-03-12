@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
+using System.Threading.Tasks;
+using System.Windows;
 using WpfApp3.Models;
 using WpfApp3.Services;
 
@@ -22,6 +25,7 @@ namespace WpfApp3.ViewModels.Settings
         [ObservableProperty] private string fundSearchText = "";
         [ObservableProperty] private string classificationSearchText = "";
         [ObservableProperty] private string roleSearchText = "";
+        [ObservableProperty] private bool isLoading;
 
         public ObservableCollection<SettingOptionRecord> DepartmentItems { get; } = new();
         public ObservableCollection<SettingOptionRecord> FundItems { get; } = new();
@@ -48,21 +52,52 @@ namespace WpfApp3.ViewModels.Settings
 
         public SettingsViewModel()
         {
-            LoadAll();
-            ApplyAll();
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                ApplyAll();
+                return;
+            }
+
+            _ = InitializeAsync();
         }
 
-        private void LoadAll()
+        private async Task InitializeAsync()
         {
-            _allDepartments.Clear();
-            _allFunds.Clear();
-            _allClassifications.Clear();
-            _allRoles.Clear();
+            await RefreshAsync();
+        }
 
-            _allDepartments.AddRange(_repo.GetAll("departments"));
-            _allFunds.AddRange(_repo.GetAll("source_of_funds"));
-            _allClassifications.AddRange(_repo.GetAll("classifications"));
-            _allRoles.AddRange(_repo.GetAll("roles"));
+        private async Task RefreshAsync()
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+            try
+            {
+                var data = await Task.Run(() => new
+                {
+                    Departments = _repo.GetAll("departments"),
+                    Funds = _repo.GetAll("source_of_funds"),
+                    Classifications = _repo.GetAll("classifications"),
+                    Roles = _repo.GetAll("roles")
+                });
+
+                _allDepartments.Clear();
+                _allFunds.Clear();
+                _allClassifications.Clear();
+                _allRoles.Clear();
+
+                _allDepartments.AddRange(data.Departments);
+                _allFunds.AddRange(data.Funds);
+                _allClassifications.AddRange(data.Classifications);
+                _allRoles.AddRange(data.Roles);
+
+                ApplyAll();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         partial void OnDepartmentSearchTextChanged(string value) => ApplyDepartments();
@@ -257,7 +292,7 @@ namespace WpfApp3.ViewModels.Settings
         }
 
         [RelayCommand]
-        private void SaveForm()
+        private async Task SaveForm()
         {
             var name = (NameInput ?? "").Trim();
             if (string.IsNullOrWhiteSpace(name))
@@ -268,20 +303,21 @@ namespace WpfApp3.ViewModels.Settings
 
             try
             {
-                if (_repo.NameExists(table, name, ignoreId))
+                var exists = await Task.Run(() => _repo.NameExists(table, name, ignoreId));
+                if (exists)
                     return;
 
                 if (_editingTarget is null)
                 {
-                    _repo.Create(table, name, IsActiveInput);
+                    await Task.Run(() => _repo.Create(table, name, IsActiveInput));
                 }
                 else
                 {
-                    _repo.Update(table, _editingTarget.Id, name, IsActiveInput);
+                    var editingId = _editingTarget.Id;
+                    await Task.Run(() => _repo.Update(table, editingId, name, IsActiveInput));
                 }
 
-                LoadAll();
-                ApplyAll();
+                await RefreshAsync();
                 IsFormOpen = false;
             }
             catch
@@ -341,15 +377,16 @@ namespace WpfApp3.ViewModels.Settings
         }
 
         [RelayCommand]
-        private void ConfirmDelete()
+        private async Task ConfirmDelete()
         {
             if (_deleteTarget is null) return;
 
             try
             {
-                _repo.Delete(GetCurrentTableName(), _deleteTarget.Id);
-                LoadAll();
-                ApplyAll();
+                var deleteId = _deleteTarget.Id;
+                var table = GetCurrentTableName();
+                await Task.Run(() => _repo.Delete(table, deleteId));
+                await RefreshAsync();
             }
             catch
             {

@@ -20,6 +20,7 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <!-- Colors -->
         <SolidColorBrush x:Key="AppBg" Color="#F3F5F9"/>
         <SolidColorBrush x:Key="Primary" Color="#1E3A8A"/>
@@ -241,11 +242,11 @@
 
         <!-- TOP AREA -->
         <Grid Grid.Row="0">
-            <Border Margin="18"
+            <Border 
                     Background="#FFFFFF"
-                    CornerRadius="20"
+                    
                     BorderBrush="#110F172A"
-                    BorderThickness="1">
+                    >
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="30" ShadowDepth="10" Opacity="0.18"/>
                 </Border.Effect>
@@ -262,7 +263,7 @@
                                 HorizontalAlignment="Center"
                                 Margin="0,2,0,18">
                         <Border Background="Transparent" Padding="2" Margin="0,0,0,10">
-                          <Image Width="210"
+                            <Image Width="210"
        Height="110"
        Stretch="Uniform"
        RenderOptions.BitmapScalingMode="HighQuality"
@@ -438,11 +439,21 @@
 
                     <!-- BUTTON -->
                     <Grid Grid.Row="2">
-                        <Button Style="{StaticResource PrimaryButton}"
-                                Command="{Binding LoginCommand}"
-                                Content="Log in"
+                        <Button Command="{Binding LoginCommand}"
                                 HorizontalAlignment="Stretch"
-                                VerticalAlignment="Center"/>
+                                VerticalAlignment="Center">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                                    <Setter Property="Content" Value="Log in"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                            <Setter Property="Content" Value="Signing in..."/>
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
                     </Grid>
                 </Grid>
             </Border>
@@ -462,6 +473,53 @@
                            TextAlignment="Center"
                            Margin="0,6,0,0"/>
             </StackPanel>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Grid Panel.ZIndex="30"
+              Background="#66000000"
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <Border Width="220"
+                    Padding="22"
+                    Background="White"
+                    CornerRadius="18"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <ProgressBar IsIndeterminate="True" Height="6" Margin="0,0,0,14"/>
+                    <TextBlock Text="Signing in..."
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="#2E3A59"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Please wait while we fetch your account."
+                               Margin="0,8,0,0"
+                               FontSize="12"
+                               Foreground="#64748B"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Error Toast -->
+        <Border Panel.ZIndex="40"
+                Width="340"
+                Padding="14,12"
+                CornerRadius="14"
+                Background="{Binding ToastBackground}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,18,18,0"
+                Visibility="{Binding IsToastVisible, Converter={StaticResource BoolToVis}}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.22"/>
+            </Border.Effect>
+            <TextBlock Text="{Binding ToastMessage}"
+                       Foreground="White"
+                       FontWeight="SemiBold"
+                       FontSize="12"
+                       TextWrapping="Wrap"/>
         </Border>
     </Grid>
 </Window>

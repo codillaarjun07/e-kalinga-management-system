@@ -7,6 +7,7 @@ using System.Windows.Media.Imaging;
 using WpfApp3.Models;
 using WpfApp3.Services;
 using System.Windows;
+using System.ComponentModel;
 using static WpfApp3.ViewModels.Validators.ValidatorsViewModel;
 
 namespace WpfApp3.ViewModels.Distribution
@@ -21,6 +22,7 @@ namespace WpfApp3.ViewModels.Distribution
 
         // paging (main page)
         [ObservableProperty] private int currentPage = 1;
+        [ObservableProperty] private bool isLoading;
         public int PageSize { get; } = 8;
 
         public ObservableCollection<AllotmentProjectOption> Projects { get; } = new();
@@ -105,8 +107,21 @@ namespace WpfApp3.ViewModels.Distribution
 
         public DistributionViewModel()
         {
-            LoadProjectsFromDb();
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                ClassificationOptions.Add("All");
+                ClassificationOptions.Add("PWD");
+                ClassificationOptions.Add("Senior Citizen");
+                ClassificationOptions.Add("Indigenous");
+                ClassificationOptions.Add("Farmer");
+                ClassificationOptions.Add("Vendor");
+                ClassificationOptions.Add("None");
 
+                SelectedClassification = "All";
+                _ready = true;
+                ApplyPaging();
+                return;
+            }
 
             ClassificationOptions.Add("All");
             ClassificationOptions.Add("PWD");
@@ -119,8 +134,12 @@ namespace WpfApp3.ViewModels.Distribution
             SelectedClassification = "All";
             _ready = true;
 
-            SelectedProject = Projects.FirstOrDefault();
-            Reload();
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await LoadDataAsync(selectFirstProject: true);
         }
 
         partial void OnSelectedClassificationChanged(string? value)
@@ -159,20 +178,65 @@ namespace WpfApp3.ViewModels.Distribution
         {
             if (!_ready) return;
             CurrentPage = 1;
-            Reload();
             OnPropertyChanged(nameof(TotalBudgetText));
+            _ = LoadBeneficiariesAsync();
         }
 
         partial void OnCurrentPageChanged(int value) => ApplyPaging();
 
-        private void LoadProjectsFromDb()
+        private async Task LoadDataAsync(bool selectFirstProject = false)
         {
-            Projects.Clear();
-            foreach (var p in _allotmentRepo.GetAllProjects())
-                Projects.Add(p);
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
+            try
+            {
+                var result = await Task.Run(() => new
+                {
+                    Projects = _allotmentRepo.GetAllProjects()
+                });
+
+                Projects.Clear();
+                foreach (var p in result.Projects)
+                    Projects.Add(p);
+
+                if (selectFirstProject || SelectedProject is null || Projects.All(x => x.Id != SelectedProject.Id))
+                    SelectedProject = Projects.FirstOrDefault();
+
+                await LoadBeneficiariesCoreAsync();
+            }
+            catch
+            {
+                Projects.Clear();
+                _cache.Clear();
+                ApplyPaging();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
-        private void Reload()
+        private async Task LoadBeneficiariesAsync()
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
+            try
+            {
+                await LoadBeneficiariesCoreAsync();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private async Task LoadBeneficiariesCoreAsync()
         {
             _cache.Clear();
 
@@ -182,8 +246,26 @@ namespace WpfApp3.ViewModels.Distribution
                 return;
             }
 
-            _cache = _assignRepo.GetAssignedEndorsed(SelectedProject.Id);
+            var rows = await Task.Run(() => _assignRepo.GetAssignedEndorsed(SelectedProject.Id));
+            _cache = rows ?? new List<BeneficiaryRecord>();
             ApplyPaging();
+        }
+
+        private async Task ReloadAfterReleaseAsync()
+        {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
+            try
+            {
+                await LoadBeneficiariesCoreAsync();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private void ApplyPaging()
@@ -423,7 +505,7 @@ namespace WpfApp3.ViewModels.Distribution
         }
 
         [RelayCommand]
-        private void ConfirmRelease()
+        private async Task ConfirmRelease()
         {
             if (SelectedProject is null || _pendingRelease is null) return;
 
@@ -433,7 +515,7 @@ namespace WpfApp3.ViewModels.Distribution
             ReloadReleaseItems();
 
             // ✅ update main page table
-            Reload();
+            await ReloadAfterReleaseAsync();
 
             IsConfirmReleaseOpen = false;
             ShowToast($"Released to ID {_pendingRelease.BeneficiaryId}", "success");

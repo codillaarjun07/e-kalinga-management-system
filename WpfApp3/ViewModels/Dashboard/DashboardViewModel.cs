@@ -19,6 +19,7 @@ namespace WpfApp3.ViewModels.Dashboard
         [ObservableProperty] private int releasedCount;
         [ObservableProperty] private int pendingReleaseCount;
         [ObservableProperty] private string statusSummary = "0 Released • 0 Pending";
+        [ObservableProperty] private bool isLoading;
 
         public SeriesCollection BeneficiariesPieSeries { get; } = new();
         public SeriesCollection YearlyAllotmentSeries { get; } = new();
@@ -35,13 +36,13 @@ namespace WpfApp3.ViewModels.Dashboard
             MoneyFormatter = value => $"₱{value:N0}";
             CountFormatter = value => value.ToString("N0", CultureInfo.InvariantCulture);
 
-            LoadDashboard();
+            _ = LoadDashboardAsync();
         }
 
         [RelayCommand]
-        private void Refresh()
+        private async Task Refresh()
         {
-            LoadDashboard();
+            await LoadDashboardAsync();
         }
 
         [RelayCommand]
@@ -62,11 +63,16 @@ namespace WpfApp3.ViewModels.Dashboard
             }
         }
 
-        private void LoadDashboard()
+        private async Task LoadDashboardAsync()
         {
+            if (IsLoading)
+                return;
+
+            IsLoading = true;
+
             try
             {
-                var data = _repo.GetSnapshot();
+                var data = await Task.Run(() => _repo.GetSnapshot());
 
                 TotalAllotmentAmount = $"₱ {data.TotalAllotmentAmount:N2}";
                 BeneficiariesCount = data.BeneficiariesCount;
@@ -93,6 +99,10 @@ namespace WpfApp3.ViewModels.Dashboard
                 ProjectHistorySeries.Clear();
                 YearlyLabels = Array.Empty<string>();
                 MonthLabels = Array.Empty<string>();
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
