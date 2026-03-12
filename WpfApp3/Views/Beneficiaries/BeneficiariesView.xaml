@@ -909,12 +909,53 @@
                                         <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
                                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
                                         <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="DataGridRow">
+                                                    <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                        <SelectiveScrollingGrid>
+                                                            <SelectiveScrollingGrid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </SelectiveScrollingGrid.ColumnDefinitions>
+                                                            <SelectiveScrollingGrid.RowDefinitions>
+                                                                <RowDefinition Height="*"/>
+                                                                <RowDefinition Height="Auto"/>
+                                                            </SelectiveScrollingGrid.RowDefinitions>
+
+                                                            <DataGridCellsPresenter Grid.Column="1"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+
+                                                            <DataGridDetailsPresenter Grid.Column="1"
+                                                  Grid.Row="1"
+                                                  Visibility="{TemplateBinding DetailsVisibility}"/>
+
+                                                            <DataGridRowHeader Grid.RowSpan="2"
+                                           SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical"
+                                           Visibility="{Binding RelativeSource={RelativeSource AncestorType=DataGrid},
+                                                                Path=HeadersVisibility,
+                                                                Converter={x:Static DataGrid.HeadersVisibilityConverter},
+                                                                ConverterParameter={x:Static DataGridHeadersVisibility.Row}}"/>
+                                                        </SelectiveScrollingGrid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+
+                                        <EventSetter Event="PreviewMouseLeftButtonUp"
+                 Handler="BeneficiaryRow_PreviewMouseLeftButtonUp"/>
+
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter Property="Background" Value="#FAFBFF"/>
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+                                                <Setter Property="Background" Value="Transparent"/>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
@@ -1007,6 +1048,250 @@
                                     Style="{StaticResource PageButton}"
                                     Command="{Binding AddNextPageCommand}"/>
                         </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- PROFILE MODAL -->
+        <Grid Panel.ZIndex="940"
+      Visibility="{Binding IsProfileOpen, Converter={StaticResource BoolToVis}}">
+
+            <!-- overlay -->
+            <Border Background="#80000000">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick"
+                          Command="{Binding CloseProfileCommand}"/>
+                </Border.InputBindings>
+            </Border>
+
+            <!-- modal -->
+            <Border Width="1120"
+            MaxHeight="760"
+            Padding="22"
+            CornerRadius="20"
+            Background="White"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- header -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Beneficiary Profile"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="#2E3A59"/>
+                            <TextBlock Text="View details and past releases"
+                               FontSize="12"
+                               Foreground="#A3AEC2"
+                               Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                        Command="{Binding CloseProfileCommand}"
+                        Width="34"
+                        Height="34"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                            <TextBlock Text="✕"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#2E3A59"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- body -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="18"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- left profile card -->
+                        <Border Grid.Column="0"
+                        CornerRadius="18"
+                        BorderBrush="#EEF2FF"
+                        BorderThickness="1"
+                        Background="#FCFDFE"
+                        Padding="20">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+
+                                    <Border Width="84"
+                                    Height="84"
+                                    CornerRadius="42"
+                                    Background="#EEF2FF"
+                                    HorizontalAlignment="Left">
+                                        <TextBlock Text="👤"
+                                           FontSize="34"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <TextBlock Text="{Binding ProfileFullName}"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="#2E3A59"
+                                       Margin="0,16,0,4"/>
+
+                                    <TextBlock Text="{Binding ProfileBeneficiaryId, StringFormat=Beneficiary ID: {0}}"
+                                       FontSize="12"
+                                       Foreground="#7C8AA5"/>
+
+                                    <TextBlock Text="{Binding ProfileCivilRegistryId, StringFormat=Civil Registry ID: {0}}"
+                                       FontSize="12"
+                                       Foreground="#7C8AA5"
+                                       Margin="0,4,0,0"/>
+
+                                    <Grid Margin="0,22,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Text="Gender" Grid.Row="0" Grid.Column="0" Foreground="#A3AEC2" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding ProfileGender}" Grid.Row="0" Grid.Column="1" Foreground="#2E3A59"/>
+
+                                        <TextBlock Text="Classification" Grid.Row="1" Grid.Column="0" Foreground="#A3AEC2" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                        <TextBlock Text="{Binding ProfileClassification}" Grid.Row="1" Grid.Column="1" Foreground="#2E3A59" Margin="0,12,0,0"/>
+
+                                        <TextBlock Text="Barangay" Grid.Row="2" Grid.Column="0" Foreground="#A3AEC2" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                        <TextBlock Text="{Binding ProfileBarangay}" Grid.Row="2" Grid.Column="1" Foreground="#2E3A59" Margin="0,12,0,0"/>
+
+                                        <TextBlock Text="Address" Grid.Row="3" Grid.Column="0" Foreground="#A3AEC2" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                        <TextBlock Text="{Binding ProfilePresentAddress}" Grid.Row="3" Grid.Column="1" Foreground="#2E3A59" TextWrapping="Wrap" Margin="0,12,0,0"/>
+
+                                        <TextBlock Text="Current Share" Grid.Row="4" Grid.Column="0" Foreground="#A3AEC2" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                        <TextBlock Text="{Binding ProfileShareText}" Grid.Row="4" Grid.Column="1" Foreground="#2E3A59" Margin="0,12,0,0"/>
+
+                                        <TextBlock Text="Release Status" Grid.Row="5" Grid.Column="0" Foreground="#A3AEC2" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                        <TextBlock Text="{Binding ProfileReleasedText}" Grid.Row="5" Grid.Column="1" Foreground="#2E3A59" Margin="0,12,0,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+
+                        <!-- right history card -->
+                        <Border Grid.Column="2"
+                        CornerRadius="18"
+                        BorderBrush="#EEF2FF"
+                        BorderThickness="1"
+                        Background="#FFFFFF"
+                        Padding="18">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="14"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="Past Releases"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Foreground="#2E3A59"/>
+                                    <TextBlock Text="Previous project release history"
+                                       FontSize="12"
+                                       Foreground="#A3AEC2"
+                                       Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <Grid Grid.Row="2">
+                                    <TextBlock Text="{Binding ProfileHistoryEmptyText}"
+                                       Foreground="#A3AEC2"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontStyle="Italic"/>
+
+                                    <DataGrid ItemsSource="{Binding ProfileHistory}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="None"
+                                      RowHeaderWidth="0"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      FontSize="12"
+                                      ColumnHeaderHeight="42"
+                                      RowHeight="46"
+                                      IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      SelectionUnit="FullRow"
+                                      FocusVisualStyle="{x:Null}">
+
+                                        <DataGrid.Resources>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+                                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Padding" Value="10,0"/>
+                                            </Style>
+
+                                            <Style TargetType="DataGridRow">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+                                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+
+                                            <Style TargetType="DataGridCell">
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                                <Setter Property="Padding" Value="8,0"/>
+                                            </Style>
+                                        </DataGrid.Resources>
+
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Project"
+                                                        Binding="{Binding ProjectName}"
+                                                        Width="*"/>
+
+                                            <DataGridTextColumn Header="Share"
+                                                        Binding="{Binding ShareText}"
+                                                        Width="150"/>
+
+                                            <DataGridTextColumn Header="Status"
+                                                        Binding="{Binding ReleasedText}"
+                                                        Width="130"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </Grid>
             </Border>

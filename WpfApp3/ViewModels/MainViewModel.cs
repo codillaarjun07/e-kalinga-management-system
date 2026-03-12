@@ -10,6 +10,7 @@ using WpfApp3.Views.Beneficiaries;
 using WpfApp3.Views.Dashboard;
 using WpfApp3.Views.Distribution;
 using WpfApp3.Views.Users;
+using WpfApp3.Views.Settings;
 using WpfApp3.Views.Validators;
 
 namespace WpfApp3.ViewModels;
@@ -39,6 +40,7 @@ public partial class MainViewModel : ObservableObject
             //new NavItem("👤 Client Profile", NavigateClientProfileCommand),
             new NavItem("🔐 Validators", NavigateValidatorsCommand),
             new NavItem("🖥️ Users", NavigateUsersCommand),
+            new NavItem("⚙️ Settings", NavigateSettingsCommand),
         };
 
         // Default selection (highlights Dashboard on startup)
@@ -88,6 +90,13 @@ public partial class MainViewModel : ObservableObject
     {
         PageTitle = "Users";
         CurrentView = new UsersView();
+    }
+
+    [RelayCommand]
+    private void NavigateSettings()
+    {
+        PageTitle = "Settings";
+        CurrentView = new SettingsView();
     }
 
     private void NavigatePlaceholder(string title)

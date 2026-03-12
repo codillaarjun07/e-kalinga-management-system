@@ -8,6 +8,14 @@ namespace WpfApp3.Services
 {
     public class BeneficiariesRepository
     {
+
+        public sealed class BeneficiaryPastReleaseRow
+        {
+            public string ProjectName { get; set; } = "";
+            public string ShareText { get; set; } = "";
+            public string ReleasedText { get; set; } = "";
+        }
+
         public void EnsureTable()
         {
             using var conn = MySqlDb.OpenConnection();
@@ -339,6 +347,62 @@ LIMIT 1;";
                 PresentAddress = Convert.ToString(r["present_address"]) ?? "",
                 ProfileImage = img
             };
+        }
+
+
+        public List<BeneficiaryPastReleaseRow> GetPastReleasesByBeneficiaryId(int beneficiaryId, int? excludeProjectId = null)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = conn.CreateCommand();
+
+            cmd.CommandText = @"
+SELECT
+    a.project_name,
+    ab.share_amount,
+    ab.share_qty,
+    ab.share_unit,
+    ab.is_released
+FROM allotment_beneficiaries ab
+INNER JOIN allotments a ON a.id = ab.allotment_id
+WHERE ab.beneficiary_id = @beneficiaryId
+  AND (@excludeProjectId IS NULL OR ab.allotment_id <> @excludeProjectId)
+ORDER BY ab.id DESC;";
+
+            cmd.Parameters.AddWithValue("@beneficiaryId", beneficiaryId);
+            cmd.Parameters.AddWithValue("@excludeProjectId", excludeProjectId.HasValue ? excludeProjectId.Value : DBNull.Value);
+
+            var list = new List<BeneficiaryPastReleaseRow>();
+
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                string shareText = "";
+
+                if (r["share_amount"] != DBNull.Value)
+                {
+                    var amount = Convert.ToDecimal(r["share_amount"]);
+                    shareText = $"₱ {amount:N2}";
+                }
+                else if (r["share_qty"] != DBNull.Value && r["share_unit"] != DBNull.Value)
+                {
+                    var qty = Convert.ToInt32(r["share_qty"]);
+                    var unit = Convert.ToString(r["share_unit"]) ?? "";
+                    shareText = $"{qty:N0} {unit}";
+                }
+
+                var released = false;
+                if (r["is_released"] != DBNull.Value)
+                    released = Convert.ToBoolean(r["is_released"]);
+
+                list.Add(new BeneficiaryPastReleaseRow
+                {
+                    ProjectName = Convert.ToString(r["project_name"]) ?? "",
+                    ShareText = shareText,
+                    ReleasedText = released ? "Released" : "Not Released"
+                });
+            }
+
+            return list;
         }
     }
 }

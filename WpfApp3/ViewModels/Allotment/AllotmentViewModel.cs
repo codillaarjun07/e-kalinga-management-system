@@ -83,16 +83,15 @@ namespace WpfApp3.ViewModels.Allotment
         [ObservableProperty] private string budgetUnitError = "";
         [ObservableProperty] private bool hasBudgetUnitError;
 
-        // dropdown options (dummy for now)
-        public ObservableCollection<string> Departments { get; } = new()
-        {
-            "Operations", "Finance", "Health", "Admin"
-        };
+        private readonly Lazy<SettingsRepository> _settingsRepo = new(() => new SettingsRepository());
+        private SettingsRepository SettingsRepo => _settingsRepo.Value;
 
-        public ObservableCollection<string> SourcesOfFund { get; } = new()
-        {
-            "LGU Admin", "Donation"
-        };
+        private const string DepartmentsTable = "departments";
+        private const string SourcesOfFundTable = "source_of_funds";
+
+        // dropdown options from settings tables
+        public ObservableCollection<string> Departments { get; } = new();
+        public ObservableCollection<string> SourcesOfFund { get; } = new();
 
         public ObservableCollection<string> BudgetTypes { get; } = new()
         {
@@ -113,6 +112,7 @@ namespace WpfApp3.ViewModels.Allotment
             try
             {
                 Repo.EnsureTable();
+                LoadSettingsOptions();
                 ReloadFromDb();
             }
             catch
@@ -140,6 +140,32 @@ namespace WpfApp3.ViewModels.Allotment
         partial void OnCurrentPageChanged(int value)
         {
             Apply();
+        }
+
+        private void LoadSettingsOptions()
+        {
+            Departments.Clear();
+            SourcesOfFund.Clear();
+
+            var departmentOptions = SettingsRepo.GetAll(DepartmentsTable)
+                .Where(x => x.IsActive && !string.IsNullOrWhiteSpace(x.Name))
+                .Select(x => x.Name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            foreach (var item in departmentOptions)
+                Departments.Add(item);
+
+            var sourceOfFundOptions = SettingsRepo.GetAll(SourcesOfFundTable)
+                .Where(x => x.IsActive && !string.IsNullOrWhiteSpace(x.Name))
+                .Select(x => x.Name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            foreach (var item in sourceOfFundOptions)
+                SourcesOfFund.Add(item);
         }
 
         // validate on any form change
@@ -256,6 +282,7 @@ namespace WpfApp3.ViewModels.Allotment
         [RelayCommand]
         private void AddAllotment()
         {
+            LoadSettingsOptions();
             _editingId = null;
             FormTitle = "Add Allotment";
 
@@ -278,6 +305,8 @@ namespace WpfApp3.ViewModels.Allotment
         private void Edit(AllotmentRecord? row)
         {
             if (row is null) return;
+
+            LoadSettingsOptions();
 
             _editingId = row.Id;
             FormTitle = "Edit Allotment";

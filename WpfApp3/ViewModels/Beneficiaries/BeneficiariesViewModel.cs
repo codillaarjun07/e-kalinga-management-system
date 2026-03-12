@@ -9,6 +9,24 @@ namespace WpfApp3.ViewModels.Beneficiaries
 {
     public partial class BeneficiariesViewModel : ObservableObject
     {
+
+        private readonly BeneficiariesRepository _beneficiariesRepo = new();
+
+        [ObservableProperty] private bool isProfileOpen;
+
+        [ObservableProperty] private string profileBeneficiaryId = "";
+        [ObservableProperty] private string profileCivilRegistryId = "";
+        [ObservableProperty] private string profileFullName = "";
+        [ObservableProperty] private string profileGender = "";
+        [ObservableProperty] private string profileClassification = "";
+        [ObservableProperty] private string profileBarangay = "";
+        [ObservableProperty] private string profilePresentAddress = "";
+        [ObservableProperty] private string profileShareText = "";
+        [ObservableProperty] private string profileReleasedText = "";
+        [ObservableProperty] private string profileHistoryEmptyText = "No past releases found.";
+
+        public ObservableCollection<BeneficiaryReleaseHistoryRow> ProfileHistory { get; } = new();
+
         private readonly AllotmentsRepository _allotmentRepo = new();
         private readonly AllotmentBeneficiariesRepository _assignRepo = new();
 
@@ -457,5 +475,77 @@ namespace WpfApp3.ViewModels.Beneficiaries
         [RelayCommand] private void AddPreviousPage() { if (AddCurrentPage > 1) AddCurrentPage--; ApplyAddPaging(); }
         [RelayCommand] private void AddNextPage() { AddCurrentPage++; ApplyAddPaging(); }
         [RelayCommand] private void AddGoToPage(int page) { AddCurrentPage = page; ApplyAddPaging(); }
+
+        public partial class BeneficiaryReleaseHistoryRow : ObservableObject
+        {
+            [ObservableProperty] private string projectName = "";
+            [ObservableProperty] private string shareText = "";
+            [ObservableProperty] private string releasedText = "";
+        }
+
+
+        [RelayCommand]
+        private void OpenProfile(BeneficiaryRecord? row)
+        {
+            if (row is null) return;
+
+            var details = _beneficiariesRepo.GetDetailsByInternalId(row.Id);
+
+            ProfileBeneficiaryId = details?.BeneficiaryId ?? row.BeneficiaryId ?? "";
+            ProfileCivilRegistryId = details?.CivilRegistryId ?? row.CivilRegistryId ?? "";
+            ProfileFullName = $"{details?.FirstName ?? row.FirstName} {details?.MiddleName ?? row.MiddleName} {details?.LastName ?? row.LastName}".Replace("  ", " ").Trim();
+            ProfileGender = details?.Gender ?? row.Gender ?? "";
+            ProfileClassification = details?.Classification ?? row.Classification ?? "";
+            ProfileBarangay = details?.Barangay ?? row.Barangay ?? "";
+            ProfilePresentAddress = details?.PresentAddress ?? row.PresentAddress ?? "";
+            ProfileShareText = row.ShareText;
+            ProfileReleasedText = row.ReleasedText;
+
+            LoadProfileHistory(row.Id);
+
+            IsProfileOpen = true;
+        }
+
+        [RelayCommand]
+        private void CloseProfile()
+        {
+            IsProfileOpen = false;
+
+            ProfileBeneficiaryId = "";
+            ProfileCivilRegistryId = "";
+            ProfileFullName = "";
+            ProfileGender = "";
+            ProfileClassification = "";
+            ProfileBarangay = "";
+            ProfilePresentAddress = "";
+            ProfileShareText = "";
+            ProfileReleasedText = "";
+            ProfileHistory.Clear();
+            ProfileHistoryEmptyText = "No past releases found.";
+        }
+
+        private void LoadProfileHistory(int beneficiaryId)
+        {
+            ProfileHistory.Clear();
+
+            var rows = _beneficiariesRepo.GetPastReleasesByBeneficiaryId(
+                beneficiaryId,
+                SelectedProject?.Id
+            );
+
+            foreach (var row in rows)
+            {
+                ProfileHistory.Add(new BeneficiaryReleaseHistoryRow
+                {
+                    ProjectName = row.ProjectName,
+                    ShareText = row.ShareText,
+                    ReleasedText = row.ReleasedText
+                });
+            }
+
+            ProfileHistoryEmptyText = ProfileHistory.Count == 0
+                ? "No past releases found."
+                : "";
+        }
     }
 }

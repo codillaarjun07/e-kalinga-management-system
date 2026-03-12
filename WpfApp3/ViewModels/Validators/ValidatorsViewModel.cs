@@ -31,6 +31,8 @@ namespace WpfApp3.ViewModels.Validators
     {
         private readonly BeneficiariesRepository _repo = new();
         private readonly AllotmentBeneficiariesRepository _releaseRepo = new();
+        private readonly SettingsRepository _settingsRepo = new();
+        private const string ClassificationTable = "classifications";
 
         public ObservableCollection<ReleaseHistoryItem> ReleaseHistory { get; } = new();
 
@@ -76,15 +78,15 @@ namespace WpfApp3.ViewModels.Validators
         // ===== Dropdown Sources =====
         public ObservableCollection<string> GenderOptions { get; } = new() { "Male", "Female" };
 
-        // ✅ updated classification list (Farmer, Vendor)
-        public ObservableCollection<string> ClassificationOptions { get; } =
-            new() { "PWD", "Senior Citizen", "Indigenous", "Farmer", "Vendor", "None" };
+        public ObservableCollection<string> ClassificationOptions { get; } = new();
 
         public ObservableCollection<string> ValidateStatusOptions { get; } = new() { "Endorsed", "Pending", "Rejected" };
 
         public ValidatorsViewModel()
         {
             _repo.EnsureTable();
+
+            LoadClassificationOptions();
 
             SeedExternalPeople(); // replace later with actual external DB pull
 
@@ -177,6 +179,24 @@ NewExternal(120, "BENE-000120", "CR-900120", "Clarisse","P.","Bautista", "Female
             if (status.Equals("Endorsed", StringComparison.OrdinalIgnoreCase)) return "Endorsed";
             if (status.Equals("Not Validated", StringComparison.OrdinalIgnoreCase)) return "Not Validated";
             return status;
+        }
+
+        private void LoadClassificationOptions()
+        {
+            ClassificationOptions.Clear();
+
+            var items = _settingsRepo.GetAll(ClassificationTable)
+                .Where(x => x.IsActive && !string.IsNullOrWhiteSpace(x.Name))
+                .Select(x => x.Name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            foreach (var item in items)
+                ClassificationOptions.Add(item);
+
+            if (ClassificationOptions.Count == 0)
+                ClassificationOptions.Add("None");
         }
 
         private string CurrentValidatedStatus()

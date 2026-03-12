@@ -261,7 +261,25 @@ namespace WpfApp3.ViewModels.Distribution
                 return;
             }
 
-            var reportRows = ReleaseFiltered().ToList();
+            List<BeneficiaryRecord> reportRows;
+            string activeFilter;
+
+            // If report is triggered from the modal, use modal data/filter.
+            // If triggered from the main page, use main page data/filter.
+            if (IsReleaseSessionOpen)
+            {
+                if (ReleaseItems.Count == 0)
+                    ReloadReleaseItems();
+
+                activeFilter = NormalizeLabel(ReleaseSelectedClassification, "All");
+                reportRows = ReleaseFiltered().ToList();
+            }
+            else
+            {
+                activeFilter = NormalizeLabel(SelectedClassification, "All");
+                reportRows = Filtered().ToList();
+            }
+
             if (reportRows.Count == 0)
             {
                 ShowToast("No release records found for the current filter.", "warning");
@@ -279,7 +297,7 @@ namespace WpfApp3.ViewModels.Distribution
             {
                 IsGeneratingReport = true;
 
-                var reportData = BuildReleaseReportData(reportRows);
+                var reportData = BuildReleaseReportData(reportRows, activeFilter);
                 await Task.Run(() => _reportService.GeneratePdf(savePath, reportData));
 
                 ShowToast("Release report generated successfully.", "success");
@@ -600,7 +618,7 @@ namespace WpfApp3.ViewModels.Distribution
             OnPropertyChanged(nameof(HasConfirmReleaseHistory));
         }
 
-        private ReleaseReportData BuildReleaseReportData(List<BeneficiaryRecord> rows)
+        private ReleaseReportData BuildReleaseReportData(List<BeneficiaryRecord> rows, string classificationFilter)
         {
             var total = rows.Count;
             var released = rows.Count(x => x.IsReleased);
@@ -652,7 +670,7 @@ namespace WpfApp3.ViewModels.Distribution
             {
                 ProjectName = SelectedProject?.ProjectName ?? "Release Report",
                 TotalBudgetText = SelectedProject?.TotalBudgetText ?? "-",
-                ClassificationFilter = NormalizeLabel(ReleaseSelectedClassification, "All"),
+                ClassificationFilter = classificationFilter,
                 GeneratedAt = DateTime.Now,
                 TotalBeneficiaries = total,
                 ReleasedCount = released,
