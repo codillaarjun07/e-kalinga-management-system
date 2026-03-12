@@ -1,4 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.IO;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace WpfApp3.Models
 {
@@ -20,6 +23,13 @@ namespace WpfApp3.Models
 
         [ObservableProperty] private bool isPasswordRevealed;
 
+        [ObservableProperty] private byte[]? profilePicture;
+        public bool IsCurrentSessionUser { get; set; }
+
+        public bool HasProfileImage => ProfilePicture is { Length: > 0 };
+
+        public ImageSource? ProfileImagePreview => CreateImage(ProfilePicture);
+
         public string PasswordDisplay => IsPasswordRevealed
             ? Password
             : "********";
@@ -32,6 +42,33 @@ namespace WpfApp3.Models
         partial void OnPasswordChanged(string value)
         {
             OnPropertyChanged(nameof(PasswordDisplay));
+        }
+
+        partial void OnProfilePictureChanged(byte[]? value)
+        {
+            OnPropertyChanged(nameof(HasProfileImage));
+            OnPropertyChanged(nameof(ProfileImagePreview));
+        }
+
+        private static ImageSource? CreateImage(byte[]? bytes)
+        {
+            if (bytes is null || bytes.Length == 0) return null;
+
+            try
+            {
+                using var ms = new MemoryStream(bytes);
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = ms;
+                image.EndInit();
+                image.Freeze();
+                return image;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

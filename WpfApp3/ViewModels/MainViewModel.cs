@@ -2,8 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WpfApp3.Services;
 using WpfApp3.Views.Allotment;
 using WpfApp3.Views.Beneficiaries;
@@ -15,11 +19,13 @@ using WpfApp3.Views.Validators;
 
 namespace WpfApp3.ViewModels;
 
-
 public partial class MainViewModel : ObservableObject
 {
     [ObservableProperty] private UserControl currentView = new DashboardView();
     [ObservableProperty] private string pageTitle = "Dashboard";
+    [ObservableProperty] private string currentUserLabel = "User";
+    [ObservableProperty] private ImageSource? currentUserProfileImage;
+    [ObservableProperty] private bool isCurrentUserProfileImageEmpty = true;
 
     public ObservableCollection<NavItem> NavItems { get; }
 
@@ -37,21 +43,80 @@ public partial class MainViewModel : ObservableObject
             new NavItem("🔀 Allotment", NavigateAllotmentCommand),
             new NavItem("👥 Beneficiaries", NavigateBeneficiariesCommand),
             new NavItem("📦 Distribution", NavigateDistributionCommand),
-            //new NavItem("👤 Client Profile", NavigateClientProfileCommand),
             new NavItem("🔐 Validators", NavigateValidatorsCommand),
             new NavItem("🖥️ Users", NavigateUsersCommand),
             new NavItem("⚙️ Settings", NavigateSettingsCommand),
         };
 
-        // Default selection (highlights Dashboard on startup)
         SelectedNavItem = NavItems[0];
         LogoutCommand = new RelayCommand(Logout);
 
+        LoadCurrentUser();
+    }
+
+    private void LoadCurrentUser()
+    {
+        try
+        {
+            var repo = new UsersRepository();
+            var username = SessionService.Username;
+
+            var user = repo.GetAll()
+                           .FirstOrDefault(x => string.Equals(x.Username, username, StringComparison.OrdinalIgnoreCase));
+
+            if (user == null)
+            {
+                CurrentUserLabel = "User";
+                CurrentUserProfileImage = null;
+                IsCurrentUserProfileImageEmpty = true;
+                return;
+            }
+
+            CurrentUserLabel = $"{user.FirstName} {user.LastName}".Trim();
+
+            if (string.IsNullOrWhiteSpace(CurrentUserLabel))
+                CurrentUserLabel = user.Username ?? "User";
+
+            if (user.ProfilePicture != null && user.ProfilePicture.Length > 0)
+            {
+                CurrentUserProfileImage = ToImage(user.ProfilePicture);
+                IsCurrentUserProfileImageEmpty = CurrentUserProfileImage == null;
+            }
+            else
+            {
+                CurrentUserProfileImage = null;
+                IsCurrentUserProfileImageEmpty = true;
+            }
+        }
+        catch
+        {
+            CurrentUserLabel = "User";
+            CurrentUserProfileImage = null;
+            IsCurrentUserProfileImageEmpty = true;
+        }
+    }
+
+    private ImageSource? ToImage(byte[] bytes)
+    {
+        try
+        {
+            using var ms = new MemoryStream(bytes);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = ms;
+            image.EndInit();
+            image.Freeze();
+            return image;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     partial void OnSelectedNavItemChanged(NavItem? value)
     {
-        // When user clicks a menu item, run its command
         value?.Command.Execute(null);
     }
 
@@ -69,24 +134,32 @@ public partial class MainViewModel : ObservableObject
         CurrentView = new AllotmentView();
     }
 
-    [RelayCommand] private void NavigateBeneficiaries()
+    [RelayCommand]
+    private void NavigateBeneficiaries()
     {
         PageTitle = "Beneficiaries";
         CurrentView = new BeneficiariesView();
     }
-    [RelayCommand] private void NavigateDistribution()
+
+    [RelayCommand]
+    private void NavigateDistribution()
     {
         PageTitle = "Distribution";
         CurrentView = new DistributionView();
     }
-    [RelayCommand] private void NavigateClientProfile() => NavigatePlaceholder("Client Profile");
-    [RelayCommand] private void NavigateValidators()
+
+    [RelayCommand]
+    private void NavigateClientProfile() => NavigatePlaceholder("Client Profile");
+
+    [RelayCommand]
+    private void NavigateValidators()
     {
         PageTitle = "Validators";
         CurrentView = new ValidatorsView();
     }
 
-    [RelayCommand] private void NavigateUsers()
+    [RelayCommand]
+    private void NavigateUsers()
     {
         PageTitle = "Users";
         CurrentView = new UsersView();
@@ -116,10 +189,7 @@ public partial class MainViewModel : ObservableObject
 
     private void Logout()
     {
-        // Clear session (POC)
         SessionService.Clear();
-
-        // Ask the window to switch back to Login
         LogoutRequested?.Invoke();
     }
 }

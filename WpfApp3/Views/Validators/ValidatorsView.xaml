@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:WpfApp3.ViewModels.Validators"
              xmlns:models="clr-namespace:WpfApp3.Models"
-             Background="Transparent">
+             >
 
     <UserControl.DataContext>
         <vm:ValidatorsViewModel/>
@@ -315,8 +315,8 @@
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0F172A"/>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource PageBackgroundBrush}">
-        <Grid Margin="24">
+    <Grid >
+        <Grid >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>

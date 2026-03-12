@@ -14,16 +14,19 @@ namespace WpfApp3.ViewModels.Settings
         private readonly List<SettingOptionRecord> _allDepartments = new();
         private readonly List<SettingOptionRecord> _allFunds = new();
         private readonly List<SettingOptionRecord> _allClassifications = new();
+        private readonly List<SettingOptionRecord> _allRoles = new();
 
         [ObservableProperty] private string selectedTab = "Departments";
 
         [ObservableProperty] private string departmentSearchText = "";
         [ObservableProperty] private string fundSearchText = "";
         [ObservableProperty] private string classificationSearchText = "";
+        [ObservableProperty] private string roleSearchText = "";
 
         public ObservableCollection<SettingOptionRecord> DepartmentItems { get; } = new();
         public ObservableCollection<SettingOptionRecord> FundItems { get; } = new();
         public ObservableCollection<SettingOptionRecord> ClassificationItems { get; } = new();
+        public ObservableCollection<SettingOptionRecord> RoleItems { get; } = new();
 
         [ObservableProperty] private bool isFormOpen;
         [ObservableProperty] private bool isDeleteOpen;
@@ -41,6 +44,7 @@ namespace WpfApp3.ViewModels.Settings
         public string DepartmentFoundText => $"Found {FilteredDepartments().Count} records";
         public string FundFoundText => $"Found {FilteredFunds().Count} records";
         public string ClassificationFoundText => $"Found {FilteredClassifications().Count} records";
+        public string RoleFoundText => $"Found {FilteredRoles().Count} records";
 
         public SettingsViewModel()
         {
@@ -53,15 +57,18 @@ namespace WpfApp3.ViewModels.Settings
             _allDepartments.Clear();
             _allFunds.Clear();
             _allClassifications.Clear();
+            _allRoles.Clear();
 
             _allDepartments.AddRange(_repo.GetAll("departments"));
             _allFunds.AddRange(_repo.GetAll("source_of_funds"));
             _allClassifications.AddRange(_repo.GetAll("classifications"));
+            _allRoles.AddRange(_repo.GetAll("roles"));
         }
 
         partial void OnDepartmentSearchTextChanged(string value) => ApplyDepartments();
         partial void OnFundSearchTextChanged(string value) => ApplyFunds();
         partial void OnClassificationSearchTextChanged(string value) => ApplyClassifications();
+        partial void OnRoleSearchTextChanged(string value) => ApplyRoles();
 
         private List<SettingOptionRecord> FilteredDepartments()
         {
@@ -76,6 +83,11 @@ namespace WpfApp3.ViewModels.Settings
         private List<SettingOptionRecord> FilteredClassifications()
         {
             return Filter(_allClassifications, ClassificationSearchText);
+        }
+
+        private List<SettingOptionRecord> FilteredRoles()
+        {
+            return Filter(_allRoles, RoleSearchText);
         }
 
         private List<SettingOptionRecord> Filter(List<SettingOptionRecord> src, string q)
@@ -96,6 +108,7 @@ namespace WpfApp3.ViewModels.Settings
             ApplyDepartments();
             ApplyFunds();
             ApplyClassifications();
+            ApplyRoles();
         }
 
         private void ApplyDepartments()
@@ -123,6 +136,15 @@ namespace WpfApp3.ViewModels.Settings
                 ClassificationItems.Add(item);
 
             OnPropertyChanged(nameof(ClassificationFoundText));
+        }
+
+        private void ApplyRoles()
+        {
+            RoleItems.Clear();
+            foreach (var item in FilteredRoles())
+                RoleItems.Add(item);
+
+            OnPropertyChanged(nameof(RoleFoundText));
         }
 
         [RelayCommand]
@@ -166,6 +188,17 @@ namespace WpfApp3.ViewModels.Settings
         }
 
         [RelayCommand]
+        private void AddRole()
+        {
+            _mode = "Roles";
+            _editingTarget = null;
+            FormTitle = "Add Role";
+            NameInput = "";
+            IsActiveInput = true;
+            IsFormOpen = true;
+        }
+
+        [RelayCommand]
         private void EditDepartment(SettingOptionRecord? row)
         {
             if (row is null) return;
@@ -199,6 +232,19 @@ namespace WpfApp3.ViewModels.Settings
             _mode = "Classifications";
             _editingTarget = row;
             FormTitle = "Edit Classification";
+            NameInput = row.Name;
+            IsActiveInput = row.IsActive;
+            IsFormOpen = true;
+        }
+
+        [RelayCommand]
+        private void EditRole(SettingOptionRecord? row)
+        {
+            if (row is null) return;
+
+            _mode = "Roles";
+            _editingTarget = row;
+            FormTitle = "Edit Role";
             NameInput = row.Name;
             IsActiveInput = row.IsActive;
             IsFormOpen = true;
@@ -277,6 +323,17 @@ namespace WpfApp3.ViewModels.Settings
         }
 
         [RelayCommand]
+        private void DeleteRole(SettingOptionRecord? row)
+        {
+            if (row is null) return;
+
+            _mode = "Roles";
+            _deleteTarget = row;
+            DeleteMessage = $"Are you sure you want to delete role, {row.Name}? This action cannot be undone.";
+            IsDeleteOpen = true;
+        }
+
+        [RelayCommand]
         private void CancelDelete()
         {
             IsDeleteOpen = false;
@@ -309,6 +366,7 @@ namespace WpfApp3.ViewModels.Settings
                 "Departments" => "departments",
                 "Source of Fund" => "source_of_funds",
                 "Classifications" => "classifications",
+                "Roles" => "roles",
                 _ => "departments"
             };
         }

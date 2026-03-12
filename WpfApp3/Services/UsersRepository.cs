@@ -9,7 +9,7 @@ namespace WpfApp3.Services
             using var conn = MySqlDb.OpenConnection();
 
             const string sql = @"
-SELECT id, first_name, last_name, office, role, username, is_active
+SELECT id, first_name, last_name, office, role, username, is_active, profile_picture
 FROM users
 ORDER BY id DESC;";
 
@@ -25,24 +25,78 @@ ORDER BY id DESC;";
                     FirstName = reader.GetString("first_name"),
                     LastName = reader.GetString("last_name"),
                     Office = reader.IsDBNull(reader.GetOrdinal("office")) ? "" : reader.GetString("office"),
-                    Role = reader.GetString("role"),
+                    Role = reader.IsDBNull(reader.GetOrdinal("role")) ? "" : reader.GetString("role"),
                     Username = reader.GetString("username"),
-                    IsActive = reader.GetInt32("is_active") == 1
+                    IsActive = reader.GetInt32("is_active") == 1,
+                    ProfilePicture = reader.IsDBNull(reader.GetOrdinal("profile_picture"))
+                        ? null
+                        : (byte[])reader["profile_picture"]
                 });
             }
 
             return list;
         }
 
-        public int Create(string firstName, string lastName, string? office, string role, string username, string passwordPlain)
+        public List<string> GetDepartments()
+        {
+            using var conn = MySqlDb.OpenConnection();
+
+            const string sql = @"
+SELECT name
+FROM departments
+WHERE is_active = 1
+ORDER BY name ASC;";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            using var reader = cmd.ExecuteReader();
+
+            var list = new List<string>();
+            while (reader.Read())
+            {
+                list.Add(reader.GetString("name"));
+            }
+
+            return list;
+        }
+
+        public List<string> GetRoles()
+        {
+            using var conn = MySqlDb.OpenConnection();
+
+            const string sql = @"
+SELECT name
+FROM roles
+WHERE is_active = 1
+ORDER BY name ASC;";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            using var reader = cmd.ExecuteReader();
+
+            var list = new List<string>();
+            while (reader.Read())
+            {
+                list.Add(reader.GetString("name"));
+            }
+
+            return list;
+        }
+
+        public int Create(
+            string firstName,
+            string lastName,
+            string? office,
+            string role,
+            string username,
+            string passwordPlain,
+            byte[]? profilePicture)
         {
             using var conn = MySqlDb.OpenConnection();
 
             var hash = BCrypt.Net.BCrypt.HashPassword(passwordPlain);
 
             const string sql = @"
-INSERT INTO users (first_name, last_name, office, role, username, password_hash, is_active)
-VALUES (@first_name, @last_name, @office, @role, @username, @password_hash, 1);
+INSERT INTO users (first_name, last_name, office, role, username, password_hash, profile_picture, is_active)
+VALUES (@first_name, @last_name, @office, @role, @username, @password_hash, @profile_picture, 1);
 SELECT LAST_INSERT_ID();";
 
             using var cmd = new MySqlCommand(sql, conn);
@@ -52,12 +106,22 @@ SELECT LAST_INSERT_ID();";
             cmd.Parameters.AddWithValue("@role", role);
             cmd.Parameters.AddWithValue("@username", username);
             cmd.Parameters.AddWithValue("@password_hash", hash);
+            cmd.Parameters.Add("@profile_picture", MySqlDbType.LongBlob).Value =
+                profilePicture is null || profilePicture.Length == 0 ? DBNull.Value : profilePicture;
 
             var idObj = cmd.ExecuteScalar();
             return Convert.ToInt32(idObj);
         }
 
-        public void Update(int id, string firstName, string lastName, string? office, string role, string username, string? newPasswordPlainOrNull)
+        public void Update(
+            int id,
+            string firstName,
+            string lastName,
+            string? office,
+            string role,
+            string username,
+            string? newPasswordPlainOrNull,
+            byte[]? profilePicture)
         {
             using var conn = MySqlDb.OpenConnection();
 
@@ -72,7 +136,8 @@ SET first_name=@first_name,
     office=@office,
     role=@role,
     username=@username,
-    password_hash=@password_hash
+    password_hash=@password_hash,
+    profile_picture=@profile_picture
 WHERE id=@id;";
 
                 using var cmd = new MySqlCommand(sql, conn);
@@ -83,6 +148,8 @@ WHERE id=@id;";
                 cmd.Parameters.AddWithValue("@role", role);
                 cmd.Parameters.AddWithValue("@username", username);
                 cmd.Parameters.AddWithValue("@password_hash", hash);
+                cmd.Parameters.Add("@profile_picture", MySqlDbType.LongBlob).Value =
+                    profilePicture is null || profilePicture.Length == 0 ? DBNull.Value : profilePicture;
                 cmd.ExecuteNonQuery();
             }
             else
@@ -93,7 +160,8 @@ SET first_name=@first_name,
     last_name=@last_name,
     office=@office,
     role=@role,
-    username=@username
+    username=@username,
+    profile_picture=@profile_picture
 WHERE id=@id;";
 
                 using var cmd = new MySqlCommand(sql, conn);
@@ -103,6 +171,8 @@ WHERE id=@id;";
                 cmd.Parameters.AddWithValue("@office", string.IsNullOrWhiteSpace(office) ? null : office);
                 cmd.Parameters.AddWithValue("@role", role);
                 cmd.Parameters.AddWithValue("@username", username);
+                cmd.Parameters.Add("@profile_picture", MySqlDbType.LongBlob).Value =
+                    profilePicture is null || profilePicture.Length == 0 ? DBNull.Value : profilePicture;
                 cmd.ExecuteNonQuery();
             }
         }
@@ -122,8 +192,8 @@ WHERE id=@id;";
             using var conn = MySqlDb.OpenConnection();
 
             const string sql = @"
-SELECT COUNT(*) 
-FROM users 
+SELECT COUNT(*)
+FROM users
 WHERE username=@username
   AND (@ignoreId IS NULL OR id <> @ignoreId);";
 
@@ -145,5 +215,6 @@ WHERE username=@username
         public string Role { get; set; } = "";
         public string Username { get; set; } = "";
         public bool IsActive { get; set; }
+        public byte[]? ProfilePicture { get; set; }
     }
 }

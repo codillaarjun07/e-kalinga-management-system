@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              d:DesignHeight="900"
              d:DesignWidth="1440"
-             Background="#F3F5F9">
+            >
 
     <UserControl.DataContext>
         <vm:SettingsViewModel/>
@@ -21,7 +21,7 @@
             <Setter Property="MinWidth" Value="170"/>
             <Setter Property="Padding" Value="22,0"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#2E3A59"/>
+            <Setter Property="Background" Value="#4F46E5"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -155,7 +155,7 @@
         <Style x:Key="TabButtonDepartments" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Departments">
-                    <Setter Property="Background" Value="#2E3A59"/>
+                    <Setter Property="Background" Value="#4F46E5"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -164,7 +164,7 @@
         <Style x:Key="TabButtonFunds" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Source of Fund">
-                    <Setter Property="Background" Value="#2E3A59"/>
+                    <Setter Property="Background" Value="#4F46E5"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -173,7 +173,16 @@
         <Style x:Key="TabButtonClassifications" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Classifications">
-                    <Setter Property="Background" Value="#2E3A59"/>
+                    <Setter Property="Background" Value="#4F46E5"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TabButtonRoles" TargetType="Button" BasedOn="{StaticResource TabButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedTab}" Value="Roles">
+                    <Setter Property="Background" Value="#4F46E5"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -222,8 +231,8 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#F3F5F9">
-        <Border Margin="20"
+    <Grid >
+        <Border
                 Background="White"
                 CornerRadius="24"
                 Padding="28">
@@ -237,25 +246,30 @@
 
                 <!-- tabs -->
                 <Border Background="#F5F7FB"
-                        CornerRadius="24"
-                        Padding="6"
-                        HorizontalAlignment="Left">
+        CornerRadius="24"
+        Padding="6"
+        HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Departments"
-                                Style="{StaticResource TabButtonDepartments}"
-                                Command="{Binding SelectTabCommand}"
-                                CommandParameter="Departments"/>
+                Style="{StaticResource TabButtonDepartments}"
+                Command="{Binding SelectTabCommand}"
+                CommandParameter="Departments"/>
 
                         <Button Content="Source of Fund"
-                                Style="{StaticResource TabButtonFunds}"
-                                Command="{Binding SelectTabCommand}"
-                                CommandParameter="Source of Fund"/>
+                Style="{StaticResource TabButtonFunds}"
+                Command="{Binding SelectTabCommand}"
+                CommandParameter="Source of Fund"/>
 
                         <Button Content="Classifications"
-                                Style="{StaticResource TabButtonClassifications}"
-                                Command="{Binding SelectTabCommand}"
-                                CommandParameter="Classifications"
-                                Margin="0"/>
+                Style="{StaticResource TabButtonClassifications}"
+                Command="{Binding SelectTabCommand}"
+                CommandParameter="Classifications"/>
+
+                        <Button Content="Roles"
+                Style="{StaticResource TabButtonRoles}"
+                Command="{Binding SelectTabCommand}"
+                CommandParameter="Roles"
+                Margin="0"/>
                     </StackPanel>
                 </Border>
 
@@ -798,6 +812,188 @@
                                                             Style="{StaticResource DangerButton}"
                                                             Command="{Binding DataContext.DeleteClassificationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                             CommandParameter="{Binding}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <!-- ROLES -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTab}" Value="Roles">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="18"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="420"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Height="46"
+                Background="#F8FAFD"
+                BorderBrush="#EEF2FF"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="16,0">
+                                <Grid>
+                                    <TextBox Text="{Binding RoleSearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource SearchBoxText}"/>
+                                    <TextBlock Text="Search role"
+                           Foreground="#A3AEC2"
+                           FontSize="13"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RoleSearchText}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+
+                            <Button Grid.Column="2"
+                Style="{StaticResource PrimaryButton}"
+                Command="{Binding AddRoleCommand}"
+                Content="Add Role"
+                Margin="16,0,0,0"/>
+                        </Grid>
+
+                        <Grid Grid.Row="2" Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Role Options"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Foreground="#2E3A59"
+                   VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="1"
+                Background="#F5F7FB"
+                CornerRadius="14"
+                Padding="12,6"
+                VerticalAlignment="Center">
+                                <TextBlock Text="{Binding RoleFoundText}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Foreground="#6B778C"/>
+                            </Border>
+                        </Grid>
+
+                        <Border Grid.Row="4"
+            Background="White"
+            BorderBrush="#EEF2FF"
+            BorderThickness="1"
+            CornerRadius="20"
+            Padding="10">
+                            <DataGrid ItemsSource="{Binding RoleItems}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  SelectionUnit="FullRow"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="None"
+                  RowHeaderWidth="0"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  Foreground="#2E3A59"
+                  FontSize="13"
+                  ColumnHeaderHeight="44"
+                  RowHeight="44">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID"
+                                    Binding="{Binding Id}"
+                                    Width="80"/>
+
+                                    <DataGridTextColumn Header="Role"
+                                    Binding="{Binding Name}"
+                                    Width="*"/>
+
+                                    <DataGridTemplateColumn Header="Status" Width="130">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Height="28"
+                                    MinWidth="68"
+                                    Padding="12,0"
+                                    CornerRadius="14"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#FDECEC"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                    <Setter Property="Background" Value="#EAF7EE"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+
+                                                    <TextBlock VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           FontSize="12"
+                                           FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="Inactive"/>
+                                                                <Setter Property="Foreground" Value="#C43D3D"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                        <Setter Property="Text" Value="Active"/>
+                                                                        <Setter Property="Foreground" Value="#2F8F57"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Actions" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Left">
+                                                    <Button Content="Edit"
+                                        Style="{StaticResource IconTextButton}"
+                                        Command="{Binding DataContext.EditRoleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"/>
+
+                                                    <Button Content="Delete"
+                                        Style="{StaticResource DangerButton}"
+                                        Command="{Binding DataContext.DeleteRoleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"/>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>

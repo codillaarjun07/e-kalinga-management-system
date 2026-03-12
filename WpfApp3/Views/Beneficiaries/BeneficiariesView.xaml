@@ -364,9 +364,9 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource PageBackgroundBrush}">
+    <Grid >
         <!-- PAGE -->
-        <Grid Margin="24">
+        <Grid >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>

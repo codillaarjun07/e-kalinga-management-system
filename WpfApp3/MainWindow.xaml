@@ -69,7 +69,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Top bar (simple) -->
+            <!-- Top bar -->
             <Grid Grid.Row="0" Margin="0,0,0,18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -82,16 +82,36 @@
                            Foreground="#2E3A59"
                            VerticalAlignment="Center"/>
 
-                <Border Grid.Column="1" Background="White" CornerRadius="14" Padding="14,10">
-                    <!-- Optional: show session username -->
-                    <TextBlock Text="{Binding CurrentUserLabel}"
-                               Foreground="#2E3A59"
-                               FontWeight="SemiBold"/>
+                <Border Grid.Column="1"
+
+        >
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid Width="42"
+              Height="42"
+              Margin="0,0,10,0">
+                            <Ellipse Fill="#E9EEF7"/>
+
+                            <Image Source="{Binding CurrentUserProfileImage}"
+                   Stretch="UniformToFill">
+                                <Image.Clip>
+                                    <EllipseGeometry Center="21,21"
+                                     RadiusX="21"
+                                     RadiusY="21"/>
+                                </Image.Clip>
+                            </Image>
+
+                            <TextBlock Text="👤"
+                       FontSize="18"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Visibility="{Binding IsCurrentUserProfileImageEmpty, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Page host -->
-            <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <Border Grid.Row="1">
                 <ContentControl Content="{Binding CurrentView}" />
             </Border>
         </Grid>
