@@ -173,7 +173,7 @@ WHERE beneficiary_id IN ({string.Join(",", paramNames)});";
         {
             if (person is null) throw new ArgumentNullException(nameof(person));
             if (string.IsNullOrWhiteSpace(person.BeneficiaryId)) throw new ArgumentException("BeneficiaryId is required.");
-            if (string.IsNullOrWhiteSpace(person.CivilRegistryId)) throw new ArgumentException("CivilRegistryId is required.");
+            //if (string.IsNullOrWhiteSpace(person.CivilRegistryId)) throw new ArgumentException("CivilRegistryId is required.");
             if (string.IsNullOrWhiteSpace(person.FirstName)) throw new ArgumentException("FirstName is required.");
             if (string.IsNullOrWhiteSpace(person.LastName)) throw new ArgumentException("LastName is required.");
 

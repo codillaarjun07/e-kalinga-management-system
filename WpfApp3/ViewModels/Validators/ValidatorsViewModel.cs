@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using WpfApp3.Models;
+using WpfApp3.Repositories;
 using WpfApp3.Services;
 
 namespace WpfApp3.ViewModels.Validators
@@ -31,11 +32,13 @@ namespace WpfApp3.ViewModels.Validators
     public partial class ValidatorsViewModel : ObservableObject
     {
         private readonly BeneficiariesRepository _repo = new();
+        private readonly ExternalValBeneficiariesRepository _externalRepo = new();
         private readonly AllotmentBeneficiariesRepository _releaseRepo = new();
         private readonly SettingsRepository _settingsRepo = new();
         private const string ClassificationTable = "classifications";
+        private const int PageSize = 20;
 
-        private readonly List<ValidatorRecord> _externalPeople = new();
+        private List<ValidatorRecord> _externalPeoplePage = new();
         private List<ValidatorRecord> _notYetBase = new();
         private readonly Dictionary<string, List<ValidatorRecord>> _validatedByStatus = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -43,6 +46,19 @@ namespace WpfApp3.ViewModels.Validators
             ["Pending"] = new List<ValidatorRecord>(),
             ["Rejected"] = new List<ValidatorRecord>()
         };
+
+        [ObservableProperty] private int notYetCurrentPage = 1;
+        [ObservableProperty] private int notYetTotalPages = 1;
+        [ObservableProperty] private int validatedCurrentPage = 1;
+        [ObservableProperty] private int validatedTotalPages = 1;
+
+        public bool CanGoNotYetPrevious => NotYetCurrentPage > 1;
+        public bool CanGoNotYetNext => NotYetCurrentPage < NotYetTotalPages;
+        public bool CanGoValidatedPrevious => ValidatedCurrentPage > 1;
+        public bool CanGoValidatedNext => ValidatedCurrentPage < ValidatedTotalPages;
+
+        public string NotYetPageText => $"Page {NotYetCurrentPage} of {NotYetTotalPages}";
+        public string ValidatedPageText => $"Page {ValidatedCurrentPage} of {ValidatedTotalPages}";
 
         public ObservableCollection<ReleaseHistoryItem> ReleaseHistory { get; } = new();
         public bool HasReleaseHistory => ReleaseHistory.Count > 0;
@@ -85,13 +101,7 @@ namespace WpfApp3.ViewModels.Validators
             {
                 _repo.EnsureTable();
                 LoadClassificationOptions();
-                SeedExternalPeople();
-                BuildCaches(
-                    _repo.GetByBeneficiaryIds(_externalPeople.Select(x => x.BeneficiaryId)),
-                    _repo.GetByStatus("Not Validated") ?? new List<ValidatorRecord>(),
-                    _repo.GetByStatus("Endorsed") ?? new List<ValidatorRecord>(),
-                    _repo.GetByStatus("Pending") ?? new List<ValidatorRecord>(),
-                    _repo.GetByStatus("Rejected") ?? new List<ValidatorRecord>());
+                _notYetBase = new List<ValidatorRecord>();
                 ApplyAllFilters();
                 SelectedPerson = NotYetItems.FirstOrDefault() ?? ValidatedItems.FirstOrDefault();
                 return;
@@ -128,22 +138,28 @@ namespace WpfApp3.ViewModels.Validators
                     if (classifications.Count == 0)
                         classifications.Add("None");
 
-                    SeedExternalPeople();
+                    var externalSearch = (SearchNotYetText ?? "").Trim();
+                    var externalCount = _externalRepo.Count(externalSearch);
+                    var notYetPages = Math.Max(1, (int)Math.Ceiling(externalCount / (double)PageSize));
+                    var safeNotYetPage = Math.Min(Math.Max(1, NotYetCurrentPage), notYetPages);
+                    var externalRows = _externalRepo.GetPage(safeNotYetPage, PageSize, externalSearch);
 
-                    var savedByIds = _repo.GetByBeneficiaryIds(_externalPeople.Select(x => x.BeneficiaryId));
-                    var notValidated = _repo.GetByStatus("Not Validated") ?? new List<ValidatorRecord>();
-                    var endorsed = _repo.GetByStatus("Endorsed") ?? new List<ValidatorRecord>();
-                    var pending = _repo.GetByStatus("Pending") ?? new List<ValidatorRecord>();
-                    var rejected = _repo.GetByStatus("Rejected") ?? new List<ValidatorRecord>();
+                    var savedByIds = _repo.GetByBeneficiaryIds(externalRows.Select(x => x.BeneficiaryId));
+
+                    var endorsedAll = _repo.GetByStatus("Endorsed") ?? new List<ValidatorRecord>();
+                    var pendingAll = _repo.GetByStatus("Pending") ?? new List<ValidatorRecord>();
+                    var rejectedAll = _repo.GetByStatus("Rejected") ?? new List<ValidatorRecord>();
 
                     return new RefreshSnapshot
                     {
                         Classifications = classifications,
                         SavedByIds = savedByIds,
-                        NotValidated = notValidated,
-                        Endorsed = endorsed,
-                        Pending = pending,
-                        Rejected = rejected
+                        ExternalRows = externalRows,
+                        NotYetPage = safeNotYetPage,
+                        NotYetTotalPages = notYetPages,
+                        Endorsed = endorsedAll,
+                        Pending = pendingAll,
+                        Rejected = rejectedAll
                     };
                 });
 
@@ -151,9 +167,19 @@ namespace WpfApp3.ViewModels.Validators
                 foreach (var item in result.Classifications)
                     ClassificationOptions.Add(item);
 
-                BuildCaches(result.SavedByIds, result.NotValidated, result.Endorsed, result.Pending, result.Rejected);
+                _externalPeoplePage = result.ExternalRows;
+                NotYetCurrentPage = result.NotYetPage;
+                NotYetTotalPages = result.NotYetTotalPages;
+
+                BuildCaches(
+                    result.SavedByIds,
+                    result.Endorsed,
+                    result.Pending,
+                    result.Rejected);
+
                 ApplyAllFilters();
                 RestoreSelection(preferredBeneficiaryId);
+                UpdatePaginationState();
             }
             finally
             {
@@ -162,15 +188,14 @@ namespace WpfApp3.ViewModels.Validators
         }
 
         private void BuildCaches(
-            Dictionary<string, ValidatorRecord> savedByIds,
-            List<ValidatorRecord> notValidated,
-            List<ValidatorRecord> endorsed,
-            List<ValidatorRecord> pending,
-            List<ValidatorRecord> rejected)
+    Dictionary<string, ValidatorRecord> savedByIds,
+    List<ValidatorRecord> endorsed,
+    List<ValidatorRecord> pending,
+    List<ValidatorRecord> rejected)
         {
             var merged = new List<ValidatorRecord>();
 
-            foreach (var ext in _externalPeople)
+            foreach (var ext in _externalPeoplePage)
             {
                 if (savedByIds.TryGetValue(ext.BeneficiaryId, out var dbRow))
                 {
@@ -186,26 +211,8 @@ namespace WpfApp3.ViewModels.Validators
                 }
             }
 
-            var extIds = new HashSet<string>(
-                _externalPeople.Select(x => x.BeneficiaryId),
-                StringComparer.OrdinalIgnoreCase);
-
-            var mergedIds = new HashSet<string>(
-                merged.Where(x => !string.IsNullOrWhiteSpace(x.BeneficiaryId)).Select(x => x.BeneficiaryId),
-                StringComparer.OrdinalIgnoreCase);
-
-            foreach (var dbRow in notValidated)
-            {
-                if (!string.IsNullOrWhiteSpace(dbRow.BeneficiaryId)
-                    && !extIds.Contains(dbRow.BeneficiaryId)
-                    && !mergedIds.Contains(dbRow.BeneficiaryId))
-                {
-                    merged.Add(dbRow);
-                    mergedIds.Add(dbRow.BeneficiaryId);
-                }
-            }
-
             _notYetBase = merged;
+
             _validatedByStatus["Endorsed"] = endorsed;
             _validatedByStatus["Pending"] = pending;
             _validatedByStatus["Rejected"] = rejected;
@@ -221,18 +228,7 @@ namespace WpfApp3.ViewModels.Validators
         {
             NotYetItems.Clear();
 
-            IEnumerable<ValidatorRecord> q = _notYetBase;
-            var s = (SearchNotYetText ?? "").Trim();
-
-            if (!string.IsNullOrWhiteSpace(s))
-            {
-                q = q.Where(x =>
-                    (x.FirstName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                    (x.LastName ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) ||
-                    (x.BeneficiaryId ?? "").Contains(s, StringComparison.OrdinalIgnoreCase));
-            }
-
-            foreach (var item in q)
+            foreach (var item in _notYetBase)
                 NotYetItems.Add(item);
 
             OnPropertyChanged(nameof(NotYetFoundText));
@@ -256,7 +252,20 @@ namespace WpfApp3.ViewModels.Validators
                     (x.BeneficiaryId ?? "").Contains(s, StringComparison.OrdinalIgnoreCase));
             }
 
-            foreach (var item in q)
+            var all = q.ToList();
+            ValidatedTotalPages = Math.Max(1, (int)Math.Ceiling(all.Count / (double)PageSize));
+
+            if (ValidatedCurrentPage > ValidatedTotalPages)
+                ValidatedCurrentPage = ValidatedTotalPages;
+            if (ValidatedCurrentPage <= 0)
+                ValidatedCurrentPage = 1;
+
+            var pageItems = all
+                .Skip((ValidatedCurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+
+            foreach (var item in pageItems)
                 ValidatedItems.Add(item);
 
             OnPropertyChanged(nameof(ValidatedFoundText));
@@ -292,6 +301,8 @@ namespace WpfApp3.ViewModels.Validators
         [RelayCommand]
         private async Task RefreshAsync()
         {
+            NotYetCurrentPage = 1;
+            ValidatedCurrentPage = 1;
             await RefreshDataAsync();
         }
 
@@ -303,34 +314,34 @@ namespace WpfApp3.ViewModels.Validators
             IsSaveConfirmOpen = false;
         }
 
-        private void SeedExternalPeople()
-        {
-            _externalPeople.Clear();
+        //private void SeedExternalPeople()
+        //{
+        //    _externalPeople.Clear();
 
-            _externalPeople.AddRange(new[]
-            {
-                NewExternal(101,"BENE-000101","CR-900101","Arjun","M.","Codilla","Male","25 January 1990","PWD","San Jose","San Jose, California, USA"),
-                NewExternal(102,"BENE-000102","CR-900102","Maria","L.","Santos","Female","03 March 1992","Senior Citizen","Quezon City","Quezon City, Philippines"),
-                NewExternal(103,"BENE-000103","CR-900103","John","A.","Dela Cruz","Male","12 December 1988","PWD","Cebu City","Cebu City, Philippines"),
-                NewExternal(104,"BENE-000104","CR-900104","Angel","R.","Reyes","Female","06 June 1996","Indigenous","Davao City","Davao City, Philippines"),
-                NewExternal(105,"BENE-000105","CR-900105","Paolo","S.","Garcia","Male","09 September 1991","None","Baguio City","Baguio City, Philippines"),
-                NewExternal(106,"BENE-000106","CR-900106","Kristine","P.","Navarro","Female","21 July 1994","PWD","Iloilo City","Iloilo City, Philippines"),
-                NewExternal(107,"BENE-000107","CR-900107","Mark","T.","Flores","Male","10 October 1993","Vendor","Cagayan de Oro","Cagayan de Oro, Philippines"),
-                NewExternal(108,"BENE-000108","CR-900108","Lea","G.","Mendoza","Female","14 February 1995","Farmer","Legazpi","Legazpi, Philippines"),
-                NewExternal(109,"BENE-000109","CR-900109","Joshua","K.","Ramos","Male","18 August 1987","Fisherfolk","Navotas City","Navotas City, Metro Manila, Philippines"),
-                NewExternal(110,"BENE-000110","CR-900110","Andrea","M.","Villanueva","Female","02 February 1998","Student","Makati City","Makati City, Metro Manila, Philippines"),
-                NewExternal(111,"BENE-000111","CR-900111","Rafael","D.","Lim","Male","27 November 1984","OFW","Pasig City","Pasig City, Metro Manila, Philippines"),
-                NewExternal(112,"BENE-000112","CR-900112","Shaina","C.","Del Rosario","Female","05 May 1990","Single Parent","Taguig City","Taguig City, Metro Manila, Philippines"),
-                NewExternal(113,"BENE-000113","CR-900113","Noel","B.","Aquino","Male","11 January 1979","Senior Citizen","Manila","Manila, Metro Manila, Philippines"),
-                NewExternal(114,"BENE-000114","CR-900114","Patricia","E.","Castro","Female","19 September 1993","PWD","Caloocan City","Caloocan City, Metro Manila, Philippines"),
-                NewExternal(115,"BENE-000115","CR-900115","Harold","S.","Gonzales","Male","30 June 1995","Vendor","Bacolod City","Bacolod City, Negros Occidental, Philippines"),
-                NewExternal(116,"BENE-000116","CR-900116","Jenica","T.","Soriano","Female","07 July 1991","Farmer","Malaybalay City","Malaybalay City, Bukidnon, Philippines"),
-                NewExternal(117,"BENE-000117","CR-900117","Dennis","A.","Pineda","Male","22 October 1989","Indigenous","Kidapawan City","Kidapawan City, Cotabato, Philippines"),
-                NewExternal(118,"BENE-000118","CR-900118","Aileen","R.","Salazar","Female","13 March 1997","Unemployed","Zamboanga City","Zamboanga City, Zamboanga Peninsula, Philippines"),
-                NewExternal(119,"BENE-000119","CR-900119","Gerald","N.","Uy","Male","04 April 1992","None","General Santos City","General Santos City, South Cotabato, Philippines"),
-                NewExternal(120,"BENE-000120","CR-900120","Clarisse","P.","Bautista","Female","16 December 1986","Healthcare","Tacloban City","Tacloban City, Leyte, Philippines"),
-            });
-        }
+        //    _externalPeople.AddRange(new[]
+        //    {
+        //        NewExternal(101,"BENE-000101","CR-900101","Arjun","M.","Codilla","Male","25 January 1990","PWD","San Jose","San Jose, California, USA"),
+        //        NewExternal(102,"BENE-000102","CR-900102","Maria","L.","Santos","Female","03 March 1992","Senior Citizen","Quezon City","Quezon City, Philippines"),
+        //        NewExternal(103,"BENE-000103","CR-900103","John","A.","Dela Cruz","Male","12 December 1988","PWD","Cebu City","Cebu City, Philippines"),
+        //        NewExternal(104,"BENE-000104","CR-900104","Angel","R.","Reyes","Female","06 June 1996","Indigenous","Davao City","Davao City, Philippines"),
+        //        NewExternal(105,"BENE-000105","CR-900105","Paolo","S.","Garcia","Male","09 September 1991","None","Baguio City","Baguio City, Philippines"),
+        //        NewExternal(106,"BENE-000106","CR-900106","Kristine","P.","Navarro","Female","21 July 1994","PWD","Iloilo City","Iloilo City, Philippines"),
+        //        NewExternal(107,"BENE-000107","CR-900107","Mark","T.","Flores","Male","10 October 1993","Vendor","Cagayan de Oro","Cagayan de Oro, Philippines"),
+        //        NewExternal(108,"BENE-000108","CR-900108","Lea","G.","Mendoza","Female","14 February 1995","Farmer","Legazpi","Legazpi, Philippines"),
+        //        NewExternal(109,"BENE-000109","CR-900109","Joshua","K.","Ramos","Male","18 August 1987","Fisherfolk","Navotas City","Navotas City, Metro Manila, Philippines"),
+        //        NewExternal(110,"BENE-000110","CR-900110","Andrea","M.","Villanueva","Female","02 February 1998","Student","Makati City","Makati City, Metro Manila, Philippines"),
+        //        NewExternal(111,"BENE-000111","CR-900111","Rafael","D.","Lim","Male","27 November 1984","OFW","Pasig City","Pasig City, Metro Manila, Philippines"),
+        //        NewExternal(112,"BENE-000112","CR-900112","Shaina","C.","Del Rosario","Female","05 May 1990","Single Parent","Taguig City","Taguig City, Metro Manila, Philippines"),
+        //        NewExternal(113,"BENE-000113","CR-900113","Noel","B.","Aquino","Male","11 January 1979","Senior Citizen","Manila","Manila, Metro Manila, Philippines"),
+        //        NewExternal(114,"BENE-000114","CR-900114","Patricia","E.","Castro","Female","19 September 1993","PWD","Caloocan City","Caloocan City, Metro Manila, Philippines"),
+        //        NewExternal(115,"BENE-000115","CR-900115","Harold","S.","Gonzales","Male","30 June 1995","Vendor","Bacolod City","Bacolod City, Negros Occidental, Philippines"),
+        //        NewExternal(116,"BENE-000116","CR-900116","Jenica","T.","Soriano","Female","07 July 1991","Farmer","Malaybalay City","Malaybalay City, Bukidnon, Philippines"),
+        //        NewExternal(117,"BENE-000117","CR-900117","Dennis","A.","Pineda","Male","22 October 1989","Indigenous","Kidapawan City","Kidapawan City, Cotabato, Philippines"),
+        //        NewExternal(118,"BENE-000118","CR-900118","Aileen","R.","Salazar","Female","13 March 1997","Unemployed","Zamboanga City","Zamboanga City, Zamboanga Peninsula, Philippines"),
+        //        NewExternal(119,"BENE-000119","CR-900119","Gerald","N.","Uy","Male","04 April 1992","None","General Santos City","General Santos City, South Cotabato, Philippines"),
+        //        NewExternal(120,"BENE-000120","CR-900120","Clarisse","P.","Bautista","Female","16 December 1986","Healthcare","Tacloban City","Tacloban City, Leyte, Philippines"),
+        //    });
+        //}
 
         private static ValidatorRecord NewExternal(
             int sourceId,
@@ -420,23 +431,42 @@ namespace WpfApp3.ViewModels.Validators
         private void SetStatusTab(ValidatorsStatusTab tab)
         {
             ActiveStatusTab = tab;
+            ValidatedCurrentPage = 1;
             ApplyValidatedFilter();
             RestoreSelection();
             IsAddingProfile = false;
+            UpdatePaginationState();
         }
 
         [RelayCommand]
-        private void SearchNotYet()
+        private async Task SearchNotYet()
         {
-            ApplyNotYetFilter();
-            RestoreSelection();
+            if (IsLoading)
+                return;
+
+            var search = (SearchNotYetText ?? string.Empty).Trim();
+            SearchNotYetText = search;
+
+            NotYetCurrentPage = 1;
+            await RefreshDataAsync();
+        }
+
+        partial void OnSearchNotYetTextChanged(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                NotYetCurrentPage = 1;
+                _ = RefreshDataAsync();
+            }
         }
 
         [RelayCommand]
         private void SearchValidated()
         {
+            ValidatedCurrentPage = 1;
             ApplyValidatedFilter();
             RestoreSelection();
+            UpdatePaginationState();
         }
 
         [RelayCommand]
@@ -617,7 +647,7 @@ namespace WpfApp3.ViewModels.Validators
 
         private int GetNextBeneNumber()
         {
-            var max = _externalPeople.Count == 0 ? 0 : _externalPeople.Max(x => ExtractDigits(x.BeneficiaryId));
+            var max = _notYetBase.Count == 0 ? 0 : _notYetBase.Max(x => ExtractDigits(x.BeneficiaryId));
 
             if (_notYetBase.Count > 0)
                 max = Math.Max(max, _notYetBase.Max(x => ExtractDigits(x.BeneficiaryId)));
@@ -681,8 +711,10 @@ namespace WpfApp3.ViewModels.Validators
         private sealed class RefreshSnapshot
         {
             public List<string> Classifications { get; set; } = new();
-            public Dictionary<string, ValidatorRecord> SavedByIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-            public List<ValidatorRecord> NotValidated { get; set; } = new();
+            public Dictionary<string, ValidatorRecord> SavedByIds { get; set; } = new();
+            public List<ValidatorRecord> ExternalRows { get; set; } = new();
+            public int NotYetPage { get; set; } = 1;
+            public int NotYetTotalPages { get; set; } = 1;
             public List<ValidatorRecord> Endorsed { get; set; } = new();
             public List<ValidatorRecord> Pending { get; set; } = new();
             public List<ValidatorRecord> Rejected { get; set; } = new();
@@ -699,6 +731,52 @@ namespace WpfApp3.ViewModels.Validators
                 ReleasedAt.ToString("MMM dd, yyyy • hh:mm tt", CultureInfo.InvariantCulture);
 
             public string Description => $"Allotment #{AllotmentId} • {ShareText}";
+        }
+
+        [RelayCommand]
+        private async Task GoNotYetPrevious()
+        {
+            if (NotYetCurrentPage <= 1) return;
+            NotYetCurrentPage--;
+            await RefreshDataAsync(SelectedPerson?.BeneficiaryId);
+        }
+
+        [RelayCommand]
+        private async Task GoNotYetNext()
+        {
+            if (NotYetCurrentPage >= NotYetTotalPages) return;
+            NotYetCurrentPage++;
+            await RefreshDataAsync(SelectedPerson?.BeneficiaryId);
+        }
+
+        [RelayCommand]
+        private void GoValidatedPrevious()
+        {
+            if (ValidatedCurrentPage <= 1) return;
+            ValidatedCurrentPage--;
+            ApplyValidatedFilter();
+            RestoreSelection();
+            UpdatePaginationState();
+        }
+
+        [RelayCommand]
+        private void GoValidatedNext()
+        {
+            if (ValidatedCurrentPage >= ValidatedTotalPages) return;
+            ValidatedCurrentPage++;
+            ApplyValidatedFilter();
+            RestoreSelection();
+            UpdatePaginationState();
+        }
+
+        private void UpdatePaginationState()
+        {
+            OnPropertyChanged(nameof(NotYetPageText));
+            OnPropertyChanged(nameof(ValidatedPageText));
+            OnPropertyChanged(nameof(CanGoNotYetPrevious));
+            OnPropertyChanged(nameof(CanGoNotYetNext));
+            OnPropertyChanged(nameof(CanGoValidatedPrevious));
+            OnPropertyChanged(nameof(CanGoValidatedNext));
         }
     }
 }

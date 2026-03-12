@@ -386,6 +386,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Text="People"
@@ -480,6 +481,32 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        <Grid Grid.Row="4" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+            Content="Previous"
+            Style="{StaticResource SmallOutlineButton}"
+            Command="{Binding GoNotYetPreviousCommand}"
+            IsEnabled="{Binding CanGoNotYetPrevious}"/>
+
+                            <TextBlock Grid.Column="1"
+               Text="{Binding NotYetPageText}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               FontWeight="SemiBold"
+               Foreground="{StaticResource TextSecondaryBrush}"/>
+
+                            <Button Grid.Column="2"
+            Content="Next"
+            Style="{StaticResource SmallOutlineButton}"
+            Command="{Binding GoNotYetNextCommand}"
+            IsEnabled="{Binding CanGoNotYetNext}"/>
+                        </Grid>
                     </Grid>
                 </Border>
 
@@ -656,6 +683,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Search -->
@@ -836,6 +864,33 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Border>
+
+                        <Grid Grid.Row="4" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+            Content="Previous"
+            Style="{StaticResource SmallOutlineButton}"
+            Command="{Binding GoValidatedPreviousCommand}"
+            IsEnabled="{Binding CanGoValidatedPrevious}"/>
+
+                            <TextBlock Grid.Column="1"
+               Text="{Binding ValidatedPageText}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               FontWeight="SemiBold"
+               Foreground="{StaticResource TextSecondaryBrush}"/>
+
+                            <Button Grid.Column="2"
+            Content="Next"
+            Style="{StaticResource SmallOutlineButton}"
+            Command="{Binding GoValidatedNextCommand}"
+            IsEnabled="{Binding CanGoValidatedNext}"/>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
