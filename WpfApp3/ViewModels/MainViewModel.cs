@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WpfApp3.Services;
 using WpfApp3.Views.Allotment;
+using WpfApp3.Views.Backup;
 using WpfApp3.Views.Beneficiaries;
 using WpfApp3.Views.Dashboard;
 using WpfApp3.Views.Distribution;
@@ -48,11 +49,19 @@ public partial class MainViewModel : ObservableObject
             new NavItem("⚙️ Settings", NavigateSettingsCommand),
         };
 
+        if (IsSuperadmin)
+        {
+            NavItems.Add(new NavItem("🗄️ Backup", NavigateBackupCommand));
+        }
+
         SelectedNavItem = NavItems[0];
         LogoutCommand = new RelayCommand(Logout);
 
         LoadCurrentUser();
     }
+
+    public bool IsSuperadmin =>
+        string.Equals(SessionService.Role, "Superadmin", StringComparison.OrdinalIgnoreCase);
 
     private void LoadCurrentUser()
     {
@@ -170,6 +179,16 @@ public partial class MainViewModel : ObservableObject
     {
         PageTitle = "Settings";
         CurrentView = new SettingsView();
+    }
+
+    [RelayCommand]
+    private void NavigateBackup()
+    {
+        if (!IsSuperadmin)
+            return;
+
+        PageTitle = "Backup";
+        CurrentView = new BackupView();
     }
 
     private void NavigatePlaceholder(string title)
