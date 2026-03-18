@@ -16,7 +16,7 @@
         <!-- COLORS -->
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#F6F8FC"/>
         <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#4F46E5"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#1F2A44"/>
         <SolidColorBrush x:Key="AccentHoverBrush" Color="#4338CA"/>
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#EEF2FF"/>
         <SolidColorBrush x:Key="BorderBrushSoft" Color="#E7ECF5"/>
@@ -1243,7 +1243,7 @@
                     <ProgressBar IsIndeterminate="True"
                                  Height="8"
                                  Margin="0,16,0,0"
-                                 Foreground="#4F46E5"
+                                 Foreground="#1F2A44"
                                  Background="#E9EEF7"/>
 
                     <TextBlock Text="Please wait while data is being fetched."

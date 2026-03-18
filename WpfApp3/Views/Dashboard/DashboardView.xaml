@@ -65,7 +65,7 @@
             <Button Grid.Column="3"
                     Content="Export PDF"
                     Command="{Binding ExportPdfCommand}"
-                    Background="#4F46E5"
+                    Background="#1F2A44"
                     Foreground="White"
                     Padding="14,8"
                     MinWidth="116"
@@ -309,7 +309,7 @@
                         <ProgressBar IsIndeterminate="True"
                                      Height="8"
                                      Margin="0,16,0,0"
-                                     Foreground="#4F46E5"
+                                     Foreground="#1F2A44"
                                      Background="#E9EEF7"/>
 
                         <TextBlock Text="Please wait while data is being fetched."

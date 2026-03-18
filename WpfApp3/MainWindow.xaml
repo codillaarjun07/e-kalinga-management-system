@@ -12,6 +12,106 @@
         <vm:MainViewModel/>
     </Window.DataContext>
 
+    <Window.Resources>
+        <Style x:Key="SidebarNavListBoxStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <Style x:Key="SidebarNavListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="8,4"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#5B52EF"/>
+                            </Trigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="#2E3A59"/>
+                                <Setter TargetName="Bd" Property="Background" Value="White"/>
+                            </Trigger>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Foreground" Value="#2E3A59"/>
+                                <Setter TargetName="Bd" Property="Background" Value="White"/>
+                            </MultiTrigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SidebarLogoutButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="12"
+                        Padding="{TemplateBinding Padding}"
+                        SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#5B52EF"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#4338CA"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="260"/>
@@ -19,7 +119,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- SIDEBAR -->
-        <Border Grid.Column="0" Background="White">
+        <Border Grid.Column="0" Background="#1F2A44">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="120"/>
@@ -28,37 +128,67 @@
                 </Grid.RowDefinitions>
 
                 <!-- Logo / Title -->
-                <StackPanel Grid.Row="0" Margin="20" VerticalAlignment="Center">
-                    <TextBlock Text="E-Kalinga" FontSize="18" FontWeight="Bold" Foreground="#2E3A59"/>
-                    <TextBlock Text="Management System" FontSize="12" Foreground="#6B778C"/>
+                <StackPanel Grid.Row="0"
+            Margin="20"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+
+                    <Image Source="/Ekalinga-Icon.png"
+           Width="60"
+           Height="60"
+           Margin="0,0,14,0"
+           Stretch="Uniform"
+           VerticalAlignment="Center"/>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="E-Kalinga"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Foreground="White"/>
+                        <TextBlock Text="Management System"
+                   FontSize="12"
+                   Foreground="White"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <!-- Menu -->
                 <ListBox Grid.Row="1"
-                         Style="{StaticResource NavListBoxStyle}"
-                         ItemContainerStyle="{StaticResource NavListBoxItemStyle}"
+                         Style="{StaticResource SidebarNavListBoxStyle}"
+                         ItemContainerStyle="{StaticResource SidebarNavListBoxItemStyle}"
                          ItemsSource="{Binding NavItems}"
                          SelectedItem="{Binding SelectedNavItem}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Title}"
-                                       Foreground="#2E3A59"
+                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"
                                        FontSize="14"
+                                       FontWeight="SemiBold"
                                        VerticalAlignment="Center"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <!-- Logout -->
                 <Button Grid.Row="2"
-                        Margin="18"
-                        Padding="12,10"
-                        Content="Log Out"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        Foreground="#2E3A59"
-                        HorizontalAlignment="Left"
-                        Command="{Binding LogoutCommand}"/>
+        Margin="12,0,12,18"
+        Padding="16,12"
+        Background="Transparent"
+        BorderBrush="Transparent"
+        Foreground="White"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Left"
+        Command="{Binding LogoutCommand}"
+        Style="{StaticResource SidebarLogoutButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⎋"
+                   FontSize="15"
+                   Margin="0,0,10,0"
+                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Log Out"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </Grid>
         </Border>
 
@@ -82,29 +212,27 @@
                            Foreground="#2E3A59"
                            VerticalAlignment="Center"/>
 
-                <Border Grid.Column="1"
-
-        >
+                <Border Grid.Column="1">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Grid Width="42"
-              Height="42"
-              Margin="0,0,10,0">
+                              Height="42"
+                              Margin="0,0,10,0">
                             <Ellipse Fill="#E9EEF7"/>
 
                             <Image Source="{Binding CurrentUserProfileImage}"
-                   Stretch="UniformToFill">
+                                   Stretch="UniformToFill">
                                 <Image.Clip>
                                     <EllipseGeometry Center="21,21"
-                                     RadiusX="21"
-                                     RadiusY="21"/>
+                                                     RadiusX="21"
+                                                     RadiusY="21"/>
                                 </Image.Clip>
                             </Image>
 
                             <TextBlock Text="👤"
-                       FontSize="18"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Visibility="{Binding IsCurrentUserProfileImageEmpty, Converter={StaticResource BoolToVis}}"/>
+                                       FontSize="18"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding IsCurrentUserProfileImageEmpty, Converter={StaticResource BoolToVis}}"/>
                         </Grid>
                     </StackPanel>
                 </Border>

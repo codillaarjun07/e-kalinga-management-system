@@ -16,7 +16,7 @@
             <Setter Property="Width" Value="40"/>
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Background" Value="#4338CA"/>
+            <Setter Property="Background" Value="#1F2A44"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -32,7 +32,7 @@
         </Style>
 
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#4338CA"/>
+            <Setter Property="Background" Value="#1F2A44"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Padding" Value="18,10"/>
@@ -194,7 +194,7 @@
                         Style="{StaticResource IconButton}"
                         Margin="10,0,0,0"
                         Background="#EEF2FF"
-                        Foreground="#4338CA"
+                        Foreground="#1F2A44"
                         Content="≡"/>
 
                 <Button Grid.Column="4"
@@ -392,7 +392,7 @@
                                                                  RelativeSource="{RelativeSource AncestorType=UserControl}"/>
                                                     </MultiBinding>
                                                 </DataTrigger.Binding>
-                                                <Setter Property="Background" Value="#4338CA"/>
+                                                <Setter Property="Background" Value="#1F2A44"/>
                                                 <Setter Property="Foreground" Value="White"/>
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -719,7 +719,7 @@
                     <ProgressBar IsIndeterminate="True"
                                  Height="8"
                                  Margin="0,16,0,0"
-                                 Foreground="#4F46E5"
+                                 Foreground="#1F2A44"
                                  Background="#E9EEF7"/>
 
                     <TextBlock Text="Please wait while data is being fetched."

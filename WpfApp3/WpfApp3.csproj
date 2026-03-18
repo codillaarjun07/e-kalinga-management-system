@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="ekaling.png" />
+    <None Remove="Ekalinga-Icon.png" />
     <None Remove="Views\Login\ekaling.png" />
   </ItemGroup>
 
@@ -30,6 +31,7 @@
 
   <ItemGroup>
     <Resource Include="ekaling.png" />
+    <Resource Include="Ekalinga-Icon.png" />
     <Resource Include="Views\Login\ekaling.png" />
   </ItemGroup>
 

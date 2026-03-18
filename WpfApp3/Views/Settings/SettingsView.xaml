@@ -21,7 +21,7 @@
             <Setter Property="MinWidth" Value="170"/>
             <Setter Property="Padding" Value="22,0"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#4F46E5"/>
+            <Setter Property="Background" Value="#1F2A44"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -155,7 +155,7 @@
         <Style x:Key="TabButtonDepartments" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Departments">
-                    <Setter Property="Background" Value="#4F46E5"/>
+                    <Setter Property="Background" Value="#1F2A44"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -164,7 +164,7 @@
         <Style x:Key="TabButtonFunds" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Source of Fund">
-                    <Setter Property="Background" Value="#4F46E5"/>
+                    <Setter Property="Background" Value="#1F2A44"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -173,7 +173,7 @@
         <Style x:Key="TabButtonClassifications" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Classifications">
-                    <Setter Property="Background" Value="#4F46E5"/>
+                    <Setter Property="Background" Value="#1F2A44"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -182,7 +182,7 @@
         <Style x:Key="TabButtonRoles" TargetType="Button" BasedOn="{StaticResource TabButton}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedTab}" Value="Roles">
-                    <Setter Property="Background" Value="#4F46E5"/>
+                    <Setter Property="Background" Value="#1F2A44"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -1160,7 +1160,7 @@
                     <ProgressBar IsIndeterminate="True"
                                  Height="8"
                                  Margin="0,16,0,0"
-                                 Foreground="#4F46E5"
+                                 Foreground="#1F2A44"
                                  Background="#E9EEF7"/>
 
                     <TextBlock Text="Please wait while data is being fetched."
