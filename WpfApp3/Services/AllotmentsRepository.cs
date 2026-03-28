@@ -8,6 +8,8 @@ namespace WpfApp3.Services
 {
     public class AllotmentsRepository
     {
+        private readonly AuditLogsService _auditLogsService = new();
+
         public void EnsureTable()
         {
             using var conn = MySqlDb.OpenConnection();
@@ -88,11 +90,26 @@ SELECT LAST_INSERT_ID();";
             FillParams(cmd, a, includeId: false);
 
             var id = Convert.ToInt32(cmd.ExecuteScalar());
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            _auditLogsService.AddLog(
+                operationType: "CREATE",
+                tableName: "allotments",
+                recordId: id.ToString(),
+                actorName: actor,
+                description: $"Created allotment '{a.ProjectName}' for company '{a.Company}' with source of fund '{a.SourceOfFund}'."
+            );
+
             return id;
         }
 
         public void Update(AllotmentRecord a)
         {
+            var existing = GetById(a.Id);
+
             using var conn = MySqlDb.OpenConnection();
             using var cmd = conn.CreateCommand();
 
@@ -111,15 +128,79 @@ WHERE id=@id;";
 
             FillParams(cmd, a, includeId: true);
             cmd.ExecuteNonQuery();
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            var oldName = existing?.ProjectName ?? "(unknown)";
+            var newName = a.ProjectName ?? "(empty)";
+
+            _auditLogsService.AddLog(
+                operationType: "UPDATE",
+                tableName: "allotments",
+                recordId: a.Id.ToString(),
+                actorName: actor,
+                description: $"Updated allotment ID {a.Id} from project '{oldName}' to '{newName}'."
+            );
         }
 
         public void Delete(int id)
         {
+            var existing = GetById(id);
+
             using var conn = MySqlDb.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "DELETE FROM allotments WHERE id=@id;";
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            var projectName = existing?.ProjectName ?? "(unknown)";
+
+            _auditLogsService.AddLog(
+                operationType: "DELETE",
+                tableName: "allotments",
+                recordId: id.ToString(),
+                actorName: actor,
+                description: $"Deleted allotment '{projectName}' (ID {id})."
+            );
+        }
+
+        private AllotmentRecord? GetById(int id)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = conn.CreateCommand();
+
+            cmd.CommandText = @"
+SELECT id, project_name, company, department, source_of_fund, beneficiaries_count,
+       budget_type, budget_amount, budget_qty, budget_unit
+FROM allotments
+WHERE id = @id
+LIMIT 1;";
+
+            cmd.Parameters.AddWithValue("@id", id);
+
+            using var r = cmd.ExecuteReader();
+            if (!r.Read())
+                return null;
+
+            return new AllotmentRecord
+            {
+                Id = Convert.ToInt32(r["id"]),
+                ProjectName = Convert.ToString(r["project_name"]) ?? "",
+                Company = Convert.ToString(r["company"]) ?? "",
+                Department = Convert.ToString(r["department"]) ?? "",
+                SourceOfFund = Convert.ToString(r["source_of_fund"]) ?? "",
+                BeneficiariesCount = Convert.ToInt32(r["beneficiaries_count"]),
+                BudgetType = Convert.ToString(r["budget_type"]) ?? "Money",
+                BudgetAmount = r["budget_amount"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(r["budget_amount"]),
+                BudgetQty = r["budget_qty"] == DBNull.Value ? (int?)null : Convert.ToInt32(r["budget_qty"]),
+                BudgetUnit = r["budget_unit"] == DBNull.Value ? "" : Convert.ToString(r["budget_unit"]) ?? ""
+            };
         }
 
         private static void FillParams(MySqlCommand cmd, AllotmentRecord a, bool includeId)
@@ -156,7 +237,6 @@ WHERE id=@id;";
             using var conn = MySqlDb.OpenConnection();
             using var cmd = conn.CreateCommand();
 
-            // ⚠️ assumes your allotments table has these columns
             cmd.CommandText = @"
 SELECT
     id,

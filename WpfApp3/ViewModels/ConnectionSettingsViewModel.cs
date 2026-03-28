@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.IO;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using WpfApp3.Models;
@@ -10,6 +10,8 @@ namespace WpfApp3.ViewModels
 {
     public partial class ConnectionSettingsViewModel : ObservableObject
     {
+        public event Action? ReLoginRequested;
+
         [ObservableProperty] private string mode = "Server";
         [ObservableProperty] private string host = "";
         [ObservableProperty] private string port = "3306";
@@ -29,7 +31,6 @@ namespace WpfApp3.ViewModels
 
         public bool IsLocal => Mode == "Local";
         public bool IsServer => Mode == "Server";
-
         public string ConnectionTypeLabel => IsServer ? "Server Connection" : "Local Connection";
 
         partial void OnModeChanged(string value)
@@ -127,7 +128,7 @@ namespace WpfApp3.ViewModels
         }
 
         [RelayCommand]
-        private void Save(Window? window)
+        private void Save()
         {
             var settings = new ConnectionSettings
             {
@@ -141,14 +142,20 @@ namespace WpfApp3.ViewModels
             };
 
             ConnectionSettingsService.Save(settings);
-            MessageBox.Show("Connection settings saved successfully.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
-            window?.Close();
-        }
 
-        [RelayCommand]
-        private void Back(Window? window)
-        {
-            window?.Close();
+            TestResultMessage = "Connection settings saved successfully.";
+            TestResultBrush = "#16A34A";
+
+            var result = MessageBox.Show(
+                "Connection settings were saved successfully.\n\nYou need to log in again to use the selected connection.\n\nLog out now?",
+                "Connection Updated",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ReLoginRequested?.Invoke();
+            }
         }
     }
 }

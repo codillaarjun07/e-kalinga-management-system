@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using WpfApp3.ViewModels.Backup;
 
 namespace WpfApp3.Views.Backup
 {
-    /// <summary>
-    /// Interaction logic for BackupView.xaml
-    /// </summary>
     public partial class BackupView : UserControl
     {
         public BackupView()
         {
             InitializeComponent();
+        }
+
+        private void OverlayBackdrop_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not BackupViewModel vm) return;
+
+            if (vm.IsDeleteOpen)
+                vm.CancelDeleteBackupCommand.Execute(null);
         }
     }
 }

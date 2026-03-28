@@ -3,13 +3,37 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
+using WpfApp3.Models;
 
 namespace WpfApp3.Services
 {
     public class DatabaseBackupService
     {
-        public void CreateBackup(string outputPath)
+        public void EnsureBackupTable()
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = new MySqlCommand(@"
+                CREATE TABLE IF NOT EXISTS `database_backups` (
+                    `id` INT NOT NULL AUTO_INCREMENT,
+                    `file_name` VARCHAR(255) NOT NULL,
+                    `database_name` VARCHAR(150) NOT NULL,
+                    `server_name` VARCHAR(150) NOT NULL,
+                    `content_type` VARCHAR(100) NOT NULL DEFAULT 'application/sql',
+                    `file_data` LONGBLOB NOT NULL,
+                    `file_size_bytes` BIGINT NOT NULL DEFAULT 0,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `created_by` VARCHAR(120) NOT NULL,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_database_backups_created_at` (`created_at`),
+                    KEY `idx_database_backups_created_by` (`created_by`)
+                );", conn);
+
+            cmd.ExecuteNonQuery();
+        }
+
+        public DatabaseBackupRecord CreateAndStoreBackup(string createdBy)
         {
             using var conn = MySqlDb.OpenConnection();
 
@@ -17,6 +41,176 @@ namespace WpfApp3.Services
             if (string.IsNullOrWhiteSpace(databaseName))
                 throw new InvalidOperationException("No database selected.");
 
+            var builder = new MySqlConnectionStringBuilder(MySqlDb.ConnectionString);
+            var serverName = builder.Server ?? "";
+
+            var sqlContent = BuildBackupSql(conn, databaseName);
+
+            var baseFileName = $"ekalinga_backup_{DateTime.Now:yyyyMMdd_HHmmss}.sql";
+            var storedFileName = $"{baseFileName}.gz";
+
+            var rawBytes = Encoding.UTF8.GetBytes(sqlContent);
+            var compressedBytes = CompressBytes(rawBytes);
+
+            EnsureBackupTable();
+
+            using var insert = new MySqlCommand(@"
+        INSERT INTO `database_backups`
+        (
+            `file_name`,
+            `database_name`,
+            `server_name`,
+            `content_type`,
+            `file_data`,
+            `file_size_bytes`,
+            `created_by`
+        )
+        VALUES
+        (
+            @file_name,
+            @database_name,
+            @server_name,
+            @content_type,
+            @file_data,
+            @file_size_bytes,
+            @created_by
+        );
+        SELECT LAST_INSERT_ID();", conn);
+
+            insert.Parameters.AddWithValue("@file_name", storedFileName);
+            insert.Parameters.AddWithValue("@database_name", databaseName);
+            insert.Parameters.AddWithValue("@server_name", serverName);
+            insert.Parameters.AddWithValue("@content_type", "application/gzip");
+            insert.Parameters.AddWithValue("@file_data", compressedBytes);
+            insert.Parameters.AddWithValue("@file_size_bytes", compressedBytes.LongLength);
+            insert.Parameters.AddWithValue("@created_by", createdBy ?? "Unknown");
+
+            var id = Convert.ToInt32(insert.ExecuteScalar(), CultureInfo.InvariantCulture);
+
+            return new DatabaseBackupRecord
+            {
+                Id = id,
+                FileName = storedFileName,
+                DatabaseName = databaseName,
+                ServerName = serverName,
+                ContentType = "application/gzip",
+                FileSizeBytes = compressedBytes.LongLength,
+                CreatedAt = DateTime.Now,
+                CreatedBy = createdBy ?? "Unknown"
+            };
+        }
+
+        public List<DatabaseBackupRecord> GetBackupHistory()
+        {
+            EnsureBackupTable();
+
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = new MySqlCommand(@"
+                SELECT
+                    `id`,
+                    `file_name`,
+                    `database_name`,
+                    `server_name`,
+                    `content_type`,
+                    `file_size_bytes`,
+                    `created_at`,
+                    `created_by`
+                FROM `database_backups`
+                ORDER BY `created_at` DESC, `id` DESC;", conn);
+
+            using var reader = cmd.ExecuteReader();
+
+            var result = new List<DatabaseBackupRecord>();
+            while (reader.Read())
+            {
+                result.Add(new DatabaseBackupRecord
+                {
+                    Id = reader.GetInt32("id"),
+                    FileName = reader.GetString("file_name"),
+                    DatabaseName = reader.GetString("database_name"),
+                    ServerName = reader.GetString("server_name"),
+                    ContentType = reader.GetString("content_type"),
+                    FileSizeBytes = reader.GetInt64("file_size_bytes"),
+                    CreatedAt = reader.GetDateTime("created_at"),
+                    CreatedBy = reader.GetString("created_by")
+                });
+            }
+
+            return result;
+        }
+
+        public void DownloadBackup(int backupId, string outputPath)
+        {
+            EnsureBackupTable();
+
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = new MySqlCommand(@"
+        SELECT `file_name`, `content_type`, `file_data`
+        FROM `database_backups`
+        WHERE `id` = @id
+        LIMIT 1;", conn);
+
+            cmd.Parameters.AddWithValue("@id", backupId);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                throw new InvalidOperationException("Backup file not found.");
+
+            var fileName = reader.GetString("file_name");
+            var contentType = reader.GetString("content_type");
+            var bytes = (byte[])reader["file_data"];
+
+            if (bytes.Length == 0)
+                throw new InvalidOperationException("Backup file is empty.");
+
+            if (string.Equals(contentType, "application/gzip", StringComparison.OrdinalIgnoreCase) ||
+                fileName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase))
+            {
+                var decompressed = DecompressBytes(bytes);
+                File.WriteAllBytes(outputPath, decompressed);
+            }
+            else
+            {
+                File.WriteAllBytes(outputPath, bytes);
+            }
+        }
+
+        private byte[] CompressBytes(byte[] input)
+        {
+            using var output = new MemoryStream();
+            using (var gzip = new GZipStream(output, CompressionLevel.Optimal, leaveOpen: true))
+            {
+                gzip.Write(input, 0, input.Length);
+            }
+
+            return output.ToArray();
+        }
+
+        private byte[] DecompressBytes(byte[] input)
+        {
+            using var inputStream = new MemoryStream(input);
+            using var gzip = new GZipStream(inputStream, CompressionMode.Decompress);
+            using var output = new MemoryStream();
+
+            gzip.CopyTo(output);
+            return output.ToArray();
+        }
+
+        public void DeleteBackup(int backupId)
+        {
+            EnsureBackupTable();
+
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = new MySqlCommand(@"
+                DELETE FROM `database_backups`
+                WHERE `id` = @id;", conn);
+
+            cmd.Parameters.AddWithValue("@id", backupId);
+            cmd.ExecuteNonQuery();
+        }
+
+        private string BuildBackupSql(MySqlConnection conn, string databaseName)
+        {
             var sb = new StringBuilder();
 
             sb.AppendLine("-- E-Kalinga MySQL Backup");
@@ -69,7 +263,7 @@ namespace WpfApp3.Services
             sb.AppendLine("SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;");
             sb.AppendLine("SET SQL_MODE=@OLD_SQL_MODE;");
 
-            File.WriteAllText(outputPath, sb.ToString(), new UTF8Encoding(false));
+            return sb.ToString();
         }
 
         private List<string> GetBaseTables(MySqlConnection conn, string databaseName)
@@ -239,7 +433,6 @@ namespace WpfApp3.Services
                 throw new InvalidOperationException($"Unable to read procedure '{procedureName}'.");
 
             var createSql = reader.GetString("Create Procedure");
-
             createSql = RemoveDefiner(createSql);
 
             sb.AppendLine($"-- ----------------------------");
@@ -258,7 +451,6 @@ namespace WpfApp3.Services
                 throw new InvalidOperationException($"Unable to read function '{functionName}'.");
 
             var createSql = reader.GetString("Create Function");
-
             createSql = RemoveDefiner(createSql);
 
             sb.AppendLine($"-- ----------------------------");
@@ -273,48 +465,39 @@ namespace WpfApp3.Services
             if (string.IsNullOrWhiteSpace(sql))
                 return sql;
 
-            var upper = sql.ToUpperInvariant();
-            var definerIndex = upper.IndexOf("DEFINER=");
-            if (definerIndex < 0)
+            const string marker = " DEFINER=";
+            var idx = sql.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
                 return sql;
 
-            var nextSpace = sql.IndexOf(' ', definerIndex);
-            if (nextSpace < 0)
+            var before = sql.Substring(0, idx);
+            var rest = sql.Substring(idx + 1);
+
+            var sqlIdx = rest.IndexOf("SQL SECURITY", StringComparison.OrdinalIgnoreCase);
+            if (sqlIdx < 0)
                 return sql;
 
-            return sql.Remove(definerIndex, nextSpace - definerIndex + 1);
+            return before + " " + rest.Substring(sqlIdx);
         }
 
         private string ToSqlValue(object value)
         {
-            if (value == null || value == DBNull.Value)
+            if (value == DBNull.Value || value is null)
                 return "NULL";
 
             return value switch
             {
-                string s => $"'{EscapeSqlString(s)}'",
-                char c => $"'{EscapeSqlString(c.ToString())}'",
+                byte[] bytes => "0x" + BitConverter.ToString(bytes).Replace("-", string.Empty),
                 bool b => b ? "1" : "0",
-                byte[] bytes => "0x" + BitConverter.ToString(bytes).Replace("-", ""),
-                DateTime dt => $"'{dt:yyyy-MM-dd HH:mm:ss}'",
-                DateTimeOffset dto => $"'{dto:yyyy-MM-dd HH:mm:ss}'",
-                TimeSpan ts => $"'{ts:hh\\:mm\\:ss}'",
                 sbyte or byte or short or ushort or int or uint or long or ulong
                     => Convert.ToString(value, CultureInfo.InvariantCulture) ?? "0",
                 float or double or decimal
                     => Convert.ToString(value, CultureInfo.InvariantCulture) ?? "0",
-                _ => $"'{EscapeSqlString(Convert.ToString(value, CultureInfo.InvariantCulture) ?? "")}'"
+                DateTime dt => $"'{dt:yyyy-MM-dd HH:mm:ss}'",
+                DateOnly d => $"'{d:yyyy-MM-dd}'",
+                TimeSpan ts => $"'{ts}'",
+                _ => $"'{MySqlHelper.EscapeString(Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty)}'"
             };
-        }
-
-        private string EscapeSqlString(string value)
-        {
-            return value
-                .Replace("\\", "\\\\")
-                .Replace("'", "\\'")
-                .Replace("\r", "\\r")
-                .Replace("\n", "\\n")
-                .Replace("\0", "\\0");
         }
     }
 }

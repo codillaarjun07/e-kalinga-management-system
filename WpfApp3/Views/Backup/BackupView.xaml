@@ -3,42 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:WpfApp3.ViewModels.Backup"
-             mc:Ignorable="d">
+              xmlns:vm="clr-namespace:WpfApp3.ViewModels.Backup"
+             mc:Ignorable="d"
+             d:DesignHeight="760" d:DesignWidth="1200"
+             Background="#F3F5F9">
 
     <UserControl.DataContext>
         <vm:BackupViewModel/>
     </UserControl.DataContext>
 
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 
-        <Style x:Key="CardBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="CornerRadius" Value="20"/>
-            <Setter Property="Padding" Value="24"/>
-            <Setter Property="Margin" Value="0,0,0,16"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.08"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Background" Value="#1F2A44"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#1F2A44"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="22,12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="14"
+                                CornerRadius="16"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
@@ -48,106 +38,323 @@
             </Setter>
         </Style>
 
-        <Style x:Key="InfoLabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#64748B"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
+        <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#EEF2FF"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="BorderBrush" Value="#D9E2F2"/>
         </Style>
 
-        <Style x:Key="InfoValueStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#1E293B"/>
-            <Setter Property="FontSize" Value="18"/>
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="BorderBrush" Value="#EF4444"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style x:Key="SearchBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#F8FAFD"/>
+            <Setter Property="BorderBrush" Value="#EEF2FF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style x:Key="HistoryHeaderText" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="HistoryCellText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="PageButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostButton}">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="3,0"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#F5F7FB" Margin="8">
+    <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="8">
+            <StackPanel Margin="30,22,30,30">
 
-                <Border Style="{StaticResource CardBorderStyle}">
+                <Border Background="White"
+                        CornerRadius="26"
+                        Padding="28"
+                        BorderBrush="#EEF2FF"
+                        BorderThickness="1">
                     <StackPanel>
+
                         <TextBlock Text="Database Backup"
-                                   FontSize="28"
+                                   FontSize="24"
                                    FontWeight="Bold"
-                                   Foreground="#243B6B"/>
+                                   Foreground="#294287"/>
 
-                        <TextBlock Text="Create a backup of the active MySQL database."
-                                   Margin="0,8,0,24"
-                                   Foreground="#64748B"
-                                   FontSize="14"/>
+                        <TextBlock Text="Create a backup of the active MySQL database and store it in backup history."
+                                   Foreground="#7184A3"
+                                   FontSize="13"
+                                   Margin="0,8,0,24"/>
 
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                                <TextBlock Text="Database" Style="{StaticResource InfoLabelStyle}"/>
-                                <TextBlock Text="{Binding DatabaseName}" Style="{StaticResource InfoValueStyle}"/>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Database" Foreground="#7184A3" FontSize="13"/>
+                                <TextBlock Text="{Binding DatabaseName}" Foreground="#1E293B" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1" Margin="0,0,16,0">
-                                <TextBlock Text="Server" Style="{StaticResource InfoLabelStyle}"/>
-                                <TextBlock Text="{Binding ServerName}" Style="{StaticResource InfoValueStyle}"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Server" Foreground="#7184A3" FontSize="13"/>
+                                <TextBlock Text="{Binding ServerName}" Foreground="#1E293B" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Current Role" Style="{StaticResource InfoLabelStyle}"/>
-                                <TextBlock Text="{Binding CurrentUserRole}" Style="{StaticResource InfoValueStyle}"/>
+                                <TextBlock Text="Current Role" Foreground="#7184A3" FontSize="13"/>
+                                <TextBlock Text="{Binding CurrentUserRole}" Foreground="#1E293B" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Grid>
 
-                        <Border Background="#EEF2FF"
-                                BorderBrush="#C7D2FE"
+                        <Border Background="#F5F7FF"
+                                BorderBrush="#C8D3FF"
                                 BorderThickness="1"
-                                CornerRadius="14"
-                                Padding="16"
-                                Margin="0,0,0,18">
+                                CornerRadius="16"
+                                Padding="16,14"
+                                Margin="0,0,0,20">
                             <TextBlock Text="Only Superadmin can generate a database backup."
-                                       Foreground="#3730A3"
+                                       Foreground="#5856D6"
                                        FontWeight="SemiBold"/>
                         </Border>
 
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                             <Button Content="Create Backup"
-                                    Width="170"
-                                    Height="48"
+                                    Style="{StaticResource PrimaryButton}"
                                     Command="{Binding CreateBackupCommand}"
-                                    Style="{StaticResource PrimaryButtonStyle}"/>
+                                    MinWidth="170"/>
 
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="16,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-                                <ProgressBar Width="140"
-                                             Height="8"
-                                             IsIndeterminate="True"/>
-                                <TextBlock Text=" Processing..."
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Foreground="#64748B"/>
-                            </StackPanel>
+                            <Button Content="Refresh"
+                                    Style="{StaticResource GhostButton}"
+                                    Command="{Binding RefreshCommand}"
+                                    MinWidth="120"
+                                    Margin="12,0,0,0"/>
                         </StackPanel>
 
-                        <Border Margin="0,20,0,0"
-                                Padding="14"
-                                CornerRadius="12"
-                                Background="#F8FAFC"
-                                BorderBrush="#E2E8F0"
-                                BorderThickness="1">
+                        <Border Background="#F8FAFD"
+                                BorderBrush="#EEF2FF"
+                                BorderThickness="1"
+                                CornerRadius="16"
+                                Padding="16,14"
+                                Margin="0,0,0,26">
                             <TextBlock Text="{Binding StatusMessage}"
                                        Foreground="{Binding StatusBrush}"
                                        FontWeight="SemiBold"
                                        TextWrapping="Wrap"/>
                         </Border>
+
+                        <DockPanel Margin="0,0,0,14">
+                            <TextBlock Text="Backup History"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       Foreground="#2E3A59"
+                                       DockPanel.Dock="Left"/>
+
+                            <Border Background="#F4F7FC"
+                                    CornerRadius="14"
+                                    Padding="12,6"
+                                    HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding FoundText}"
+                                           Foreground="#7184A3"
+                                           FontWeight="SemiBold"/>
+                            </Border>
+                        </DockPanel>
+
+                        <Grid Margin="0,0,0,18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="420"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding HistorySearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource SearchBoxStyle}"
+                                     Height="46"
+                                     VerticalContentAlignment="Center"
+                                     ToolTip="Search backup history"/>
+                        </Grid>
+
+                        <Border Background="White"
+                                BorderBrush="#EEF2FF"
+                                BorderThickness="1"
+                                CornerRadius="22"
+                                Padding="12">
+                            <StackPanel>
+                                <Grid Margin="10,4,10,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="2.1*"/>
+                                        <ColumnDefinition Width="1.2*"/>
+                                        <ColumnDefinition Width="1.1*"/>
+                                        <ColumnDefinition Width="1.6*"/>
+                                        <ColumnDefinition Width="1.1*"/>
+                                        <ColumnDefinition Width="180"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="ID" Style="{StaticResource HistoryHeaderText}"/>
+                                    <TextBlock Grid.Column="1" Text="File Name" Style="{StaticResource HistoryHeaderText}"/>
+                                    <TextBlock Grid.Column="2" Text="Database" Style="{StaticResource HistoryHeaderText}"/>
+                                    <TextBlock Grid.Column="3" Text="Size" Style="{StaticResource HistoryHeaderText}"/>
+                                    <TextBlock Grid.Column="4" Text="Created Date" Style="{StaticResource HistoryHeaderText}"/>
+                                    <TextBlock Grid.Column="5" Text="Created By" Style="{StaticResource HistoryHeaderText}"/>
+                                    <TextBlock Grid.Column="6" Text="Actions" Style="{StaticResource HistoryHeaderText}"/>
+                                </Grid>
+
+                                <ItemsControl ItemsSource="{Binding PagedHistoryItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#EEF2FF"
+                                                    BorderThickness="0,1,0,0"
+                                                    Padding="10,12">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70"/>
+                                                        <ColumnDefinition Width="2.1*"/>
+                                                        <ColumnDefinition Width="1.2*"/>
+                                                        <ColumnDefinition Width="1.1*"/>
+                                                        <ColumnDefinition Width="1.6*"/>
+                                                        <ColumnDefinition Width="1.1*"/>
+                                                        <ColumnDefinition Width="180"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Column="0" Text="{Binding Id}" Style="{StaticResource HistoryCellText}"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding FileName}" Style="{StaticResource HistoryCellText}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding DatabaseName}" Style="{StaticResource HistoryCellText}"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding FileSizeText}" Style="{StaticResource HistoryCellText}"/>
+                                                    <TextBlock Grid.Column="4" Text="{Binding CreatedAtText}" Style="{StaticResource HistoryCellText}"/>
+                                                    <TextBlock Grid.Column="5" Text="{Binding CreatedBy}" Style="{StaticResource HistoryCellText}"/>
+
+                                                    <StackPanel Grid.Column="6" Orientation="Horizontal">
+                                                        <Button Content="Download"
+                                                                Style="{StaticResource GhostButton}"
+                                                                Command="{Binding DataContext.DownloadBackupCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Padding="14,8"
+                                                                FontSize="12"
+                                                                Margin="0,0,8,0"/>
+
+                                                        <Button Content="Delete"
+                                                                Style="{StaticResource DangerButton}"
+                                                                Command="{Binding DataContext.OpenDeleteBackupCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Padding="14,8"
+                                                                FontSize="12"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="No backup history found."
+                                           Foreground="#A3AEC2"
+                                           FontStyle="Italic"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,24,0,12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding TotalRecords}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,18,0,0">
+                            <Button Content="‹"
+                                    Style="{StaticResource PageButtonStyle}"
+                                    Command="{Binding PreviousPageCommand}"/>
+
+                            <ItemsControl ItemsSource="{Binding PageNumbers}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding}"
+                                                Style="{StaticResource PageButtonStyle}"
+                                                Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Button Content="›"
+                                    Style="{StaticResource PageButtonStyle}"
+                                    Command="{Binding NextPageCommand}"/>
+                        </StackPanel>
+
                     </StackPanel>
                 </Border>
-
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Delete modal -->
+        <Grid Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVisibility}}"
+              Panel.ZIndex="50">
+            <Border Background="#66000000"
+                    MouseLeftButtonDown="OverlayBackdrop_MouseLeftButtonDown"/>
+
+            <Border Width="430"
+                    Padding="26"
+                    CornerRadius="22"
+                    Background="White"
+                    BorderBrush="#EEF2FF"
+                    BorderThickness="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Delete Backup"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#2E3A59"/>
+
+                    <TextBlock Text="{Binding DeleteMessage}"
+                               TextWrapping="Wrap"
+                               Foreground="#64748B"
+                               FontSize="14"
+                               Margin="0,12,0,24"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding CancelDeleteBackupCommand}"
+                                MinWidth="110"
+                                Margin="0,0,10,0"/>
+
+                        <Button Content="Delete"
+                                Style="{StaticResource DangerButton}"
+                                Command="{Binding ConfirmDeleteBackupCommand}"
+                                MinWidth="110"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

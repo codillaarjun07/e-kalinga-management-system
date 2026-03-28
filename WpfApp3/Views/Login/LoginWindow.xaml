@@ -264,7 +264,7 @@
     <Grid Background="{StaticResource AppBg}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
@@ -286,25 +286,28 @@
                 </Grid.RowDefinitions>
 
                 <!-- top bar -->
-                <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0"
-                               Text="{Binding ConnectionTypeLabel}"
-                               Foreground="#475569"
-                               FontWeight="SemiBold"
-                               FontSize="13"
-                               VerticalAlignment="Center"
-                               Margin="2,0,0,0"/>
-
-                    <Button Grid.Column="1"
-                            Style="{StaticResource GearButtonStyle}"
-                            Command="{Binding OpenConnectionSettingsCommand}"
-                            ToolTip="Connection Settings"/>
-                </Grid>
+                <!-- top bar -->
+                <Border Grid.Row="0"
+        Margin="0,0,0,0"
+        Background="#F8FAFD"
+        BorderBrush="#E7ECF5"
+        BorderThickness="1"
+        CornerRadius="12"
+        Padding="10,5"
+        HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="10"
+                 Height="10"
+                 Fill="#16A34A"
+                 VerticalAlignment="Center"
+                 Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding ConnectionTypeLabel}"
+                   Foreground="#475569"
+                   FontWeight="SemiBold"
+                   FontSize="13"
+                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
 
                 <!-- header -->
                 <StackPanel Grid.Row="1"
@@ -469,8 +472,8 @@
                         </Grid>
                     </Border>
 
-                    <Grid Margin="0,14,0,0"
-                          MinHeight="44">
+                    <Grid Margin="0,0,0,0"
+                          MinHeight="20">
                         <TextBlock Text="{Binding ErrorMessage}"
                                    Foreground="#C0392B"
                                    FontSize="12"
@@ -503,20 +506,42 @@
 
         <!-- bigger footer -->
         <Border Grid.Row="1"
-                Background="#1F2A44">
+        Background="#1F2A44"
+        MinHeight="190"
+        Padding="20,28">
             <StackPanel VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Margin="18,0">
+                HorizontalAlignment="Center">
                 <TextBlock Text="Local Government Unit of Sulop"
-                           Foreground="White"
-                           FontWeight="SemiBold"
-                           FontSize="15"
-                           TextAlignment="Center"/>
+                   Foreground="White"
+                   FontWeight="SemiBold"
+                   FontSize="18"
+                   TextAlignment="Center"/>
+
                 <TextBlock Text="Municipality of Sulop, Davao del Sur"
-                           Foreground="#D6DDF0"
-                           FontSize="13"
-                           TextAlignment="Center"
-                           Margin="0,8,0,0"/>
+                   Foreground="#D6DDF0"
+                   FontSize="14"
+                   TextAlignment="Center"
+                   Margin="0,10,0,0"/>
+
+                <TextBlock Text="Created By ArjunCode Technologies"
+                   Foreground="White"
+                   FontSize="12"
+                   FontWeight="SemiBold"
+                   TextAlignment="Center"
+                   Margin="0,20,0,0"/>
+
+                <TextBlock Foreground="#D6DDF0"
+                   FontSize="10"
+                   TextAlignment="Center"
+                   Margin="0,8,0,0">
+            <Run Text="All rights reserved © 2026 "/>
+                </TextBlock>
+
+                <TextBlock Text="Serial Number: EKMS-2026-001"
+                   Foreground="#D6DDF0"
+                   FontSize="10"
+                   TextAlignment="Center"
+                   Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 

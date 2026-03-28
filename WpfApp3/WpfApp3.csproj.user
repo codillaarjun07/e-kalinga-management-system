@@ -5,6 +5,9 @@
     <Compile Update="Views\Allotment\AllotmentView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\AuditLogs\AuditLogsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Backup\BackupView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

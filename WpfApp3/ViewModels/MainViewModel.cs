@@ -17,6 +17,7 @@ using WpfApp3.Views.Distribution;
 using WpfApp3.Views.Users;
 using WpfApp3.Views.Settings;
 using WpfApp3.Views.Validators;
+using WpfApp3.Views.AuditLogs;
 
 namespace WpfApp3.ViewModels;
 
@@ -51,6 +52,7 @@ public partial class MainViewModel : ObservableObject
 
         if (IsSuperadmin)
         {
+            NavItems.Add(new NavItem("🕵 Audit Logs", NavigateAuditLogsCommand));
             NavItems.Add(new NavItem("🗄️ Backup", NavigateBackupCommand));
         }
 
@@ -189,6 +191,16 @@ public partial class MainViewModel : ObservableObject
 
         PageTitle = "Backup";
         CurrentView = new BackupView();
+    }
+
+    [RelayCommand]
+    private void NavigateAuditLogs()
+    {
+        if (!IsSuperadmin)
+            return;
+
+        PageTitle = "Audit Logs";
+        CurrentView = new AuditLogsView();
     }
 
     private void NavigatePlaceholder(string title)

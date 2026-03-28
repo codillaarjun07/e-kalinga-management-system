@@ -27,6 +27,8 @@ namespace WpfApp3.ViewModels.Settings
         [ObservableProperty] private string roleSearchText = "";
         [ObservableProperty] private bool isLoading;
 
+        public ConnectionSettingsViewModel Connection { get; } = new();
+
         public ObservableCollection<SettingOptionRecord> DepartmentItems { get; } = new();
         public ObservableCollection<SettingOptionRecord> FundItems { get; } = new();
         public ObservableCollection<SettingOptionRecord> ClassificationItems { get; } = new();

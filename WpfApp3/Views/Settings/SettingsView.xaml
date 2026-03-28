@@ -229,6 +229,76 @@
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
+
+
+        <Style x:Key="TabButtonConnections" TargetType="Button" BasedOn="{StaticResource TabButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedTab}" Value="Connections">
+                    <Setter Property="Background" Value="#1F2A44"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ConnectionFieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style x:Key="ConnectionInputBorder" TargetType="Border">
+            <Setter Property="Background" Value="#F8FAFD"/>
+            <Setter Property="BorderBrush" Value="#EEF2FF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Height" Value="48"/>
+        </Style>
+
+        <Style x:Key="ConnectionTextBoxStyle" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ConnectionPasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ConnectionModeButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd"
+                        Padding="18,10"
+                        Background="White"
+                        BorderBrush="#D9E2F2"
+                        BorderThickness="1"
+                        CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2E3A59"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#2E3A59"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid >
@@ -270,6 +340,12 @@
                 Command="{Binding SelectTabCommand}"
                 CommandParameter="Roles"
                 Margin="0"/>
+
+                        <Button Content="Connections"
+        Style="{StaticResource TabButtonConnections}"
+        Command="{Binding SelectTabCommand}"
+        CommandParameter="Connections"
+        Margin="0"/>
                     </StackPanel>
                 </Border>
 
@@ -1001,6 +1077,199 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Border>
+                    </Grid>
+
+                    <!-- CONNECTIONS -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTab}" Value="Connections">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  CanContentScroll="True"
+                  Padding="0">
+                            <Border Background="White"
+                BorderBrush="#EEF2FF"
+                BorderThickness="1"
+                CornerRadius="24"
+                Padding="28"
+                Margin="0,0,6,0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="24"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="24"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Header -->
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel>
+                                            <TextBlock Text="Connection Settings"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="#223A8F"/>
+                                            <TextBlock Text="Configure local or server database connection"
+                                   Margin="0,6,0,0"
+                                   FontSize="12"
+                                   Foreground="#64748B"/>
+                                        </StackPanel>
+
+                                        <Border Grid.Column="1"
+                            Background="#F5F7FB"
+                            CornerRadius="16"
+                            Padding="12,8"
+                            VerticalAlignment="Top">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="10"
+                                     Height="10"
+                                     Fill="#16A34A"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding Connection.Mode}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="#2E3A59"
+                                       VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Mode -->
+                                    <StackPanel Grid.Row="2">
+                                        <TextBlock Text="Connection Type" Style="{StaticResource ConnectionFieldLabel}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <RadioButton Content="Local"
+                                     GroupName="ConnectionModeGroup"
+                                     Style="{StaticResource ConnectionModeButtonStyle}"
+                                     IsChecked="{Binding Connection.IsLocal, Mode=OneWay}"
+                                     Checked="LocalMode_Checked"/>
+                                            <RadioButton Content="Server"
+                                     GroupName="ConnectionModeGroup"
+                                     Style="{StaticResource ConnectionModeButtonStyle}"
+                                     IsChecked="{Binding Connection.IsServer, Mode=OneWay}"
+                                     Checked="ServerMode_Checked"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Fields -->
+                                    <Grid Grid.Row="4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="180"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="18"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="18"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="18"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="22"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="28"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="0">
+                                            <TextBlock Text="Host" Style="{StaticResource ConnectionFieldLabel}"/>
+                                            <Border Style="{StaticResource ConnectionInputBorder}">
+                                                <TextBox Text="{Binding Connection.Host, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ConnectionTextBoxStyle}"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="2">
+                                            <TextBlock Text="Port" Style="{StaticResource ConnectionFieldLabel}"/>
+                                            <Border Style="{StaticResource ConnectionInputBorder}">
+                                                <TextBox Text="{Binding Connection.Port, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ConnectionTextBoxStyle}"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Grid.ColumnSpan="3">
+                                            <TextBlock Text="Database Name" Style="{StaticResource ConnectionFieldLabel}"/>
+                                            <Border Style="{StaticResource ConnectionInputBorder}">
+                                                <TextBox Text="{Binding Connection.Database, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ConnectionTextBoxStyle}"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
+                                            <TextBlock Text="Username" Style="{StaticResource ConnectionFieldLabel}"/>
+                                            <Border Style="{StaticResource ConnectionInputBorder}">
+                                                <TextBox Text="{Binding Connection.Username, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ConnectionTextBoxStyle}"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="6" Grid.ColumnSpan="3">
+                                            <TextBlock Text="Password" Style="{StaticResource ConnectionFieldLabel}"/>
+                                            <Border Style="{StaticResource ConnectionInputBorder}">
+                                                <PasswordBox x:Name="ConnectionPasswordInput"
+                                         PasswordChanged="ConnectionPasswordInput_PasswordChanged"
+                                         Style="{StaticResource ConnectionPasswordBoxStyle}"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <CheckBox Grid.Row="8"
+                              Grid.ColumnSpan="3"
+                              Content="Use SSL"
+                              IsChecked="{Binding Connection.UseSsl}"
+                              Foreground="#475569"
+                              FontWeight="SemiBold"
+                              VerticalAlignment="Center"/>
+
+                                        <Grid Grid.Row="10"
+                          Grid.ColumnSpan="3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0"
+                                   Text="{Binding Connection.TestResultMessage}"
+                                   Foreground="{Binding Connection.TestResultBrush}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,16,0"/>
+
+                                            <Button Grid.Column="1"
+                                Content="Test DB Connection"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding Connection.TestConnectionCommand}"
+                                MinWidth="170"/>
+
+                                            <Button Grid.Column="3"
+                                Content="Save Settings"
+                                Style="{StaticResource PrimaryButton}"
+                                Command="{Binding Connection.SaveCommand}"
+                                MinWidth="170"/>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </ScrollViewer>
                     </Grid>
                 </Grid>
             </Grid>

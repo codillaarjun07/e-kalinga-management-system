@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WpfApp3.Services;
-using WpfApp3.Views;
 
 namespace WpfApp3.ViewModels.Login
 {
@@ -25,7 +24,10 @@ namespace WpfApp3.ViewModels.Login
         [ObservableProperty] private string toastMessage = "";
         [ObservableProperty] private string toastBackground = "#2E3A59";
 
+        [ObservableProperty] private string connectionTypeLabel = "Server Connection";
+
         public event Action? LoginSucceeded;
+        public string CurrentYear => DateTime.Now.Year.ToString();
 
         public ICommand LoginCommand { get; }
 
@@ -33,7 +35,6 @@ namespace WpfApp3.ViewModels.Login
         {
             LoadConnectionType();
             LoginCommand = new AsyncRelayCommand(LoginAsync, CanLogin);
-
         }
 
         private bool CanLogin() => !IsLoading;
@@ -43,8 +44,6 @@ namespace WpfApp3.ViewModels.Login
             if (LoginCommand is AsyncRelayCommand asyncCommand)
                 asyncCommand.NotifyCanExecuteChanged();
         }
-
-        [ObservableProperty] private string connectionTypeLabel = "Server Connection";
 
         private void LoadConnectionType()
         {
@@ -58,14 +57,6 @@ namespace WpfApp3.ViewModels.Login
             {
                 ConnectionTypeLabel = "Server Connection";
             }
-        }
-
-        [RelayCommand]
-        private void OpenConnectionSettings()
-        {
-            var win = new ConnectionSettingsWindow();
-            win.ShowDialog();
-            LoadConnectionType();
         }
 
         private async Task LoginAsync()
