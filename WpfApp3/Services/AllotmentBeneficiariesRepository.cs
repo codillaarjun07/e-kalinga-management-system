@@ -6,6 +6,8 @@ namespace WpfApp3.Services
 {
     public class AllotmentBeneficiariesRepository
     {
+        private readonly AuditLogsService _auditLogsService = new();
+
         // Assigned + endorsed only
         public List<BeneficiaryRecord> GetAssignedEndorsed(int allotmentId)
         {
@@ -58,12 +60,9 @@ ORDER BY b.last_name, b.first_name;";
                     Gender = rd.IsDBNull(oGender) ? "" : rd.GetString(oGender),
                     Barangay = rd.IsDBNull(oBarangay) ? "" : rd.GetString(oBarangay),
                     Classification = rd.IsDBNull(oClass) ? "None" : rd.GetString(oClass),
-
                     ShareAmount = rd.IsDBNull(oShareAmt) ? (decimal?)null : rd.GetDecimal(oShareAmt),
                     ShareQty = rd.IsDBNull(oShareQty) ? (int?)null : rd.GetInt32(oShareQty),
                     ShareUnit = rd.IsDBNull(oShareUnit) ? null : rd.GetString(oShareUnit),
-
-                    // ✅ new
                     IsReleased = !rd.IsDBNull(oReleased) && Convert.ToInt32(rd.GetValue(oReleased)) == 1,
                     BeneficiaryId = rd.IsDBNull(oBeneId) ? "" : rd.GetString(oBeneId),
                 });
@@ -71,6 +70,7 @@ ORDER BY b.last_name, b.first_name;";
 
             return list;
         }
+
         // For Add modal: endorsed NOT assigned to this project (+ optional search)
         public List<BeneficiaryRecord> GetAvailableEndorsedNotAssigned(int allotmentId, string searchLower)
         {
@@ -101,7 +101,6 @@ WHERE b.status = 'Endorsed'
         LOWER(IFNULL(b.classification,'')) LIKE CONCAT('%', @q, '%')
       )
 ORDER BY b.last_name, b.first_name;";
-
 
             cmd.Parameters.AddWithValue("@aid", allotmentId);
             cmd.Parameters.AddWithValue("@q", (searchLower ?? "").Trim().ToLowerInvariant());
@@ -145,7 +144,6 @@ ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;";
                 cmd.ExecuteNonQuery();
             }
 
-            // ✅ IMPORTANT: recompute shares after insert
             using (var recompute = conn.CreateCommand())
             {
                 recompute.Transaction = tx;
@@ -155,8 +153,23 @@ ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;";
             }
 
             tx.Commit();
-        }
 
+            var actor = GetActor();
+            var allotmentName = GetAllotmentName(allotmentId);
+
+            foreach (var bid in beneficiaryIds.Distinct())
+            {
+                var beneficiary = GetBeneficiaryInfo(bid);
+
+                _auditLogsService.AddLog(
+                    operationType: "CREATE",
+                    tableName: "allotment_beneficiaries",
+                    recordId: $"{allotmentId}:{bid}",
+                    actorName: actor,
+                    description: $"Assigned beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) to allotment '{allotmentName}' (Allotment ID {allotmentId})."
+                );
+            }
+        }
 
         public void UpdateShareMoney(int allotmentId, int beneficiaryId, decimal amount)
         {
@@ -175,13 +188,24 @@ WHERE allotment_id = @aid AND beneficiary_id = @bid;";
             cmd.Parameters.AddWithValue("@bid", beneficiaryId);
 
             cmd.ExecuteNonQuery();
+
+            var actor = GetActor();
+            var allotmentName = GetAllotmentName(allotmentId);
+            var beneficiary = GetBeneficiaryInfo(beneficiaryId);
+
+            _auditLogsService.AddLog(
+                operationType: "UPDATE",
+                tableName: "allotment_beneficiaries",
+                recordId: $"{allotmentId}:{beneficiaryId}",
+                actorName: actor,
+                description: $"Updated money share of beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) in allotment '{allotmentName}' to ₱ {amount:N2}."
+            );
         }
 
         public void MarkReleased(int allotmentId, int beneficiaryId)
         {
             using var conn = MySqlDb.OpenConnection();
 
-            // ✅ ensure column exists (safe even if you forgot to run SQL)
             EnsureDateReleasedColumn(conn);
 
             using var cmd = conn.CreateCommand();
@@ -195,6 +219,18 @@ WHERE allotment_id = @aid AND beneficiary_id = @bid;";
             cmd.Parameters.AddWithValue("@bid", beneficiaryId);
 
             cmd.ExecuteNonQuery();
+
+            var actor = GetActor();
+            var allotmentName = GetAllotmentName(allotmentId);
+            var beneficiary = GetBeneficiaryInfo(beneficiaryId);
+
+            _auditLogsService.AddLog(
+                operationType: "UPDATE",
+                tableName: "allotment_beneficiaries",
+                recordId: $"{allotmentId}:{beneficiaryId}",
+                actorName: actor,
+                description: $"Marked beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) as released for allotment '{allotmentName}'."
+            );
         }
 
         public void UpdateShareInKind(int allotmentId, int beneficiaryId, int qty, string unit)
@@ -215,10 +251,25 @@ WHERE allotment_id = @aid AND beneficiary_id = @bid;";
             cmd.Parameters.AddWithValue("@bid", beneficiaryId);
 
             cmd.ExecuteNonQuery();
+
+            var actor = GetActor();
+            var allotmentName = GetAllotmentName(allotmentId);
+            var beneficiary = GetBeneficiaryInfo(beneficiaryId);
+
+            _auditLogsService.AddLog(
+                operationType: "UPDATE",
+                tableName: "allotment_beneficiaries",
+                recordId: $"{allotmentId}:{beneficiaryId}",
+                actorName: actor,
+                description: $"Updated in-kind share of beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) in allotment '{allotmentName}' to {qty:N0} {unit}."
+            );
         }
 
         public void RemoveAssignment(int allotmentId, int beneficiaryId)
         {
+            var allotmentName = GetAllotmentName(allotmentId);
+            var beneficiary = GetBeneficiaryInfo(beneficiaryId);
+
             using var conn = MySqlDb.OpenConnection();
             using var tx = conn.BeginTransaction();
 
@@ -233,7 +284,6 @@ WHERE allotment_id = @aid AND beneficiary_id = @bid;";
                 cmd.ExecuteNonQuery();
             }
 
-            // ✅ recompute shares after delete
             using (var recompute = conn.CreateCommand())
             {
                 recompute.Transaction = tx;
@@ -243,8 +293,15 @@ WHERE allotment_id = @aid AND beneficiary_id = @bid;";
             }
 
             tx.Commit();
-        }
 
+            _auditLogsService.AddLog(
+                operationType: "DELETE",
+                tableName: "allotment_beneficiaries",
+                recordId: $"{allotmentId}:{beneficiaryId}",
+                actorName: GetActor(),
+                description: $"Removed beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) from allotment '{allotmentName}' (Allotment ID {allotmentId})."
+            );
+        }
 
         public static void AssignAndRecompute(int allotmentId, IEnumerable<int> beneficiaryIds)
         {
@@ -274,10 +331,30 @@ VALUES (@a, @b);";
             }
 
             tx.Commit();
+
+            var audit = new AuditLogsService();
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username) ? "Unknown" : SessionService.Username!;
+            var allotmentName = GetAllotmentNameStatic(allotmentId);
+
+            foreach (var bid in beneficiaryIds.Distinct())
+            {
+                var beneficiary = GetBeneficiaryInfoStatic(bid);
+
+                audit.AddLog(
+                    operationType: "CREATE",
+                    tableName: "allotment_beneficiaries",
+                    recordId: $"{allotmentId}:{bid}",
+                    actorName: actor,
+                    description: $"Assigned beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) to allotment '{allotmentName}' (Allotment ID {allotmentId})."
+                );
+            }
         }
 
         public static void RemoveAndRecompute(int allotmentId, int beneficiaryId)
         {
+            var allotmentName = GetAllotmentNameStatic(allotmentId);
+            var beneficiary = GetBeneficiaryInfoStatic(beneficiaryId);
+
             using var conn = MySqlDb.OpenConnection();
             using var tx = conn.BeginTransaction();
 
@@ -297,6 +374,17 @@ VALUES (@a, @b);";
             }
 
             tx.Commit();
+
+            var audit = new AuditLogsService();
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username) ? "Unknown" : SessionService.Username!;
+
+            audit.AddLog(
+                operationType: "DELETE",
+                tableName: "allotment_beneficiaries",
+                recordId: $"{allotmentId}:{beneficiaryId}",
+                actorName: actor,
+                description: $"Removed beneficiary '{beneficiary.DisplayName}' ({beneficiary.BeneficiaryId}) from allotment '{allotmentName}' (Allotment ID {allotmentId})."
+            );
         }
 
         private static bool _checkedDateReleased;
@@ -368,6 +456,103 @@ ORDER BY released_at DESC;";
             }
 
             return list;
+        }
+
+        private string GetActor()
+        {
+            return string.IsNullOrWhiteSpace(SessionService.Username) ? "Unknown" : SessionService.Username!;
+        }
+
+        private string GetAllotmentName(int allotmentId)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+SELECT project_name
+FROM allotments
+WHERE id = @id
+LIMIT 1;";
+            cmd.Parameters.AddWithValue("@id", allotmentId);
+
+            var value = cmd.ExecuteScalar();
+            return value == null || value == DBNull.Value
+                ? $"ID {allotmentId}"
+                : Convert.ToString(value) ?? $"ID {allotmentId}";
+        }
+
+        private static string GetAllotmentNameStatic(int allotmentId)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+SELECT project_name
+FROM allotments
+WHERE id = @id
+LIMIT 1;";
+            cmd.Parameters.AddWithValue("@id", allotmentId);
+
+            var value = cmd.ExecuteScalar();
+            return value == null || value == DBNull.Value
+                ? $"ID {allotmentId}"
+                : Convert.ToString(value) ?? $"ID {allotmentId}";
+        }
+
+        private (string DisplayName, string BeneficiaryId) GetBeneficiaryInfo(int beneficiaryId)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+SELECT beneficiary_id, first_name, last_name
+FROM beneficiaries
+WHERE id = @id
+LIMIT 1;";
+            cmd.Parameters.AddWithValue("@id", beneficiaryId);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return ($"ID {beneficiaryId}", $"ID {beneficiaryId}");
+
+            var beneficiaryCode = reader["beneficiary_id"] == DBNull.Value ? "" : Convert.ToString(reader["beneficiary_id"]) ?? "";
+            var firstName = reader["first_name"] == DBNull.Value ? "" : Convert.ToString(reader["first_name"]) ?? "";
+            var lastName = reader["last_name"] == DBNull.Value ? "" : Convert.ToString(reader["last_name"]) ?? "";
+            var displayName = $"{firstName} {lastName}".Trim();
+
+            if (string.IsNullOrWhiteSpace(displayName))
+                displayName = $"ID {beneficiaryId}";
+
+            if (string.IsNullOrWhiteSpace(beneficiaryCode))
+                beneficiaryCode = $"ID {beneficiaryId}";
+
+            return (displayName, beneficiaryCode);
+        }
+
+        private static (string DisplayName, string BeneficiaryId) GetBeneficiaryInfoStatic(int beneficiaryId)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+SELECT beneficiary_id, first_name, last_name
+FROM beneficiaries
+WHERE id = @id
+LIMIT 1;";
+            cmd.Parameters.AddWithValue("@id", beneficiaryId);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return ($"ID {beneficiaryId}", $"ID {beneficiaryId}");
+
+            var beneficiaryCode = reader["beneficiary_id"] == DBNull.Value ? "" : Convert.ToString(reader["beneficiary_id"]) ?? "";
+            var firstName = reader["first_name"] == DBNull.Value ? "" : Convert.ToString(reader["first_name"]) ?? "";
+            var lastName = reader["last_name"] == DBNull.Value ? "" : Convert.ToString(reader["last_name"]) ?? "";
+            var displayName = $"{firstName} {lastName}".Trim();
+
+            if (string.IsNullOrWhiteSpace(displayName))
+                displayName = $"ID {beneficiaryId}";
+
+            if (string.IsNullOrWhiteSpace(beneficiaryCode))
+                beneficiaryCode = $"ID {beneficiaryId}";
+
+            return (displayName, beneficiaryCode);
         }
     }
 }

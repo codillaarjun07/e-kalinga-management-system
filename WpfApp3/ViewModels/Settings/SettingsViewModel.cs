@@ -14,6 +14,8 @@ namespace WpfApp3.ViewModels.Settings
     {
         private readonly SettingsRepository _repo = new();
 
+        public LogoSettingsViewModel Logo { get; } = new();
+
         private readonly List<SettingOptionRecord> _allDepartments = new();
         private readonly List<SettingOptionRecord> _allFunds = new();
         private readonly List<SettingOptionRecord> _allClassifications = new();

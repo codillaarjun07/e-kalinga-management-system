@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WpfApp3.Services;
 
 namespace WpfApp3.ViewModels.Login
@@ -25,6 +28,7 @@ namespace WpfApp3.ViewModels.Login
         [ObservableProperty] private string toastBackground = "#2E3A59";
 
         [ObservableProperty] private string connectionTypeLabel = "Server Connection";
+        [ObservableProperty] private ImageSource? appLogo;
 
         public event Action? LoginSucceeded;
         public string CurrentYear => DateTime.Now.Year.ToString();
@@ -34,6 +38,7 @@ namespace WpfApp3.ViewModels.Login
         public LoginViewModel()
         {
             LoadConnectionType();
+            LoadAppLogo();
             LoginCommand = new AsyncRelayCommand(LoginAsync, CanLogin);
         }
 
@@ -56,6 +61,76 @@ namespace WpfApp3.ViewModels.Login
             catch
             {
                 ConnectionTypeLabel = "Server Connection";
+            }
+        }
+
+        private void LoadAppLogo()
+        {
+            try
+            {
+                var logoRepo = new LogosRepository();
+                logoRepo.EnsureTable();
+
+                var activeLogo = logoRepo.GetActive();
+
+                if (activeLogo?.ImageData != null && activeLogo.ImageData.Length > 0)
+                {
+                    var dbLogo = ToImage(activeLogo.ImageData);
+                    if (dbLogo != null)
+                    {
+                        AppLogo = dbLogo;
+                        return;
+                    }
+                }
+            }
+            catch
+            {
+                // fall back to default logo
+            }
+
+            AppLogo = LoadDefaultLogoFromResources();
+        }
+
+        private ImageSource? LoadDefaultLogoFromResources()
+        {
+            try
+            {
+                // IMPORTANT:
+                // Replace this with the exact same logo resource path
+                // currently used in LoginWindow.xaml
+                var uri = new Uri("pack://application:,,,/ekaling.png", UriKind.Absolute);
+
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = uri;
+                image.EndInit();
+                image.Freeze();
+
+                return image;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private ImageSource? ToImage(byte[] bytes)
+        {
+            try
+            {
+                using var ms = new MemoryStream(bytes);
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = ms;
+                image.EndInit();
+                image.Freeze();
+                return image;
+            }
+            catch
+            {
+                return null;
             }
         }
 

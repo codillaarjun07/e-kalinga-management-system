@@ -188,6 +188,15 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="TabButtonLogo" TargetType="Button" BasedOn="{StaticResource TabButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedTab}" Value="Logo">
+                    <Setter Property="Background" Value="#1F2A44"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="SearchBoxText" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -340,6 +349,12 @@
                 Command="{Binding SelectTabCommand}"
                 CommandParameter="Roles"
                 Margin="0"/>
+
+                        <Button Content="Logo"
+        Style="{StaticResource TabButtonLogo}"
+        Command="{Binding SelectTabCommand}"
+        CommandParameter="Logo"
+        Margin="10,0,0,0"/>
 
                         <Button Content="Connections"
         Style="{StaticResource TabButtonConnections}"
@@ -1077,6 +1092,225 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Border>
+                    </Grid>
+
+                    <!-- LOGO -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTab}" Value="Logo">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="18"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="420"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Height="46"
+                Background="#F8FAFD"
+                BorderBrush="#EEF2FF"
+                BorderThickness="1"
+                CornerRadius="14"
+                Padding="16,0">
+                                <Grid>
+                                    <TextBox Text="{Binding Logo.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource SearchBoxText}"/>
+
+                                    <TextBlock Text="Search logo"
+                           Foreground="#A3AEC2"
+                           FontSize="13"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Logo.SearchText}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
+
+                            <Button Grid.Column="2"
+                Style="{StaticResource GhostButton}"
+                Command="{Binding Logo.RefreshCommand}"
+                Content="Refresh"/>
+
+                            <Button Grid.Column="4"
+                Style="{StaticResource PrimaryButton}"
+                Command="{Binding Logo.UploadLogoCommand}"
+                Content="Upload Logo"/>
+                        </Grid>
+
+                        <Grid Grid.Row="2" Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="Logo Gallery"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Foreground="#2E3A59"/>
+
+                                <TextBlock Text="{Binding Logo.CurrentLogoName}"
+                       Margin="0,4,0,0"
+                       FontSize="12"
+                       Foreground="#6B778C"/>
+                            </StackPanel>
+
+                            <Border Grid.Column="1"
+                Background="#F5F7FB"
+                CornerRadius="14"
+                Padding="12,6"
+                VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Logo.FoundText}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Foreground="#6B778C"/>
+                            </Border>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="4"
+                  VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Border Background="#FFF4E8"
+                    BorderBrush="#FFD8A8"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="12"
+                    Margin="0,0,0,12">
+                                    <TextBlock Text="Accepted files: PNG, JPG, JPEG, BMP, GIF, WEBP. Maximum file size: 10 MB."
+                           Foreground="#9A5B13"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+                                </Border>
+
+                                <Border Background="#FDECEC"
+                    BorderBrush="#F5C2C7"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="12"
+                    Margin="0,0,0,12"
+                    Visibility="{Binding Logo.ErrorMessage, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding Logo.ErrorMessage}"
+                           Foreground="#C43D3D"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+                                </Border>
+
+                                <Border Background="#EAF7EE"
+                    BorderBrush="#BDE3C8"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="12"
+                    Margin="0,0,0,12"
+                    Visibility="{Binding Logo.SuccessMessage, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding Logo.SuccessMessage}"
+                           Foreground="#2F8F57"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+                                </Border>
+
+                                <ItemsControl ItemsSource="{Binding Logo.Items}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Width="240"
+                                Margin="0,0,16,16"
+                                Background="White"
+                                BorderBrush="#EEF2FF"
+                                BorderThickness="1"
+                                CornerRadius="20"
+                                Padding="14">
+                                                <StackPanel>
+                                                    <Border Height="140"
+                                        Background="#F8FAFD"
+                                        CornerRadius="14"
+                                        ClipToBounds="True">
+                                                        <Image Source="{Binding PreviewImage}"
+                                           Stretch="Uniform"/>
+                                                    </Border>
+
+                                                    <TextBlock Text="{Binding Name}"
+                                           Margin="0,12,0,0"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           Foreground="#2E3A59"
+                                           TextTrimming="CharacterEllipsis"/>
+
+                                                    <TextBlock Text="{Binding FileName}"
+                                           Margin="0,4,0,0"
+                                           FontSize="12"
+                                           Foreground="#7C8AA5"
+                                           TextTrimming="CharacterEllipsis"/>
+
+                                                    <TextBlock Text="{Binding FileSizeText}"
+                                           Margin="0,2,0,0"
+                                           FontSize="12"
+                                           Foreground="#7C8AA5"/>
+
+                                                    <Border Margin="0,10,0,0"
+                                        Height="28"
+                                        MinWidth="90"
+                                        Padding="12,0"
+                                        CornerRadius="14"
+                                        HorizontalAlignment="Left"
+                                        Background="#F5F7FB">
+                                                        <TextBlock Text="{Binding StatusText}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="#2E3A59"/>
+                                                    </Border>
+
+                                                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                                        <Button Content="Use Logo"
+                                            Style="{StaticResource IconTextButton}"
+                                            Command="{Binding DataContext.Logo.SetAsActiveCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"/>
+
+                                                        <Button Content="Delete"
+                                            Style="{StaticResource DangerButton}"
+                                            Command="{Binding DataContext.Logo.DeleteLogoCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
 
                     <!-- CONNECTIONS -->

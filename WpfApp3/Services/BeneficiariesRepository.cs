@@ -8,6 +8,7 @@ namespace WpfApp3.Services
 {
     public class BeneficiariesRepository
     {
+        private readonly AuditLogsService _auditLogsService = new();
 
         public sealed class BeneficiaryPastReleaseRow
         {
@@ -177,6 +178,9 @@ WHERE beneficiary_id IN ({string.Join(",", paramNames)});";
             if (string.IsNullOrWhiteSpace(person.FirstName)) throw new ArgumentException("FirstName is required.");
             if (string.IsNullOrWhiteSpace(person.LastName)) throw new ArgumentException("LastName is required.");
 
+            var existingInternalId = GetInternalIdByBeneficiaryId(person.BeneficiaryId);
+            var operationType = existingInternalId.HasValue ? "UPDATE" : "CREATE";
+
             using var conn = MySqlDb.OpenConnection();
             using var cmd = conn.CreateCommand();
 
@@ -243,6 +247,23 @@ ON DUPLICATE KEY UPDATE
             cmd.Parameters.AddWithValue("@status", status);
 
             cmd.ExecuteNonQuery();
+
+            var internalId = existingInternalId ?? GetInternalIdByBeneficiaryId(person.BeneficiaryId);
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            var fullName = $"{person.FirstName} {person.LastName}".Trim();
+
+            _auditLogsService.AddLog(
+                operationType: operationType,
+                tableName: "beneficiaries",
+                recordId: internalId?.ToString(),
+                actorName: actor,
+                description: operationType == "CREATE"
+                    ? $"Created beneficiary '{fullName}' with Beneficiary ID '{person.BeneficiaryId}' and status '{status}'."
+                    : $"Updated beneficiary '{fullName}' with Beneficiary ID '{person.BeneficiaryId}' and set status to '{status}'."
+            );
         }
 
         private static ValidatorRecord Map(MySqlDataReader r)
@@ -286,7 +307,6 @@ ON DUPLICATE KEY UPDATE
             var val = cmd.ExecuteScalar();
             return val == null || val == DBNull.Value ? null : Convert.ToInt32(val);
         }
-
 
         public sealed class BeneficiaryDetails
         {
@@ -348,7 +368,6 @@ LIMIT 1;";
                 ProfileImage = img
             };
         }
-
 
         public List<BeneficiaryPastReleaseRow> GetPastReleasesByBeneficiaryId(int beneficiaryId, int? excludeProjectId = null)
         {

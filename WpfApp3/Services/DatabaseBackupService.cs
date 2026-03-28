@@ -11,6 +11,8 @@ namespace WpfApp3.Services
 {
     public class DatabaseBackupService
     {
+        private readonly AuditLogsService _auditLogsService = new();
+
         public void EnsureBackupTable()
         {
             using var conn = MySqlDb.OpenConnection();
@@ -86,6 +88,18 @@ namespace WpfApp3.Services
             insert.Parameters.AddWithValue("@created_by", createdBy ?? "Unknown");
 
             var id = Convert.ToInt32(insert.ExecuteScalar(), CultureInfo.InvariantCulture);
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            _auditLogsService.AddLog(
+                operationType: "CREATE",
+                tableName: "database_backups",
+                recordId: id.ToString(CultureInfo.InvariantCulture),
+                actorName: actor,
+                description: $"Created database backup '{storedFileName}' for database '{databaseName}' on server '{serverName}'."
+            );
 
             return new DatabaseBackupRecord
             {
@@ -201,12 +215,44 @@ namespace WpfApp3.Services
             EnsureBackupTable();
 
             using var conn = MySqlDb.OpenConnection();
+
+            string? fileName = null;
+            string? databaseName = null;
+
+            using (var select = new MySqlCommand(@"
+                SELECT `file_name`, `database_name`
+                FROM `database_backups`
+                WHERE `id` = @id
+                LIMIT 1;", conn))
+            {
+                select.Parameters.AddWithValue("@id", backupId);
+
+                using var reader = select.ExecuteReader();
+                if (reader.Read())
+                {
+                    fileName = reader.GetString("file_name");
+                    databaseName = reader.GetString("database_name");
+                }
+            }
+
             using var cmd = new MySqlCommand(@"
                 DELETE FROM `database_backups`
                 WHERE `id` = @id;", conn);
 
             cmd.Parameters.AddWithValue("@id", backupId);
             cmd.ExecuteNonQuery();
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            _auditLogsService.AddLog(
+                operationType: "DELETE",
+                tableName: "database_backups",
+                recordId: backupId.ToString(CultureInfo.InvariantCulture),
+                actorName: actor,
+                description: $"Deleted database backup '{fileName ?? "(unknown)"}' for database '{databaseName ?? "(unknown)"}' (ID {backupId})."
+            );
         }
 
         private string BuildBackupSql(MySqlConnection conn, string databaseName)

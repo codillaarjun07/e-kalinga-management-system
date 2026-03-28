@@ -133,12 +133,12 @@
             VerticalAlignment="Center"
             Orientation="Horizontal">
 
-                    <Image Source="/Ekalinga-Icon.png"
-           Width="60"
-           Height="60"
-           Margin="0,0,14,0"
-           Stretch="Uniform"
-           VerticalAlignment="Center"/>
+                    <Image Source="{Binding AppLogo}"
+       Width="60"
+Height="60"
+Margin="0,0,14,0"
+Stretch="Uniform"
+VerticalAlignment="Center"/>
 
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="E-Kalinga"

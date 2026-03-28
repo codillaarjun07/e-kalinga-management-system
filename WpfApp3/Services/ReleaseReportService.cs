@@ -4,6 +4,7 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 
 namespace WpfApp3.Services
 {
@@ -14,6 +15,8 @@ namespace WpfApp3.Services
         private const string Border = "#E7ECF5";
         private const string TextPrimary = "#0F172A";
         private const string TextSecondary = "#64748B";
+
+        private readonly AuditLogsService _auditLogsService = new();
 
         static ReleaseReportService()
         {
@@ -103,6 +106,21 @@ namespace WpfApp3.Services
                     });
                 });
             }).GeneratePdf(filePath);
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            var fileName = Path.GetFileName(filePath);
+            var projectName = string.IsNullOrWhiteSpace(data.ProjectName) ? "(unknown project)" : data.ProjectName;
+
+            _auditLogsService.AddLog(
+                operationType: "CREATE",
+                tableName: "release_reports",
+                recordId: null,
+                actorName: actor,
+                description: $"Generated release report '{fileName}' for project '{projectName}' with classification filter '{data.ClassificationFilter}'."
+            );
         }
 
         public void Print(string filePath)
@@ -175,7 +193,6 @@ namespace WpfApp3.Services
                                 ? 0
                                 : totalWidth * data.ReleasedCount / (float)data.TotalBeneficiaries;
 
-                            // MUST always exist
                             layers.PrimaryLayer()
                                 .Background("#E2E8F0")
                                 .CornerRadius(9);
@@ -204,11 +221,11 @@ namespace WpfApp3.Services
         }
 
         private static void ComposeMetricPanel(
-    IContainer container,
-    string title,
-    IReadOnlyList<ReleaseMetricItem> items,
-    int maxCount,
-    string accentColor)
+            IContainer container,
+            string title,
+            IReadOnlyList<ReleaseMetricItem> items,
+            int maxCount,
+            string accentColor)
         {
             container
                 .Border(1)
@@ -236,7 +253,6 @@ namespace WpfApp3.Services
                             {
                                 var filledWidth = maxCount == 0 ? 0 : 220f * item.Count / maxCount;
 
-                                // MUST always exist
                                 layers.PrimaryLayer()
                                     .Background("#E2E8F0")
                                     .CornerRadius(6);
@@ -308,7 +324,6 @@ namespace WpfApp3.Services
                     });
                 });
         }
-
 
         public void Open(string filePath)
         {

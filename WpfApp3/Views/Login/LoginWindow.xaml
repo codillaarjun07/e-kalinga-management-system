@@ -320,7 +320,7 @@
                                Height="110"
                                Stretch="Uniform"
                                RenderOptions.BitmapScalingMode="HighQuality"
-                               Source="/Views/Login/ekaling.png"/>
+                               Source="{Binding AppLogo}"/>
                     </Border>
 
                     <TextBlock Text="E-Kalinga"

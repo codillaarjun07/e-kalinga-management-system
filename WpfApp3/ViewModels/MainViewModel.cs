@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -28,6 +29,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string currentUserLabel = "User";
     [ObservableProperty] private ImageSource? currentUserProfileImage;
     [ObservableProperty] private bool isCurrentUserProfileImageEmpty = true;
+
+    [ObservableProperty] private ImageSource? appLogo;
 
     public ObservableCollection<NavItem> NavItems { get; }
 
@@ -60,6 +63,7 @@ public partial class MainViewModel : ObservableObject
         LogoutCommand = new RelayCommand(Logout);
 
         LoadCurrentUser();
+        LoadAppLogo();
     }
 
     public bool IsSuperadmin =>
@@ -104,6 +108,55 @@ public partial class MainViewModel : ObservableObject
             CurrentUserLabel = "User";
             CurrentUserProfileImage = null;
             IsCurrentUserProfileImageEmpty = true;
+        }
+    }
+
+    private void LoadAppLogo()
+    {
+        try
+        {
+            var logoRepo = new LogosRepository();
+            logoRepo.EnsureTable();
+
+            var activeLogo = logoRepo.GetActive();
+
+            if (activeLogo?.ImageData != null && activeLogo.ImageData.Length > 0)
+            {
+                var dbLogo = ToImage(activeLogo.ImageData);
+                if (dbLogo != null)
+                {
+                    AppLogo = dbLogo;
+                    return;
+                }
+            }
+        }
+        catch
+        {
+            // fall back to filesystem logo
+        }
+
+        AppLogo = LoadDefaultLogoFromFileSystem();
+    }
+
+    private ImageSource? LoadDefaultLogoFromFileSystem()
+    {
+        try
+        {
+            // Replace this with the exact same logo path currently used in your MainWindow.xaml
+            var uri = new Uri("pack://application:,,,/ekaling.png", UriKind.Absolute);
+
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = uri;
+            image.EndInit();
+            image.Freeze();
+
+            return image;
+        }
+        catch
+        {
+            return null;
         }
     }
 
@@ -212,8 +265,8 @@ public partial class MainViewModel : ObservableObject
             {
                 Text = $"{title} page (coming soon)",
                 FontSize = 22,
-                FontWeight = System.Windows.FontWeights.SemiBold,
-                Margin = new System.Windows.Thickness(24)
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(24)
             }
         };
     }

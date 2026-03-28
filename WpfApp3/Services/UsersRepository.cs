@@ -4,6 +4,8 @@ namespace WpfApp3.Services
 {
     public class UsersRepository
     {
+        private readonly AuditLogsService _auditLogsService = new();
+
         public List<UserRow> GetAll()
         {
             using var conn = MySqlDb.OpenConnection();
@@ -110,7 +112,21 @@ SELECT LAST_INSERT_ID();";
                 profilePicture is null || profilePicture.Length == 0 ? DBNull.Value : profilePicture;
 
             var idObj = cmd.ExecuteScalar();
-            return Convert.ToInt32(idObj);
+            var id = Convert.ToInt32(idObj);
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            _auditLogsService.AddLog(
+                operationType: "CREATE",
+                tableName: "users",
+                recordId: id.ToString(),
+                actorName: actor,
+                description: $"Created user '{firstName} {lastName}' with username '{username}' and role '{role}'."
+            );
+
+            return id;
         }
 
         public void Update(
@@ -124,6 +140,7 @@ SELECT LAST_INSERT_ID();";
             byte[]? profilePicture)
         {
             using var conn = MySqlDb.OpenConnection();
+            var existing = GetById(id);
 
             if (!string.IsNullOrWhiteSpace(newPasswordPlainOrNull))
             {
@@ -175,16 +192,51 @@ WHERE id=@id;";
                     profilePicture is null || profilePicture.Length == 0 ? DBNull.Value : profilePicture;
                 cmd.ExecuteNonQuery();
             }
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            var oldUsername = existing?.Username ?? "(unknown)";
+            var oldFullName = existing is null ? "(unknown)" : $"{existing.FirstName} {existing.LastName}".Trim();
+
+            var passwordNote = string.IsNullOrWhiteSpace(newPasswordPlainOrNull)
+                ? ""
+                : " Password was also changed.";
+
+            _auditLogsService.AddLog(
+                operationType: "UPDATE",
+                tableName: "users",
+                recordId: id.ToString(),
+                actorName: actor,
+                description: $"Updated user '{oldFullName}' ({oldUsername}) to '{firstName} {lastName}' ({username}) with role '{role}'.{passwordNote}"
+            );
         }
 
         public void Delete(int id)
         {
             using var conn = MySqlDb.OpenConnection();
+            var existing = GetById(id);
 
             const string sql = @"DELETE FROM users WHERE id=@id;";
             using var cmd = new MySqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
+
+            var actor = string.IsNullOrWhiteSpace(SessionService.Username)
+                ? "Unknown"
+                : SessionService.Username!;
+
+            var fullName = existing is null ? "(unknown)" : $"{existing.FirstName} {existing.LastName}".Trim();
+            var username = existing?.Username ?? "(unknown)";
+
+            _auditLogsService.AddLog(
+                operationType: "DELETE",
+                tableName: "users",
+                recordId: id.ToString(),
+                actorName: actor,
+                description: $"Deleted user '{fullName}' with username '{username}'."
+            );
         }
 
         public bool UsernameExists(string username, int? ignoreUserId = null)
@@ -203,6 +255,38 @@ WHERE username=@username
 
             var count = Convert.ToInt32(cmd.ExecuteScalar());
             return count > 0;
+        }
+
+        private UserRow? GetById(int id)
+        {
+            using var conn = MySqlDb.OpenConnection();
+
+            const string sql = @"
+SELECT id, first_name, last_name, office, role, username, is_active, profile_picture
+FROM users
+WHERE id = @id
+LIMIT 1;";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return null;
+
+            return new UserRow
+            {
+                Id = reader.GetInt32("id"),
+                FirstName = reader.GetString("first_name"),
+                LastName = reader.GetString("last_name"),
+                Office = reader.IsDBNull(reader.GetOrdinal("office")) ? "" : reader.GetString("office"),
+                Role = reader.IsDBNull(reader.GetOrdinal("role")) ? "" : reader.GetString("role"),
+                Username = reader.GetString("username"),
+                IsActive = reader.GetInt32("is_active") == 1,
+                ProfilePicture = reader.IsDBNull(reader.GetOrdinal("profile_picture"))
+                    ? null
+                    : (byte[])reader["profile_picture"]
+            };
         }
     }
 
