@@ -48,7 +48,7 @@ public partial class MainViewModel : ObservableObject
             new NavItem("🔀 Allotment", NavigateAllotmentCommand),
             new NavItem("👥 Beneficiaries", NavigateBeneficiariesCommand),
             new NavItem("📦 Distribution", NavigateDistributionCommand),
-            new NavItem("🔐 Validators", NavigateValidatorsCommand),
+            new NavItem("🔐 Master List", NavigateValidatorsCommand),
             new NavItem("🖥️ Users", NavigateUsersCommand),
             new NavItem("⚙️ Settings", NavigateSettingsCommand),
         };
@@ -218,7 +218,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateValidators()
     {
-        PageTitle = "Validators";
+        PageTitle = "Master List";
         CurrentView = new ValidatorsView();
     }
 

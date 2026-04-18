@@ -97,6 +97,17 @@ namespace WpfApp3.ViewModels.Distribution
 
         [ObservableProperty] private bool isGeneratingReport;
 
+        [ObservableProperty] private bool isReportPreviewOpen;
+        [ObservableProperty] private string reportPreviewPath = "";
+        [ObservableProperty] private string reportPreviewTitle = "Release Report Preview";
+
+        public bool HasReportPreview => !string.IsNullOrWhiteSpace(ReportPreviewPath);
+
+        partial void OnReportPreviewPathChanged(string value)
+        {
+            OnPropertyChanged(nameof(HasReportPreview));
+        }
+
         public string GenerateReportButtonText =>
             IsGeneratingReport ? "Generating..." : "Generate Report";
 
@@ -346,8 +357,6 @@ namespace WpfApp3.ViewModels.Distribution
             List<BeneficiaryRecord> reportRows;
             string activeFilter;
 
-            // If report is triggered from the modal, use modal data/filter.
-            // If triggered from the main page, use main page data/filter.
             if (IsReleaseSessionOpen)
             {
                 if (ReleaseItems.Count == 0)
@@ -369,38 +378,29 @@ namespace WpfApp3.ViewModels.Distribution
             }
 
             var fileName = SafeFileName(
-                $"{SelectedProject.ProjectName}-Release-Report-{DateTime.Now:yyyyMMdd-HHmm}");
+                $"{SelectedProject.ProjectName}-Release-Report-{DateTime.Now:yyyyMMdd-HHmm}.pdf");
 
-            var savePath = _reportService.PickSavePath(fileName);
-            if (string.IsNullOrWhiteSpace(savePath))
-                return;
+            var previewFolder = Path.Combine(
+                Path.GetTempPath(),
+                "WpfApp3",
+                "ReportPreviews");
+
+            Directory.CreateDirectory(previewFolder);
+
+            var previewPath = Path.Combine(previewFolder, fileName);
 
             try
             {
                 IsGeneratingReport = true;
 
                 var reportData = BuildReleaseReportData(reportRows, activeFilter);
-                await Task.Run(() => _reportService.GeneratePdf(savePath, reportData));
+                await Task.Run(() => _reportService.GeneratePdf(previewPath, reportData));
 
-                ShowToast("Release report generated successfully.", "success");
+                ReportPreviewTitle = $"{SelectedProject.ProjectName} - Release Report Preview";
+                ReportPreviewPath = previewPath;
+                IsReportPreviewOpen = true;
 
-                var openNow = MessageBox.Show(
-                    "Release report saved successfully.\n\nOpen the PDF now?",
-                    "Open Release Report",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (openNow == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        _reportService.Open(savePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        ShowToast($"PDF saved but could not be opened: {ex.Message}", "warning");
-                    }
-                }
+                ShowToast("Release report preview generated successfully.", "success");
             }
             catch (Exception ex)
             {
@@ -409,6 +409,59 @@ namespace WpfApp3.ViewModels.Distribution
             finally
             {
                 IsGeneratingReport = false;
+            }
+        }
+
+
+
+        [RelayCommand]
+        private void CloseReportPreview()
+        {
+            IsReportPreviewOpen = false;
+        }
+
+        [RelayCommand]
+        private void SavePreviewReport()
+        {
+            if (string.IsNullOrWhiteSpace(ReportPreviewPath) || !File.Exists(ReportPreviewPath))
+            {
+                ShowToast("Preview file not found.", "error");
+                return;
+            }
+
+            var baseName = Path.GetFileNameWithoutExtension(ReportPreviewPath);
+            var savePath = _reportService.PickSavePath(baseName);
+
+            if (string.IsNullOrWhiteSpace(savePath))
+                return;
+
+            try
+            {
+                File.Copy(ReportPreviewPath, savePath, true);
+                ShowToast("Release report saved successfully.", "success");
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Failed to save report: {ex.Message}", "error");
+            }
+        }
+
+        [RelayCommand]
+        private void OpenPreviewExternally()
+        {
+            if (string.IsNullOrWhiteSpace(ReportPreviewPath) || !File.Exists(ReportPreviewPath))
+            {
+                ShowToast("Preview file not found.", "error");
+                return;
+            }
+
+            try
+            {
+                _reportService.Open(ReportPreviewPath);
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Could not open PDF: {ex.Message}", "warning");
             }
         }
 

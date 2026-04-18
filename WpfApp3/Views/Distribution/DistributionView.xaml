@@ -1254,5 +1254,119 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <!-- REPORT PREVIEW MODAL -->
+        <Grid Panel.ZIndex="915"
+              DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              Visibility="{Binding IsReportPreviewOpen, Converter={StaticResource BoolToVis}}">
+            <Border Background="#660F172A"/>
+
+            <!-- Click outside -->
+            <Border Background="Transparent">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick"
+                                  Command="{Binding CloseReportPreviewCommand}"/>
+                </Border.InputBindings>
+            </Border>
+
+            <Border Width="1100"
+                    MaxWidth="1100"
+                    Height="720"
+                    MaxHeight="720"
+                    Padding="24"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrushLighter}"
+                    BorderThickness="1"
+                    CornerRadius="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="{Binding ReportPreviewTitle}"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Margin="0,6,0,0"
+                                       Text="Preview the PDF first, then save it when ready."
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Style="{StaticResource CloseButtonStyle}"
+                                Command="{Binding CloseReportPreviewCommand}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE8BB;"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Viewer -->
+                    <Border Grid.Row="1"
+                            Background="#F8FAFC"
+                            BorderBrush="{StaticResource BorderBrushSoft}"
+                            BorderThickness="1"
+                            CornerRadius="16"
+                            ClipToBounds="True">
+                        <Grid>
+                            <WebBrowser x:Name="PdfPreviewBrowser"/>
+
+                            <Grid Visibility="{Binding HasReportPreview, Converter={StaticResource BoolToVis}}">
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Footer -->
+                    <Grid Grid.Row="2" Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="12"
+                                   Text="Use Save As to store the final PDF."/>
+
+                        <Button Grid.Column="1"
+                                Margin="0,0,10,0"
+                                MinWidth="150"
+                                Style="{StaticResource LightButton}"
+                                Command="{Binding OpenPreviewExternallyCommand}"
+                                Content="Open Externally"/>
+
+                        <Button Grid.Column="2"
+                                Margin="0,0,10,0"
+                                MinWidth="120"
+                                Style="{StaticResource LightButton}"
+                                Command="{Binding CloseReportPreviewCommand}"
+                                Content="Close"/>
+
+                        <Button Grid.Column="3"
+                                MinWidth="140"
+                                Style="{StaticResource PrimaryButton}"
+                                Command="{Binding SavePreviewReportCommand}"
+                                Content="Save As"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

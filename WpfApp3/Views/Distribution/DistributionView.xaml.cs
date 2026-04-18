@@ -13,8 +13,8 @@ namespace WpfApp3.Views.Distribution
 
         private Window? _hostWindow;
         private bool _hooked;
+        private DistributionViewModel? _observedVm;
 
-        // keep same delegate instances for RemoveHandler
         private readonly TextCompositionEventHandler _textHandler;
         private readonly KeyEventHandler _keyHandler;
 
@@ -27,18 +27,34 @@ namespace WpfApp3.Views.Distribution
 
             Loaded += (_, __) => HookVm();
             DataContextChanged += (_, __) => HookVm();
-            Unloaded += (_, __) => UnhookGlobalScan();
+            Unloaded += (_, __) =>
+            {
+                UnhookGlobalScan();
+
+                if (_observedVm is not null)
+                    _observedVm.PropertyChanged -= Vm_PropertyChanged;
+            };
         }
 
         private void HookVm()
         {
-            if (DataContext is not DistributionViewModel vm) return;
+            if (_observedVm is not null)
+                _observedVm.PropertyChanged -= Vm_PropertyChanged;
 
-            vm.PropertyChanged -= Vm_PropertyChanged;
-            vm.PropertyChanged += Vm_PropertyChanged;
+            _observedVm = DataContext as DistributionViewModel;
 
-            if (vm.IsReleaseSessionOpen) HookGlobalScan();
+            if (_observedVm is null)
+            {
+                UnhookGlobalScan();
+                return;
+            }
+
+            _observedVm.PropertyChanged += Vm_PropertyChanged;
+
+            if (_observedVm.IsReleaseSessionOpen) HookGlobalScan();
             else UnhookGlobalScan();
+
+            RefreshPdfPreview(_observedVm);
         }
 
         private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -51,10 +67,46 @@ namespace WpfApp3.Views.Distribution
                 else UnhookGlobalScan();
             }
 
-            // optional: if confirm modal opens/closes, reset buffer so next scan is clean
             if (e.PropertyName == nameof(DistributionViewModel.IsConfirmReleaseOpen))
             {
                 _scanBuffer.Clear();
+            }
+
+            if (e.PropertyName == nameof(DistributionViewModel.IsReportPreviewOpen) ||
+                e.PropertyName == nameof(DistributionViewModel.ReportPreviewPath))
+            {
+                Dispatcher.Invoke(() => RefreshPdfPreview(vm));
+            }
+        }
+
+        private void RefreshPdfPreview(DistributionViewModel vm)
+        {
+            if (PdfPreviewBrowser == null)
+                return;
+
+            try
+            {
+                if (vm.IsReportPreviewOpen &&
+                    !string.IsNullOrWhiteSpace(vm.ReportPreviewPath) &&
+                    System.IO.File.Exists(vm.ReportPreviewPath))
+                {
+                    PdfPreviewBrowser.Navigate(new System.Uri(vm.ReportPreviewPath));
+                }
+                else
+                {
+                    PdfPreviewBrowser.Navigate("about:blank");
+                }
+            }
+            catch
+            {
+                try
+                {
+                    PdfPreviewBrowser.Navigate("about:blank");
+                }
+                catch
+                {
+                    // ignore browser reset failures
+                }
             }
         }
 
@@ -68,7 +120,6 @@ namespace WpfApp3.Views.Distribution
             _hooked = true;
             _scanBuffer.Clear();
 
-            // handledEventsToo = true so we still receive input even if something else handles it
             _hostWindow.AddHandler(UIElement.PreviewTextInputEvent, _textHandler, true);
             _hostWindow.AddHandler(UIElement.PreviewKeyDownEvent, _keyHandler, true);
         }
@@ -93,7 +144,6 @@ namespace WpfApp3.Views.Distribution
             if (DataContext is not DistributionViewModel vm) return;
             if (!vm.IsReleaseSessionOpen) return;
 
-            // ✅ While confirm modal is open, swallow scanner characters so it won't "type" into buttons
             if (vm.IsConfirmReleaseOpen)
             {
                 e.Handled = true;
@@ -101,11 +151,7 @@ namespace WpfApp3.Views.Distribution
             }
 
             _scanBuffer.Append(e.Text);
-
-            // ✅ show live scanned characters in textbox
             vm.ScanInput = _scanBuffer.ToString();
-
-            // prevent scan characters from going into other focused controls
             e.Handled = true;
         }
 
@@ -114,7 +160,6 @@ namespace WpfApp3.Views.Distribution
             if (DataContext is not DistributionViewModel vm) return;
             if (!vm.IsReleaseSessionOpen) return;
 
-            // ✅ While confirm modal open: block scanner keys EXCEPT Enter/Esc (so user can confirm/cancel)
             if (vm.IsConfirmReleaseOpen)
             {
                 if (e.Key != Key.Enter && e.Key != Key.Return && e.Key != Key.Escape)
@@ -123,13 +168,11 @@ namespace WpfApp3.Views.Distribution
                 return;
             }
 
-            // Many scanners terminate with Enter (some with Tab). Support both safely:
             if (e.Key == Key.Enter || e.Key == Key.Return || e.Key == Key.Tab)
             {
                 var raw = _scanBuffer.ToString().Trim();
                 _scanBuffer.Clear();
 
-                // show final scan value
                 vm.ScanInput = raw;
 
                 if (!string.IsNullOrWhiteSpace(raw))

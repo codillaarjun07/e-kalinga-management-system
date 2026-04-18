@@ -781,15 +781,14 @@
             <Button Style="{StaticResource BackdropButton}"
                     Command="{Binding CloseAddBeneficiariesCommand}"/>
 
-            <Border Width="860"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrushLighter}"
-                    BorderThickness="1"
-                    CornerRadius="24"
-                    Padding="22"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Effect="{StaticResource CardShadow}">
+            <Border Margin="0"
+         Background="White"
+         BorderBrush="{x:Null}"
+         BorderThickness="0"
+         CornerRadius="0"
+         Padding="20"
+         HorizontalAlignment="Stretch"
+         VerticalAlignment="Stretch">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
