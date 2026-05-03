@@ -29,6 +29,12 @@ namespace WpfApp3.ViewModels.Validators
         Rejected
     }
 
+    public enum ValidatorsProfileTab
+    {
+        ProfileDetails,
+        CedulaPayments
+    }
+
     public partial class ValidatorsViewModel : ObservableObject
     {
         private readonly BeneficiariesRepository _repo = new();
@@ -63,8 +69,13 @@ namespace WpfApp3.ViewModels.Validators
         public ObservableCollection<ReleaseHistoryItem> ReleaseHistory { get; } = new();
         public bool HasReleaseHistory => ReleaseHistory.Count > 0;
 
+        public ObservableCollection<CedulaPaymentItem> CedulaPayments { get; } = new();
+        public bool HasCedulaPayments => CedulaPayments.Count > 0;
+
         [ObservableProperty] private ValidatorsMainTab activeMainTab = ValidatorsMainTab.NotYetValidated;
         [ObservableProperty] private ValidatorsStatusTab activeStatusTab = ValidatorsStatusTab.Endorsed;
+        [ObservableProperty] private ValidatorsProfileTab activeProfileTab = ValidatorsProfileTab.ProfileDetails;
+        [ObservableProperty] private DateTime? selectedBirthDate;
 
         [ObservableProperty] private string searchNotYetText = "";
         [ObservableProperty] private string searchValidatedText = "";
@@ -100,6 +111,7 @@ namespace WpfApp3.ViewModels.Validators
             if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
                 _repo.EnsureTable();
+                _repo.EnsureCedulaPaymentsTable();
                 LoadClassificationOptions();
                 _notYetBase = new List<ValidatorRecord>();
                 ApplyAllFilters();
@@ -298,6 +310,65 @@ namespace WpfApp3.ViewModels.Validators
                 ?? ValidatedItems.FirstOrDefault(x => string.Equals(x.BeneficiaryId, beneficiaryId, StringComparison.OrdinalIgnoreCase));
         }
 
+
+        partial void OnSelectedPersonChanged(ValidatorRecord? value)
+        {
+            SyncSelectedBirthDate();
+            LoadCedulaPaymentsForSelected();
+        }
+
+        partial void OnSelectedBirthDateChanged(DateTime? value)
+        {
+            if (SelectedPerson is null)
+                return;
+
+            SelectedPerson.DateOfBirth = value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "";
+        }
+
+        private void SyncSelectedBirthDate()
+        {
+            SelectedBirthDate = ParseDateOrNull(SelectedPerson?.DateOfBirth);
+        }
+
+        private static DateTime? ParseDateOrNull(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+
+            if (DateTime.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var dt))
+                return dt.Date;
+
+            if (DateTime.TryParse(raw, out dt))
+                return dt.Date;
+
+            return null;
+        }
+
+        private void LoadCedulaPaymentsForSelected()
+        {
+            CedulaPayments.Clear();
+            OnPropertyChanged(nameof(HasCedulaPayments));
+
+            var person = SelectedPerson;
+            if (person is null || string.IsNullOrWhiteSpace(person.BeneficiaryId))
+                return;
+
+            var internalId = _repo.GetInternalIdByBeneficiaryId(person.BeneficiaryId);
+            if (internalId is null)
+                return;
+
+            foreach (var row in _repo.GetCedulaPaymentsByBeneficiaryId(internalId.Value))
+            {
+                CedulaPayments.Add(new CedulaPaymentItem
+                {
+                    PaymentDate = row.PaymentDate,
+                    Amount = row.Amount
+                });
+            }
+
+            OnPropertyChanged(nameof(HasCedulaPayments));
+        }
+
         [RelayCommand]
         private async Task RefreshAsync()
         {
@@ -312,6 +383,7 @@ namespace WpfApp3.ViewModels.Validators
             IsValidateModalOpen = false;
             IsProfileModalOpen = false;
             IsSaveConfirmOpen = false;
+            ActiveProfileTab = ValidatorsProfileTab.ProfileDetails;
         }
 
         //private void SeedExternalPeople()
@@ -417,6 +489,14 @@ namespace WpfApp3.ViewModels.Validators
                 ValidatorsStatusTab.Rejected => "Rejected",
                 _ => "Endorsed"
             };
+        }
+
+        [RelayCommand]
+        private void SetProfileTab(ValidatorsProfileTab tab)
+        {
+            ActiveProfileTab = tab;
+            if (tab == ValidatorsProfileTab.CedulaPayments)
+                LoadCedulaPaymentsForSelected();
         }
 
         [RelayCommand]
@@ -537,6 +617,8 @@ namespace WpfApp3.ViewModels.Validators
 
             NotYetItems.Insert(0, fresh);
             SelectedPerson = fresh;
+            ActiveProfileTab = ValidatorsProfileTab.ProfileDetails;
+            SyncSelectedBirthDate();
             IsAddingProfile = true;
             OnPropertyChanged(nameof(NotYetFoundText));
         }
@@ -547,6 +629,9 @@ namespace WpfApp3.ViewModels.Validators
             if (person is null) return;
             SelectedPerson = person;
 
+            ActiveProfileTab = ValidatorsProfileTab.ProfileDetails;
+            SyncSelectedBirthDate();
+            LoadCedulaPaymentsForSelected();
             LoadReleaseHistoryForSelected();
 
             IsProfileModalOpen = true;
@@ -557,8 +642,11 @@ namespace WpfApp3.ViewModels.Validators
         private void CloseProfileModal()
         {
             IsProfileModalOpen = false;
+            ActiveProfileTab = ValidatorsProfileTab.ProfileDetails;
             ReleaseHistory.Clear();
+            CedulaPayments.Clear();
             OnPropertyChanged(nameof(HasReleaseHistory));
+            OnPropertyChanged(nameof(HasCedulaPayments));
         }
 
         [RelayCommand]
@@ -591,6 +679,7 @@ namespace WpfApp3.ViewModels.Validators
             person.Status = statusToSave;
             IsSaveConfirmOpen = false;
             IsAddingProfile = false;
+            ActiveProfileTab = ValidatorsProfileTab.ProfileDetails;
 
             await RefreshDataAsync(person.BeneficiaryId);
         }
@@ -641,6 +730,7 @@ namespace WpfApp3.ViewModels.Validators
 
             IsValidateModalOpen = false;
             IsAddingProfile = false;
+            ActiveProfileTab = ValidatorsProfileTab.ProfileDetails;
 
             await RefreshDataAsync(person.BeneficiaryId);
         }
@@ -718,6 +808,18 @@ namespace WpfApp3.ViewModels.Validators
             public List<ValidatorRecord> Endorsed { get; set; } = new();
             public List<ValidatorRecord> Pending { get; set; } = new();
             public List<ValidatorRecord> Rejected { get; set; } = new();
+        }
+
+        public sealed class CedulaPaymentItem
+        {
+            public DateTime PaymentDate { get; set; }
+            public decimal Amount { get; set; }
+
+            public string PaymentDateText =>
+                PaymentDate.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture);
+
+            public string AmountText =>
+                $"₱ {Amount:N2}";
         }
 
         public sealed class ReleaseHistoryItem

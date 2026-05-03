@@ -17,7 +17,7 @@
         <!-- ========================= -->
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#F6F8FC"/>
         <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#1F2A44"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#4F46E5"/>
         <SolidColorBrush x:Key="AccentHoverBrush" Color="#4338CA"/>
         <SolidColorBrush x:Key="AccentSoftBrush" Color="#EEF2FF"/>
         <SolidColorBrush x:Key="BorderBrushSoft" Color="#E7ECF5"/>
@@ -519,10 +519,61 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="Profile Information"
-                                   Style="{StaticResource SectionTitleText}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Profile Information"
+                                       Style="{StaticResource SectionTitleText}"
+                                       VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="Profile Details"
+                                        Margin="0,0,10,0"
+                                        Command="{Binding SetProfileTabCommand}"
+                                        CommandParameter="{x:Static vm:ValidatorsProfileTab.ProfileDetails}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource TopTabPill}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.ProfileDetails}">
+                                                    <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Content="Cedula Payments"
+                                        Command="{Binding SetProfileTabCommand}"
+                                        CommandParameter="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource TopTabPill}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                                    <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
 
                         <Grid Grid.Row="1" Margin="0,16,0,0">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="18"/>
@@ -586,76 +637,179 @@
                                 </Button>
                             </StackPanel>
 
-                            <!-- Left fields -->
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Beneficiary ID" Style="{StaticResource FieldLabelText}"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.BeneficiaryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
+                            <Grid Grid.Column="2" Grid.ColumnSpan="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                <TextBlock Text="First Name" Style="{StaticResource FieldLabelText}" Margin="0,12,0,0"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.FirstName, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
+                                <StackPanel Grid.Row="0" Grid.Column="0">
+                                    <TextBlock Text="Beneficiary ID" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.BeneficiaryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
 
-                                <TextBlock Text="Gender" Style="{StaticResource FieldLabelText}" Margin="0,12,0,0"/>
-                                <ComboBox Style="{StaticResource ModernComboBox}"
-                                          ItemsSource="{Binding GenderOptions}"
-                                          SelectedItem="{Binding SelectedPerson.Gender, UpdateSourceTrigger=PropertyChanged}"/>
+                                <StackPanel Grid.Row="0" Grid.Column="2">
+                                    <TextBlock Text="Civil Registry ID" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.CivilRegistryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
 
-                                <TextBlock Text="Barangay" Style="{StaticResource FieldLabelText}" Margin="0,12,0,0"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.Barangay, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
-                            </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,0,0">
+                                    <TextBlock Text="First Name" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.FirstName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
 
-                            <!-- Right fields -->
-                            <StackPanel Grid.Column="4">
-                                <TextBlock Text="Civil Registry ID" Style="{StaticResource FieldLabelText}"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.CivilRegistryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
+                                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,12,0,0">
+                                    <TextBlock Text="Middle Name" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.MiddleName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
 
-                                <TextBlock Text="Middle Name" Style="{StaticResource FieldLabelText}" Margin="0,12,0,0"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.MiddleName, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,12,0,0">
+                                    <TextBlock Text="Birthdate" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}" Padding="10,4">
+                                        <DatePicker SelectedDate="{Binding SelectedBirthDate, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"/>
+                                    </Border>
+                                </StackPanel>
 
-                                <TextBlock Text="Last Name" Style="{StaticResource FieldLabelText}" Margin="0,12,0,0"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.LastName, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
+                                <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,12,0,0">
+                                    <TextBlock Text="Last Name" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.LastName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
 
-                                <TextBlock Text="Classification" Style="{StaticResource FieldLabelText}" Margin="0,12,0,0"/>
-                                <ComboBox Style="{StaticResource ModernComboBox}"
-                                          ItemsSource="{Binding ClassificationOptions}"
-                                          SelectedItem="{Binding SelectedPerson.Classification, UpdateSourceTrigger=PropertyChanged}"/>
-                            </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,12,0,0">
+                                    <TextBlock Text="Gender" Style="{StaticResource FieldLabelText}"/>
+                                    <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding SelectedPerson.Gender, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
 
-                            <!-- Address -->
-                            <StackPanel Grid.Column="2" Grid.ColumnSpan="3" Margin="0,310,0,0">
-                                <TextBlock Text="Present Address" Style="{StaticResource FieldLabelText}"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding SelectedPerson.PresentAddress, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource PlainInputTextBox}"/>
-                                </Border>
-                            </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,12,0,0">
+                                    <TextBlock Text="Classification" Style="{StaticResource FieldLabelText}"/>
+                                    <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding ClassificationOptions}" SelectedItem="{Binding SelectedPerson.Classification, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,12,0,0">
+                                    <TextBlock Text="Barangay" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.Barangay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="4" Grid.Column="2" Margin="0,12,0,0">
+                                    <TextBlock Text="Present Address" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.PresentAddress, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="0,16,0,0">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Border Background="#F8FAFC" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16" Padding="12">
+                                <Grid>
+                                    <TextBlock Text="No cedula payments found."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasCedulaPayments}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <DataGrid ItemsSource="{Binding CedulaPayments}"
+                                              AutoGenerateColumns="False"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="None"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              RowHeaderWidth="0"
+                                              SelectionUnit="FullRow"
+                                              SelectionMode="Single"
+                                              IsReadOnly="True">
+                                        <DataGrid.Style>
+                                            <Style TargetType="DataGrid">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasCedulaPayments}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGrid.Style>
+                                        <DataGrid.Resources>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Background" Value="#F8FAFC"/>
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+                                                <Setter Property="Padding" Value="10,0,10,10"/>
+                                            </Style>
+                                            <Style TargetType="DataGridRow">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Setter Property="Height" Value="46"/>
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                                <Setter Property="Focusable" Value="False"/>
+                                            </Style>
+                                            <Style TargetType="DataGridCell" BasedOn="{StaticResource CenteredCellStyle}">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                            </Style>
+                                        </DataGrid.Resources>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Payment Date" Binding="{Binding PaymentDateText}" Width="*"/>
+                                            <DataGridTextColumn Header="Amount" Binding="{Binding AmountText}" Width="160"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </Border>
                         </Grid>
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-                            <Button Content="Save Profile"
-                                    Style="{StaticResource OutlineButton}"
-                                    Command="{Binding OpenSaveConfirmCommand}"/>
-                            <Button Content="Validate"
-                                    Margin="12,0,0,0"
-                                    Style="{StaticResource PrimaryButton}"
-                                    Command="{Binding OpenValidateModalCommand}"/>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Button Content="Save Profile" Style="{StaticResource OutlineButton}" Command="{Binding OpenSaveConfirmCommand}"/>
+                            <Button Content="Validate" Margin="12,0,0,0" Style="{StaticResource PrimaryButton}" Command="{Binding OpenValidateModalCommand}"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -995,16 +1149,50 @@
                     <!-- Header -->
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Text="Profile Information"
                                    FontSize="18"
                                    FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
 
-                        <Button Grid.Column="1"
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,12,0">
+                            <Button Content="Profile Details"
+                                    Margin="0,0,10,0"
+                                    Command="{Binding SetProfileTabCommand}"
+                                    CommandParameter="{x:Static vm:ValidatorsProfileTab.ProfileDetails}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource TopTabPill}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.ProfileDetails}">
+                                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Content="Cedula Payments"
+                                    Command="{Binding SetProfileTabCommand}"
+                                    CommandParameter="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource TopTabPill}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
                                 Style="{StaticResource OutlineButton}"
                                 Width="34"
                                 Height="34"
@@ -1016,28 +1204,33 @@
                         </Button>
                     </Grid>
 
-                    <!-- Body -->
                     <ScrollViewer Grid.Row="1"
                                   Margin="0,18,0,0"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
-
                         <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="180"/>
                                 <ColumnDefinition Width="18"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Avatar -->
                             <StackPanel Width="160" VerticalAlignment="Top">
                                 <Grid Width="160" Height="160">
                                     <Ellipse Fill="#D9ECFF"/>
-
                                     <Ellipse>
                                         <Ellipse.Fill>
-                                            <ImageBrush ImageSource="{Binding SelectedPerson.ProfileImagePreview}"
-                                                        Stretch="UniformToFill"/>
+                                            <ImageBrush ImageSource="{Binding SelectedPerson.ProfileImagePreview}" Stretch="UniformToFill"/>
                                         </Ellipse.Fill>
                                         <Ellipse.Style>
                                             <Style TargetType="Ellipse">
@@ -1050,7 +1243,6 @@
                                             </Style>
                                         </Ellipse.Style>
                                     </Ellipse>
-
                                     <TextBlock Text="👤" FontSize="54" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -1065,14 +1257,8 @@
                                     </TextBlock>
                                 </Grid>
 
-                                <Button Content="Upload Photo"
-                                        Margin="0,10,0,0"
-                                        Style="{StaticResource SmallOutlineButton}"
-                                        Command="{Binding UploadProfileImageCommand}"/>
-
-                                <Button Content="Remove"
-                                        Margin="0,8,0,0"
-                                        Command="{Binding RemoveProfileImageCommand}">
+                                <Button Content="Upload Photo" Margin="0,10,0,0" Style="{StaticResource SmallOutlineButton}" Command="{Binding UploadProfileImageCommand}"/>
+                                <Button Content="Remove" Margin="0,8,0,0" Command="{Binding RemoveProfileImageCommand}">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource SmallOutlineButton}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -1086,14 +1272,12 @@
                                 </Button>
                             </StackPanel>
 
-                            <!-- Form -->
                             <Grid Grid.Column="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="18"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -1103,99 +1287,68 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Row 0 -->
                                 <StackPanel Grid.Row="0" Grid.Column="0">
                                     <TextBlock Text="Beneficiary ID" Style="{StaticResource FieldLabelText}"/>
                                     <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.BeneficiaryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                        <TextBox Text="{Binding SelectedPerson.BeneficiaryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                 </StackPanel>
-
                                 <StackPanel Grid.Row="0" Grid.Column="2">
                                     <TextBlock Text="Civil Registry ID" Style="{StaticResource FieldLabelText}"/>
                                     <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.CivilRegistryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                        <TextBox Text="{Binding SelectedPerson.CivilRegistryId, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                 </StackPanel>
-
-                                <!-- Row 1 -->
                                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,14,0,0">
                                     <TextBlock Text="First Name" Style="{StaticResource FieldLabelText}"/>
                                     <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.FirstName, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                        <TextBox Text="{Binding SelectedPerson.FirstName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                 </StackPanel>
-
                                 <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,14,0,0">
                                     <TextBlock Text="Middle Name" Style="{StaticResource FieldLabelText}"/>
                                     <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.MiddleName, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                        <TextBox Text="{Binding SelectedPerson.MiddleName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                 </StackPanel>
-
-                                <!-- Row 2 -->
                                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,14,0,0">
-                                    <TextBlock Text="Gender" Style="{StaticResource FieldLabelText}"/>
-                                    <ComboBox Style="{StaticResource ModernComboBox}"
-                                              ItemsSource="{Binding GenderOptions}"
-                                              SelectedItem="{Binding SelectedPerson.Gender, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <TextBlock Text="Birthdate" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}" Padding="10,4">
+                                        <DatePicker SelectedDate="{Binding SelectedBirthDate, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" Background="Transparent"/>
+                                    </Border>
                                 </StackPanel>
-
                                 <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,14,0,0">
                                     <TextBlock Text="Last Name" Style="{StaticResource FieldLabelText}"/>
                                     <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.LastName, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                        <TextBox Text="{Binding SelectedPerson.LastName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                 </StackPanel>
-
-                                <!-- Row 3 -->
                                 <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,14,0,0">
-                                    <TextBlock Text="Barangay" Style="{StaticResource FieldLabelText}"/>
-                                    <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.Barangay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
-                                    </Border>
+                                    <TextBlock Text="Gender" Style="{StaticResource FieldLabelText}"/>
+                                    <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding SelectedPerson.Gender, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
-
                                 <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,14,0,0">
                                     <TextBlock Text="Classification" Style="{StaticResource FieldLabelText}"/>
-                                    <ComboBox Style="{StaticResource ModernComboBox}"
-                                              ItemsSource="{Binding ClassificationOptions}"
-                                              SelectedItem="{Binding SelectedPerson.Classification, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding ClassificationOptions}" SelectedItem="{Binding SelectedPerson.Classification, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
-
-                                <!-- Row 4 -->
-                                <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,14,0,0">
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,14,0,0">
+                                    <TextBlock Text="Barangay" Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding SelectedPerson.Barangay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="2" Margin="0,14,0,0">
                                     <TextBlock Text="Present Address" Style="{StaticResource FieldLabelText}"/>
                                     <Border Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding SelectedPerson.PresentAddress, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                        <TextBox Text="{Binding SelectedPerson.PresentAddress, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                 </StackPanel>
 
-                                <!-- Release History -->
                                 <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,22,0,0">
-                                    <TextBlock Text="Release History"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"/>
-
-                                    <Border Margin="0,10,0,0"
-                                            Background="#F8FAFC"
-                                            BorderBrush="{StaticResource BorderBrushSoft}"
-                                            BorderThickness="1"
-                                            CornerRadius="14"
-                                            Padding="14">
-
+                                    <TextBlock Text="Release History" Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold"/>
+                                    <Border Margin="0,10,0,0" Background="#F8FAFC" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="14" Padding="14">
                                         <Grid>
-                                            <TextBlock Text="No releases yet."
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                                       FontSize="12">
+                                            <TextBlock Text="No releases yet." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Visibility" Value="Visible"/>
@@ -1207,7 +1360,6 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-
                                             <ItemsControl ItemsSource="{Binding ReleaseHistory}">
                                                 <ItemsControl.Style>
                                                     <Style TargetType="ItemsControl">
@@ -1219,7 +1371,6 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ItemsControl.Style>
-
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Grid Margin="0,0,0,14">
@@ -1227,17 +1378,9 @@
                                                                 <ColumnDefinition Width="26"/>
                                                                 <ColumnDefinition Width="*"/>
                                                             </Grid.ColumnDefinitions>
-
                                                             <Grid Grid.Column="0">
-                                                                <Ellipse Width="10" Height="10"
-                                                                         Fill="{StaticResource AccentBrush}"
-                                                                         VerticalAlignment="Top"
-                                                                         Margin="8,2,8,0"/>
-
-                                                                <Border Width="2"
-                                                                        Background="#E5ECFA"
-                                                                        VerticalAlignment="Stretch"
-                                                                        Margin="12,14,12,0">
+                                                                <Ellipse Width="10" Height="10" Fill="{StaticResource AccentBrush}" VerticalAlignment="Top" Margin="8,2,8,0"/>
+                                                                <Border Width="2" Background="#E5ECFA" VerticalAlignment="Stretch" Margin="12,14,12,0">
                                                                     <Border.Style>
                                                                         <Style TargetType="Border">
                                                                             <Style.Triggers>
@@ -1249,17 +1392,9 @@
                                                                     </Border.Style>
                                                                 </Border>
                                                             </Grid>
-
                                                             <StackPanel Grid.Column="1">
-                                                                <TextBlock Text="{Binding ReleasedAtText}"
-                                                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                                                           FontWeight="SemiBold"/>
-
-                                                                <TextBlock Text="{Binding Description}"
-                                                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                                                           FontSize="12"
-                                                                           Margin="0,4,0,0"
-                                                                           TextWrapping="Wrap"/>
+                                                                <TextBlock Text="{Binding ReleasedAtText}" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                                                <TextBlock Text="{Binding Description}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
                                                             </StackPanel>
                                                         </Grid>
                                                     </DataTemplate>
@@ -1272,14 +1407,83 @@
                         </Grid>
                     </ScrollViewer>
 
-                    <!-- Footer -->
-                    <StackPanel Grid.Row="2"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                Margin="0,18,0,0">
-                        <Button Content="Save Profile"
-                                Style="{StaticResource OutlineButton}"
-                                Command="{Binding OpenSaveConfirmCommand}"/>
+                    <Grid Grid.Row="1" Margin="0,18,0,0">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Border Background="#F8FAFC" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="16" Padding="12">
+                            <Grid>
+                                <TextBlock Text="No cedula payments found." Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasCedulaPayments}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <DataGrid ItemsSource="{Binding CedulaPayments}" AutoGenerateColumns="False" HeadersVisibility="Column" GridLinesVisibility="None" Background="Transparent" BorderThickness="0" RowHeaderWidth="0" SelectionUnit="FullRow" SelectionMode="Single" IsReadOnly="True">
+                                    <DataGrid.Style>
+                                        <Style TargetType="DataGrid">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasCedulaPayments}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGrid.Style>
+                                    <DataGrid.Resources>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="#F8FAFC"/>
+                                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+                                            <Setter Property="Padding" Value="10,0,10,10"/>
+                                        </Style>
+                                        <Style TargetType="DataGridRow">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Height" Value="46"/>
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                            <Setter Property="Focusable" Value="False"/>
+                                        </Style>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource CenteredCellStyle}">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Payment Date" Binding="{Binding PaymentDateText}" Width="*"/>
+                                        <DataGridTextColumn Header="Amount" Binding="{Binding AmountText}" Width="160"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveProfileTab}" Value="{x:Static vm:ValidatorsProfileTab.CedulaPayments}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <Button Content="Save Profile" Style="{StaticResource OutlineButton}" Command="{Binding OpenSaveConfirmCommand}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -1378,7 +1582,7 @@
                     <ProgressBar IsIndeterminate="True"
                                  Height="8"
                                  Margin="0,16,0,0"
-                                 Foreground="#1F2A44"
+                                 Foreground="#4F46E5"
                                  Background="#E9EEF7"/>
 
                     <TextBlock Text="Please wait while data is being fetched."

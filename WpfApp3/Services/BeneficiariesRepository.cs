@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using MySqlConnector;
 using WpfApp3.Models;
@@ -15,6 +16,14 @@ namespace WpfApp3.Services
             public string ProjectName { get; set; } = "";
             public string ShareText { get; set; } = "";
             public string ReleasedText { get; set; } = "";
+        }
+
+        public sealed class CedulaPaymentRow
+        {
+            public int Id { get; set; }
+            public int BeneficiaryId { get; set; }
+            public DateTime PaymentDate { get; set; }
+            public decimal Amount { get; set; }
         }
 
         public void EnsureTable()
@@ -65,6 +74,33 @@ CREATE TABLE IF NOT EXISTS beneficiaries (
                 alter.CommandText = @"ALTER TABLE beneficiaries ADD COLUMN profile_image LONGBLOB NULL;";
                 alter.ExecuteNonQuery();
             }
+
+            EnsureCedulaPaymentsTable(conn);
+        }
+
+        public void EnsureCedulaPaymentsTable()
+        {
+            using var conn = MySqlDb.OpenConnection();
+            EnsureCedulaPaymentsTable(conn);
+        }
+
+        private static void EnsureCedulaPaymentsTable(MySqlConnection conn)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+CREATE TABLE IF NOT EXISTS cedula_payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  beneficiary_id INT NOT NULL,
+  payment_date DATE NOT NULL,
+  amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_cedula_beneficiary_id (beneficiary_id),
+  CONSTRAINT fk_cedula_payments_beneficiary
+    FOREIGN KEY (beneficiary_id) REFERENCES beneficiaries(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            cmd.ExecuteNonQuery();
         }
 
         private static bool ColumnExists(MySqlConnection conn, string table, string column)
@@ -94,6 +130,7 @@ SELECT
   source_person_id,
   beneficiary_id,
   civil_registry_id,
+  date_of_birth,
   first_name,
   middle_name,
   last_name,
@@ -313,6 +350,7 @@ ON DUPLICATE KEY UPDATE
             public int Id { get; set; }
             public string BeneficiaryId { get; set; } = "";
             public string CivilRegistryId { get; set; } = "";
+            public string DateOfBirth { get; set; } = "";
             public string FirstName { get; set; } = "";
             public string MiddleName { get; set; } = "";
             public string LastName { get; set; } = "";
@@ -358,6 +396,7 @@ LIMIT 1;";
                 Id = Convert.ToInt32(r["id"]),
                 BeneficiaryId = Convert.ToString(r["beneficiary_id"]) ?? "",
                 CivilRegistryId = Convert.ToString(r["civil_registry_id"]) ?? "",
+                DateOfBirth = Convert.ToString(r["date_of_birth"]) ?? "",
                 FirstName = Convert.ToString(r["first_name"]) ?? "",
                 MiddleName = Convert.ToString(r["middle_name"]) ?? "",
                 LastName = Convert.ToString(r["last_name"]) ?? "",
@@ -423,5 +462,48 @@ ORDER BY ab.id DESC;";
 
             return list;
         }
+
+        public List<CedulaPaymentRow> GetCedulaPaymentsByBeneficiaryId(int beneficiaryId)
+        {
+            using var conn = MySqlDb.OpenConnection();
+            EnsureCedulaPaymentsTable(conn);
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+SELECT
+    id,
+    beneficiary_id,
+    payment_date,
+    amount
+FROM cedula_payments
+WHERE beneficiary_id = @beneficiaryId
+ORDER BY payment_date DESC, id DESC;";
+
+            cmd.Parameters.AddWithValue("@beneficiaryId", beneficiaryId);
+
+            var list = new List<CedulaPaymentRow>();
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var paymentDate = r["payment_date"] == DBNull.Value
+                    ? DateTime.MinValue
+                    : Convert.ToDateTime(r["payment_date"], CultureInfo.InvariantCulture);
+
+                var amount = r["amount"] == DBNull.Value
+                    ? 0m
+                    : Convert.ToDecimal(r["amount"], CultureInfo.InvariantCulture);
+
+                list.Add(new CedulaPaymentRow
+                {
+                    Id = Convert.ToInt32(r["id"]),
+                    BeneficiaryId = Convert.ToInt32(r["beneficiary_id"]),
+                    PaymentDate = paymentDate,
+                    Amount = amount
+                });
+            }
+
+            return list;
+        }
+
     }
 }

@@ -19,7 +19,7 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
-              Margin="8,-60,80,6"
+              Margin="8,-60,140,6"
               Panel.ZIndex="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
