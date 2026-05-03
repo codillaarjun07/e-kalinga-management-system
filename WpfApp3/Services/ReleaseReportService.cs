@@ -56,16 +56,9 @@ namespace WpfApp3.Services
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(10).FontColor(TextPrimary));
 
-                    page.Header().Column(col =>
-                    {
-                        col.Spacing(4);
-                        col.Item().Text("Release Session Report").FontSize(20).Bold();
-                        col.Item().Text(data.ProjectName).FontSize(14).SemiBold();
-                        col.Item().Text($"Generated: {data.GeneratedAt:MMMM dd, yyyy hh:mm tt}")
-                            .FontColor(TextSecondary);
-                        col.Item().Text($"Classification Filter: {data.ClassificationFilter}")
-                            .FontColor(TextSecondary);
-                    });
+                    var logoPath = ResolveLogoPath(data.LogoPath);
+
+                    page.Header().Element(c => ComposeHeader(c, data, logoPath));
 
                     page.Content().PaddingTop(10).Column(col =>
                     {
@@ -130,6 +123,83 @@ namespace WpfApp3.Services
                 UseShellExecute = true,
                 Verb = "print"
             });
+        }
+
+
+        private static void ComposeHeader(IContainer container, ReleaseReportData data, string? logoPath)
+        {
+            container.Row(row =>
+            {
+                row.RelativeItem().Column(col =>
+                {
+                    col.Spacing(4);
+                    col.Item().Text("Release Session Report").FontSize(20).Bold();
+                    col.Item().Text(data.ProjectName).FontSize(14).SemiBold();
+                    col.Item().Text($"Generated: {data.GeneratedAt:MMMM dd, yyyy hh:mm tt}")
+                        .FontColor(TextSecondary);
+                    col.Item().Text($"Classification Filter: {data.ClassificationFilter}")
+                        .FontColor(TextSecondary);
+                });
+
+                // sulop_lg.png is placed on the upper-right side of the report header,
+                // aligned with the report details on the left.
+                row.ConstantItem(120)
+                    .AlignRight()
+                    .AlignTop()
+                    .Element(c => ComposeLogo(c, logoPath));
+            });
+        }
+
+        private static void ComposeLogo(IContainer container, string? logoPath)
+        {
+            if (!string.IsNullOrWhiteSpace(logoPath) && File.Exists(logoPath))
+            {
+                container
+                    .AlignRight()
+                    .Width(78)
+                    .Height(78)
+                    .Image(logoPath)
+                    .FitArea();
+
+                return;
+            }
+
+            // Keep header spacing stable even if sulop_lg.png is not available.
+            container.Width(78).Height(78).Text("");
+        }
+
+        private static string? ResolveLogoPath(string? preferredPath = null)
+        {
+            const string fileName = "sulop_lg.png";
+            var candidates = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(preferredPath))
+            {
+                candidates.Add(Path.IsPathRooted(preferredPath)
+                    ? preferredPath
+                    : Path.Combine(AppContext.BaseDirectory, preferredPath));
+
+                candidates.Add(Path.IsPathRooted(preferredPath)
+                    ? preferredPath
+                    : Path.Combine(Directory.GetCurrentDirectory(), preferredPath));
+            }
+
+            candidates.Add(Path.Combine(AppContext.BaseDirectory, fileName));
+            candidates.Add(Path.Combine(Directory.GetCurrentDirectory(), fileName));
+
+            // Helps during development if the image is in the project root but has not yet
+            // been copied to bin/Debug/net*-windows.
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            for (var i = 0; i < 8 && dir is not null; i++)
+            {
+                candidates.Add(Path.Combine(dir.FullName, fileName));
+                dir = dir.Parent;
+            }
+
+            return candidates
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(File.Exists);
         }
 
         private static void ComposeSummaryCards(IContainer container, ReleaseReportData data)
@@ -350,6 +420,7 @@ namespace WpfApp3.Services
         public string TotalBudgetText { get; set; } = "-";
         public string ClassificationFilter { get; set; } = "All";
         public DateTime GeneratedAt { get; set; } = DateTime.Now;
+        public string LogoPath { get; set; } = "sulop_lg.png";
         public int TotalBeneficiaries { get; set; }
         public int ReleasedCount { get; set; }
         public int PendingCount { get; set; }

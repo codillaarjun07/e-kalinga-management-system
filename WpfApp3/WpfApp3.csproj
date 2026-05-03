@@ -34,6 +34,9 @@
   <ItemGroup>
     <Resource Include="ekaling.png" />
     <Resource Include="Ekalinga-Icon.png" />
+    <Resource Include="sulop_lg.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Login\ekaling.png" />
     <Resource Include="Views\Login\sulop_bg.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
