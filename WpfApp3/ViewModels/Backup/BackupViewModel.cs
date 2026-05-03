@@ -4,7 +4,10 @@ using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using WpfApp3.Models;
@@ -207,8 +210,8 @@ namespace WpfApp3.ViewModels.Backup
                 return;
 
             var suggestedFileName = row.FileName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase)
-    ? row.FileName.Substring(0, row.FileName.Length - 3)
-    : row.FileName;
+                ? row.FileName.Substring(0, row.FileName.Length - 3)
+                : row.FileName;
 
             var dialog = new SaveFileDialog
             {
@@ -228,8 +231,16 @@ namespace WpfApp3.ViewModels.Backup
 
             try
             {
-                await Task.Run(() => _backupService.DownloadBackup(row.Id, dialog.FileName));
-                StatusMessage = $"Backup downloaded successfully: {row.FileName}";
+                await Task.Run(() =>
+                {
+                    _backupService.DownloadBackup(row.Id, dialog.FileName);
+
+                    // Remove DEFINER clauses so the SQL file can be restored
+                    // on shared hosting / limited MySQL users.
+                    RemoveDefinersFromSqlFile(dialog.FileName);
+                });
+
+                StatusMessage = $"Backup downloaded successfully and DEFINER removed: {row.FileName}";
                 StatusBrush = "#16A34A";
             }
             catch (Exception ex)
@@ -241,6 +252,54 @@ namespace WpfApp3.ViewModels.Backup
             {
                 IsLoading = false;
             }
+        }
+
+        private static void RemoveDefinersFromSqlFile(string sqlFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(sqlFilePath))
+                throw new ArgumentException("SQL file path is empty.", nameof(sqlFilePath));
+
+            if (!File.Exists(sqlFilePath))
+                throw new FileNotFoundException("Downloaded SQL file was not found.", sqlFilePath);
+
+            var sql = File.ReadAllText(sqlFilePath, Encoding.UTF8);
+            var cleanedSql = RemoveMySqlDefiners(sql);
+
+            File.WriteAllText(
+                sqlFilePath,
+                cleanedSql,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+            );
+        }
+
+        private static string RemoveMySqlDefiners(string sql)
+        {
+            if (string.IsNullOrWhiteSpace(sql))
+                return sql;
+
+            // Handles:
+            // DEFINER=`user`@`host`
+            // DEFINER='user'@'host'
+            // DEFINER="user"@"host"
+            // DEFINER=user@host
+            var cleaned = Regex.Replace(
+                sql,
+                @"DEFINER\s*=\s*(?:`[^`]+`|'[^']+'|""[^""]+""|[^\s@]+)\s*@\s*(?:`[^`]+`|'[^']+'|""[^""]+""|[^\s]+)\s*",
+                "",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+            );
+
+            // Handles:
+            // DEFINER=CURRENT_USER
+            // DEFINER = CURRENT_USER
+            cleaned = Regex.Replace(
+                cleaned,
+                @"DEFINER\s*=\s*CURRENT_USER\s*",
+                "",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+            );
+
+            return cleaned;
         }
 
         [RelayCommand]
