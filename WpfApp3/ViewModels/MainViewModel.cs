@@ -4,11 +4,14 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using WpfApp3.Models;
 using WpfApp3.Services;
 using WpfApp3.Views.Allotment;
 using WpfApp3.Views.Backup;
@@ -24,6 +27,10 @@ namespace WpfApp3.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    private readonly AuditLogsService _auditLogsService = new();
+    private readonly DispatcherTimer _notificationTimer = new() { Interval = TimeSpan.FromSeconds(10) };
+    private bool _isRefreshingNotifications;
+
     [ObservableProperty] private UserControl currentView = new DashboardView();
     [ObservableProperty] private string pageTitle = "Dashboard";
     [ObservableProperty] private string currentUserLabel = "User";
@@ -32,7 +39,19 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private ImageSource? appLogo;
 
+    [ObservableProperty] private bool isNotificationsOpen;
+    [ObservableProperty] private int unreadNotificationCount;
+
     public ObservableCollection<NavItem> NavItems { get; }
+    public ObservableCollection<AuditLogRecord> Notifications { get; } = new();
+
+    [ObservableProperty] private string notificationEmptyText = "No notifications yet.";
+
+    public bool HasNotifications => Notifications.Count > 0;
+
+    public string NotificationBadgeText => UnreadNotificationCount > 99
+        ? "99+"
+        : UnreadNotificationCount.ToString();
 
     [ObservableProperty]
     private NavItem? selectedNavItem;
@@ -64,10 +83,121 @@ public partial class MainViewModel : ObservableObject
 
         LoadCurrentUser();
         LoadAppLogo();
+        InitializeNotifications();
     }
 
     public bool IsSuperadmin =>
         string.Equals(SessionService.Role, "Superadmin", StringComparison.OrdinalIgnoreCase);
+
+    private string CurrentAuditActorName =>
+        string.IsNullOrWhiteSpace(SessionService.Username)
+            ? CurrentUserLabel
+            : SessionService.Username.Trim();
+
+    partial void OnUnreadNotificationCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(NotificationBadgeText));
+    }
+
+    private void InitializeNotifications()
+    {
+        _notificationTimer.Tick += async (_, __) => await RefreshNotificationsAsync();
+        _notificationTimer.Start();
+
+        _ = RefreshNotificationsAsync();
+    }
+
+    private async Task RefreshNotificationsAsync()
+    {
+        if (_isRefreshingNotifications)
+            return;
+
+        _isRefreshingNotifications = true;
+
+        try
+        {
+            var actorName = CurrentAuditActorName;
+
+            var data = await Task.Run(() => new
+            {
+                Items = _auditLogsService.GetRecentNotificationsForUser(actorName, 15),
+                UnreadCount = _auditLogsService.GetUnreadNotificationCountForUser(actorName)
+            });
+
+            Notifications.Clear();
+            foreach (var item in data.Items)
+                Notifications.Add(item);
+
+            UnreadNotificationCount = data.UnreadCount;
+            NotificationEmptyText = Notifications.Count == 0
+                ? "No notifications from other users yet."
+                : "";
+            OnPropertyChanged(nameof(HasNotifications));
+        }
+        catch (Exception ex)
+        {
+            Notifications.Clear();
+            UnreadNotificationCount = 0;
+            NotificationEmptyText = $"Could not load notifications: {ex.Message}";
+            OnPropertyChanged(nameof(HasNotifications));
+        }
+        finally
+        {
+            _isRefreshingNotifications = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleNotifications()
+    {
+        if (IsNotificationsOpen)
+        {
+            IsNotificationsOpen = false;
+            return;
+        }
+
+        IsNotificationsOpen = true;
+        await RefreshNotificationsAsync();
+    }
+
+    [RelayCommand]
+    private async Task MarkNotificationsRead()
+    {
+        try
+        {
+            await Task.Run(() => _auditLogsService.MarkNotificationsReadForUser(CurrentAuditActorName));
+
+            foreach (var item in Notifications)
+                item.IsUnread = false;
+
+            UnreadNotificationCount = 0;
+        }
+        catch (Exception ex)
+        {
+            NotificationEmptyText = $"Could not mark notifications as read: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenNotification(AuditLogRecord? notification)
+    {
+        if (notification is null)
+            return;
+
+        IsNotificationsOpen = false;
+
+        try
+        {
+            await Task.Run(() => _auditLogsService.MarkNotificationReadUpToForUser(CurrentAuditActorName, notification.Id));
+            await RefreshNotificationsAsync();
+        }
+        catch (Exception ex)
+        {
+            NotificationEmptyText = $"Could not update notification read state: {ex.Message}";
+        }
+
+        ShowAuditLogs(notification.Id);
+    }
 
     private void LoadCurrentUser()
     {
@@ -249,11 +379,24 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateAuditLogs()
     {
+        ShowAuditLogs();
+    }
+
+    private void ShowAuditLogs(int focusedAuditLogId = 0)
+    {
         if (!IsSuperadmin)
             return;
 
+        var auditLogsNav = NavItems.FirstOrDefault(x =>
+            (x.Title ?? "").IndexOf("Audit Logs", StringComparison.OrdinalIgnoreCase) >= 0);
+
+        if (auditLogsNav is not null && !ReferenceEquals(SelectedNavItem, auditLogsNav))
+            SelectedNavItem = auditLogsNav;
+
         PageTitle = "Audit Logs";
-        CurrentView = new AuditLogsView();
+        CurrentView = focusedAuditLogId > 0
+            ? new AuditLogsView(focusedAuditLogId)
+            : new AuditLogsView();
     }
 
     private void NavigatePlaceholder(string title)
@@ -273,6 +416,7 @@ public partial class MainViewModel : ObservableObject
 
     private void Logout()
     {
+        _notificationTimer.Stop();
         SessionService.Clear();
         LogoutRequested?.Invoke();
     }

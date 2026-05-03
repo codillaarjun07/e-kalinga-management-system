@@ -17,6 +17,7 @@ namespace WpfApp3.ViewModels.AuditLogs
     {
         private readonly AuditLogsService _service = new();
         private readonly List<AuditLogRecord> _all = new();
+        private readonly int _initialFocusedAuditLogId;
 
         [ObservableProperty] private bool isLoading;
         [ObservableProperty] private string selectedTab = "ALL";
@@ -24,6 +25,7 @@ namespace WpfApp3.ViewModels.AuditLogs
         [ObservableProperty] private string statusMessage = "";
         [ObservableProperty] private string statusBrush = "#64748B";
         [ObservableProperty] private int currentPage = 1;
+        [ObservableProperty] private int highlightedAuditLogId;
 
         public int PageSize { get; } = 8;
 
@@ -42,8 +44,15 @@ namespace WpfApp3.ViewModels.AuditLogs
         public bool CanGoPrevious => CurrentPage > 1;
         public bool CanGoNext => CurrentPage < TotalPages;
 
-        public AuditLogsViewModel()
+        public AuditLogsViewModel() : this(0)
         {
+        }
+
+        public AuditLogsViewModel(int focusedAuditLogId)
+        {
+            _initialFocusedAuditLogId = focusedAuditLogId;
+            HighlightedAuditLogId = focusedAuditLogId;
+
             if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
                 _ = LoadAsync();
             else
@@ -65,6 +74,11 @@ namespace WpfApp3.ViewModels.AuditLogs
         partial void OnCurrentPageChanged(int value)
         {
             Apply();
+        }
+
+        partial void OnHighlightedAuditLogIdChanged(int value)
+        {
+            ApplyTargetHighlight();
         }
 
         [RelayCommand]
@@ -122,11 +136,17 @@ namespace WpfApp3.ViewModels.AuditLogs
                 _all.Clear();
                 _all.AddRange(logs);
 
-                CurrentPage = 1;
-                Apply();
-
-                StatusMessage = $"Loaded {_all.Count} audit logs.";
-                StatusBrush = "#16A34A";
+                if (_initialFocusedAuditLogId > 0)
+                {
+                    FocusAuditLog(_initialFocusedAuditLogId);
+                }
+                else
+                {
+                    CurrentPage = 1;
+                    Apply();
+                    StatusMessage = $"Loaded {_all.Count} audit logs.";
+                    StatusBrush = "#16A34A";
+                }
             }
             catch (Exception ex)
             {
@@ -140,6 +160,42 @@ namespace WpfApp3.ViewModels.AuditLogs
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        public void FocusAuditLog(int auditLogId)
+        {
+            if (auditLogId <= 0)
+            {
+                HighlightedAuditLogId = 0;
+                Apply();
+                return;
+            }
+
+            HighlightedAuditLogId = auditLogId;
+
+            if (!string.Equals(SelectedTab, "ALL", StringComparison.OrdinalIgnoreCase))
+                SelectedTab = "ALL";
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+                SearchText = "";
+
+            var filtered = Filtered();
+            var index = filtered.FindIndex(x => x.Id == auditLogId);
+
+            if (index >= 0)
+            {
+                CurrentPage = (index / PageSize) + 1;
+                Apply();
+                StatusMessage = $"Opened audit log ID {auditLogId}.";
+                StatusBrush = "#294287";
+            }
+            else
+            {
+                CurrentPage = 1;
+                Apply();
+                StatusMessage = $"Loaded {_all.Count} audit logs, but audit log ID {auditLogId} was not found.";
+                StatusBrush = "#E11D48";
             }
         }
 
@@ -191,8 +247,11 @@ namespace WpfApp3.ViewModels.AuditLogs
                          .Take(PageSize))
             {
                 item.OperationType = NormalizeOperationType(item.OperationType);
+                item.IsTargeted = item.Id == HighlightedAuditLogId;
                 Items.Add(item);
             }
+
+            ApplyTargetHighlight();
 
             PageNumbers.Clear();
             for (int i = 1; i <= totalPages; i++)
@@ -205,6 +264,12 @@ namespace WpfApp3.ViewModels.AuditLogs
             OnPropertyChanged(nameof(PagingStatusText));
             OnPropertyChanged(nameof(CanGoPrevious));
             OnPropertyChanged(nameof(CanGoNext));
+        }
+
+        private void ApplyTargetHighlight()
+        {
+            foreach (var item in Items)
+                item.IsTargeted = item.Id == HighlightedAuditLogId;
         }
 
         private static bool IsCreateType(string? value)

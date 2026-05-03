@@ -10,9 +10,6 @@
              d:DesignWidth="1200"
              d:DataContext="{d:DesignInstance Type=vm:AuditLogsViewModel}">
 
-    <UserControl.DataContext>
-        <vm:AuditLogsViewModel/>
-    </UserControl.DataContext>
 
     <UserControl.Resources>
 
@@ -296,9 +293,24 @@
                                 <ItemsControl ItemsSource="{Binding Items}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border BorderBrush="#EEF2FF"
-                                                    BorderThickness="0,1,0,0"
-                                                    Padding="10,12">
+                                            <Border Padding="10,12">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="White"/>
+                                                        <Setter Property="BorderBrush" Value="#EEF2FF"/>
+                                                        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+                                                        <Setter Property="CornerRadius" Value="0"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsTargeted}" Value="True">
+                                                                <Setter Property="Background" Value="#FFF7ED"/>
+                                                                <Setter Property="BorderBrush" Value="#FDBA74"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
+                                                                <Setter Property="CornerRadius" Value="14"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="70"/>
@@ -328,7 +340,7 @@
                                                                Margin="0,0,12,0"/>
 
                                                     <TextBlock Grid.Column="4"
-                                                               Text="{Binding CreatedAtText}"
+                                                               Text="{Binding CreatedAtText, Mode=OneWay}"
                                                                Style="{StaticResource BodyCellText}"/>
                                                 </Grid>
                                             </Border>

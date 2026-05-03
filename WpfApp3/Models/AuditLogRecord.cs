@@ -12,6 +12,8 @@ namespace WpfApp3.Models
         [ObservableProperty] private string actorName = "";
         [ObservableProperty] private string description = "";
         [ObservableProperty] private DateTime createdAt;
+        [ObservableProperty] private bool isUnread;
+        [ObservableProperty] private bool isTargeted;
 
         public string CreatedAtText => CreatedAt.ToString("MMMM dd, yyyy hh:mm tt");
     }
