@@ -26,7 +26,13 @@ namespace WpfApp3.ViewModels.Distribution
         public int PageSize { get; } = 8;
 
         public ObservableCollection<AllotmentProjectOption> Projects { get; } = new();
+        public ObservableCollection<AllotmentProjectOption> FilteredProjects { get; } = new();
+
         [ObservableProperty] private AllotmentProjectOption? selectedProject;
+        [ObservableProperty] private string projectSearchText = "";
+        [ObservableProperty] private bool isProjectDropdownOpen;
+
+        private bool _syncingProjectSearch;
 
         public ObservableCollection<BeneficiaryRecord> Items { get; } = new();
         public ObservableCollection<int> PageNumbers { get; } = new();
@@ -187,10 +193,25 @@ namespace WpfApp3.ViewModels.Distribution
 
         partial void OnSelectedProjectChanged(AllotmentProjectOption? value)
         {
+            SyncProjectSearchTextToSelection();
+            OnPropertyChanged(nameof(TotalBudgetText));
+            OnPropertyChanged(nameof(ReleaseProjectText));
+            OnPropertyChanged(nameof(ReleaseBudgetText));
+
             if (!_ready) return;
             CurrentPage = 1;
-            OnPropertyChanged(nameof(TotalBudgetText));
             _ = LoadBeneficiariesAsync();
+        }
+
+        partial void OnProjectSearchTextChanged(string value)
+        {
+            if (_syncingProjectSearch)
+                return;
+
+            ApplyProjectFilter(value);
+
+            if (_ready)
+                IsProjectDropdownOpen = true;
         }
 
         partial void OnCurrentPageChanged(int value) => ApplyPaging();
@@ -213,14 +234,19 @@ namespace WpfApp3.ViewModels.Distribution
                 foreach (var p in result.Projects)
                     Projects.Add(p);
 
+                ApplyProjectFilter(ProjectSearchText);
+
                 if (selectFirstProject || SelectedProject is null || Projects.All(x => x.Id != SelectedProject.Id))
                     SelectedProject = Projects.FirstOrDefault();
+                else
+                    SyncProjectSearchTextToSelection();
 
                 await LoadBeneficiariesCoreAsync();
             }
             catch
             {
                 Projects.Clear();
+                FilteredProjects.Clear();
                 _cache.Clear();
                 ApplyPaging();
             }
@@ -297,6 +323,84 @@ namespace WpfApp3.ViewModels.Distribution
             OnPropertyChanged(nameof(TotalRecords));
             OnPropertyChanged(nameof(TotalPages));
             OnPropertyChanged(nameof(FoundText));
+        }
+
+        private void ApplyProjectFilter(string? query)
+        {
+            var q = (query ?? "").Trim();
+
+            var filtered = string.IsNullOrWhiteSpace(q)
+                ? Projects.ToList()
+                : Projects.Where(x =>
+                    ContainsIgnoreCase(x.ProjectName, q) ||
+                    ContainsIgnoreCase(x.Company, q) ||
+                    ContainsIgnoreCase(x.Department, q) ||
+                    ContainsIgnoreCase(x.SourceOfFund, q))
+                    .ToList();
+
+            FilteredProjects.Clear();
+            foreach (var project in filtered)
+                FilteredProjects.Add(project);
+        }
+
+        private static bool ContainsIgnoreCase(string? value, string query)
+            => (value ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private void SyncProjectSearchTextToSelection()
+        {
+            _syncingProjectSearch = true;
+            try
+            {
+                ProjectSearchText = SelectedProject?.ProjectName ?? "";
+            }
+            finally
+            {
+                _syncingProjectSearch = false;
+            }
+
+            ApplyProjectFilter("");
+        }
+
+        [RelayCommand]
+        private void OpenProjectDropdown()
+        {
+            ApplyProjectFilter(ProjectSearchText);
+            IsProjectDropdownOpen = true;
+        }
+
+        [RelayCommand]
+        private void ShowAllProjectDropdown()
+        {
+            _syncingProjectSearch = true;
+            try
+            {
+                ProjectSearchText = "";
+            }
+            finally
+            {
+                _syncingProjectSearch = false;
+            }
+
+            ApplyProjectFilter("");
+            IsProjectDropdownOpen = true;
+        }
+
+        [RelayCommand]
+        private void CloseProjectDropdown()
+        {
+            IsProjectDropdownOpen = false;
+            SyncProjectSearchTextToSelection();
+        }
+
+        [RelayCommand]
+        private void SelectProject(AllotmentProjectOption? project)
+        {
+            if (project is null)
+                return;
+
+            SelectedProject = project;
+            IsProjectDropdownOpen = false;
+            SyncProjectSearchTextToSelection();
         }
 
         // ===== Reload list inside Release modal (keeps Released column updated) =====

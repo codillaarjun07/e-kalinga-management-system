@@ -41,7 +41,13 @@ namespace WpfApp3.ViewModels.Beneficiaries
         public int PageSize { get; } = 8;
 
         public ObservableCollection<AllotmentProjectOption> Projects { get; } = new();
+        public ObservableCollection<AllotmentProjectOption> FilteredProjects { get; } = new();
+
         [ObservableProperty] private AllotmentProjectOption? selectedProject;
+        [ObservableProperty] private string projectSearchText = "";
+        [ObservableProperty] private bool isProjectDropdownOpen;
+
+        private bool _syncingProjectSearch;
 
         public ObservableCollection<BeneficiaryRecord> Items { get; } = new();
         public ObservableCollection<int> PageNumbers { get; } = new();
@@ -52,6 +58,11 @@ namespace WpfApp3.ViewModels.Beneficiaries
 
         public string TotalBudgetText =>
             SelectedProject is null ? "Total Budget: ₱ 0.00" : $"Total Budget: {SelectedProject.TotalBudgetText}";
+
+        public string AddBeneficiariesTitle =>
+            SelectedProject is null
+                ? "Add Beneficiaries"
+                : $"Add Beneficiaries - {SelectedProject.ProjectName}";
 
         // ---------------- MODALS ----------------
         [ObservableProperty] private bool isProjectDetailsOpen;
@@ -75,6 +86,7 @@ namespace WpfApp3.ViewModels.Beneficiaries
         public string AddFoundText => $"Found {AddItems.Count} records";
 
         [ObservableProperty] private bool isAddAllSelected;
+        private bool _syncingAddSelectAll;
 
         // Edit share modal inputs + validation
         private BeneficiaryRecord? _editTarget;
@@ -156,15 +168,51 @@ namespace WpfApp3.ViewModels.Beneficiaries
 
         partial void OnSelectedProjectChanged(AllotmentProjectOption? value)
         {
+            SyncProjectSearchTextToSelection();
+
+            OnPropertyChanged(nameof(TotalBudgetText));
+            OnPropertyChanged(nameof(AddBeneficiariesTitle));
+
             if (!_ready) return;
             CurrentPage = 1;
             _ = ReloadEverythingAsync();
+        }
+
+        partial void OnProjectSearchTextChanged(string value)
+        {
+            if (_syncingProjectSearch)
+                return;
+
+            ApplyProjectFilter(value);
+
+            if (_ready)
+                IsProjectDropdownOpen = true;
         }
 
         partial void OnAddSearchTextChanged(string value)
         {
             AddCurrentPage = 1;
             _ = RefreshAddListAsync();
+        }
+
+        partial void OnIsAddAllSelectedChanged(bool value)
+        {
+            if (_syncingAddSelectAll)
+                return;
+
+            _syncingAddSelectAll = true;
+            try
+            {
+                foreach (var item in AddItems)
+                    item.IsSelected = value;
+            }
+            finally
+            {
+                _syncingAddSelectAll = false;
+            }
+
+            OnPropertyChanged(nameof(AddSelectedCount));
+            OnPropertyChanged(nameof(AddButtonText));
         }
 
         private async Task RefreshAddListAsync()
@@ -188,14 +236,19 @@ namespace WpfApp3.ViewModels.Beneficiaries
                 foreach (var p in projects)
                     Projects.Add(p);
 
+                ApplyProjectFilter(ProjectSearchText);
+
                 if (selectFirstProject || SelectedProject is null || Projects.All(x => x.Id != SelectedProject.Id))
                     SelectedProject = Projects.FirstOrDefault();
+                else
+                    SyncProjectSearchTextToSelection();
 
                 await ReloadEverythingCoreAsync();
             }
             catch
             {
                 Projects.Clear();
+                FilteredProjects.Clear();
                 _assignedCache.Clear();
                 AddItems.Clear();
                 AddPagedItems.Clear();
@@ -238,6 +291,7 @@ namespace WpfApp3.ViewModels.Beneficiaries
             await BuildAddListAsync();
 
             OnPropertyChanged(nameof(TotalBudgetText));
+            OnPropertyChanged(nameof(AddBeneficiariesTitle));
         }
 
         private List<BeneficiaryRecord> Filtered()
@@ -300,6 +354,84 @@ namespace WpfApp3.ViewModels.Beneficiaries
             OnPropertyChanged(nameof(FoundText));
         }
 
+        private void ApplyProjectFilter(string? query)
+        {
+            var q = (query ?? "").Trim();
+
+            var filtered = string.IsNullOrWhiteSpace(q)
+                ? Projects.ToList()
+                : Projects.Where(x =>
+                    ContainsIgnoreCase(x.ProjectName, q) ||
+                    ContainsIgnoreCase(x.Company, q) ||
+                    ContainsIgnoreCase(x.Department, q) ||
+                    ContainsIgnoreCase(x.SourceOfFund, q))
+                    .ToList();
+
+            FilteredProjects.Clear();
+            foreach (var project in filtered)
+                FilteredProjects.Add(project);
+        }
+
+        private static bool ContainsIgnoreCase(string? value, string query)
+            => (value ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private void SyncProjectSearchTextToSelection()
+        {
+            _syncingProjectSearch = true;
+            try
+            {
+                ProjectSearchText = SelectedProject?.ProjectName ?? "";
+            }
+            finally
+            {
+                _syncingProjectSearch = false;
+            }
+
+            ApplyProjectFilter("");
+        }
+
+        [RelayCommand]
+        private void OpenProjectDropdown()
+        {
+            ApplyProjectFilter(ProjectSearchText);
+            IsProjectDropdownOpen = true;
+        }
+
+        [RelayCommand]
+        private void ShowAllProjectDropdown()
+        {
+            _syncingProjectSearch = true;
+            try
+            {
+                ProjectSearchText = "";
+            }
+            finally
+            {
+                _syncingProjectSearch = false;
+            }
+
+            ApplyProjectFilter("");
+            IsProjectDropdownOpen = true;
+        }
+
+        [RelayCommand]
+        private void CloseProjectDropdown()
+        {
+            IsProjectDropdownOpen = false;
+            SyncProjectSearchTextToSelection();
+        }
+
+        [RelayCommand]
+        private void SelectProject(AllotmentProjectOption? project)
+        {
+            if (project is null)
+                return;
+
+            SelectedProject = project;
+            IsProjectDropdownOpen = false;
+            SyncProjectSearchTextToSelection();
+        }
+
         // -------- Add Beneficiaries (modal) --------
         private async Task BuildAddListAsync()
         {
@@ -341,8 +473,18 @@ namespace WpfApp3.ViewModels.Beneficiaries
                 OnPropertyChanged(nameof(AddSelectedCount));
                 OnPropertyChanged(nameof(AddButtonText));
 
-                if (AddItems.Count > 0)
-                    IsAddAllSelected = AddItems.All(x => x.IsSelected);
+                if (!_syncingAddSelectAll && AddItems.Count > 0)
+                {
+                    _syncingAddSelectAll = true;
+                    try
+                    {
+                        IsAddAllSelected = AddItems.All(x => x.IsSelected);
+                    }
+                    finally
+                    {
+                        _syncingAddSelectAll = false;
+                    }
+                }
             }
         }
 
@@ -369,6 +511,7 @@ namespace WpfApp3.ViewModels.Beneficiaries
         {
             AddSearchText = "";
             AddCurrentPage = 1;
+            OnPropertyChanged(nameof(AddBeneficiariesTitle));
             await RefreshAddListAsync();
             IsAddBeneficiariesOpen = true;
         }

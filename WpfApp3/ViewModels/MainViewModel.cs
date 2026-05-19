@@ -30,6 +30,7 @@ public partial class MainViewModel : ObservableObject
     private readonly AuditLogsService _auditLogsService = new();
     private readonly DispatcherTimer _notificationTimer = new() { Interval = TimeSpan.FromSeconds(10) };
     private bool _isRefreshingNotifications;
+    private bool _isSyncingSelectedNavItem;
 
     [ObservableProperty] private UserControl currentView = new DashboardView();
     [ObservableProperty] private string pageTitle = "Dashboard";
@@ -311,12 +312,38 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnSelectedNavItemChanged(NavItem? value)
     {
+        if (_isSyncingSelectedNavItem)
+            return;
+
         value?.Command.Execute(null);
+    }
+
+    private void SyncSelectedNavItem(string titleKeyword)
+    {
+        if (string.IsNullOrWhiteSpace(titleKeyword))
+            return;
+
+        var nav = NavItems.FirstOrDefault(x =>
+            (x.Title ?? "").IndexOf(titleKeyword, StringComparison.OrdinalIgnoreCase) >= 0);
+
+        if (nav is null || ReferenceEquals(SelectedNavItem, nav))
+            return;
+
+        try
+        {
+            _isSyncingSelectedNavItem = true;
+            SelectedNavItem = nav;
+        }
+        finally
+        {
+            _isSyncingSelectedNavItem = false;
+        }
     }
 
     [RelayCommand]
     private void NavigateDashboard()
     {
+        SyncSelectedNavItem("Dashboard");
         PageTitle = "Dashboard";
         CurrentView = new DashboardView();
     }
@@ -324,6 +351,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateAllotment()
     {
+        SyncSelectedNavItem("Allotment");
         PageTitle = "Allotment";
         CurrentView = new AllotmentView();
     }
@@ -331,6 +359,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateBeneficiaries()
     {
+        SyncSelectedNavItem("Beneficiaries");
         PageTitle = "Beneficiaries";
         CurrentView = new BeneficiariesView();
     }
@@ -338,16 +367,22 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateDistribution()
     {
+        SyncSelectedNavItem("Distribution");
         PageTitle = "Distribution";
         CurrentView = new DistributionView();
     }
 
     [RelayCommand]
-    private void NavigateClientProfile() => NavigatePlaceholder("Client Profile");
+    private void NavigateClientProfile()
+    {
+        SyncSelectedNavItem("Client Profile");
+        NavigatePlaceholder("Client Profile");
+    }
 
     [RelayCommand]
     private void NavigateValidators()
     {
+        SyncSelectedNavItem("Master List");
         PageTitle = "Master List";
         CurrentView = new ValidatorsView();
     }
@@ -355,6 +390,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateUsers()
     {
+        SyncSelectedNavItem("Users");
         PageTitle = "Users";
         CurrentView = new UsersView();
     }
@@ -362,6 +398,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void NavigateSettings()
     {
+        SyncSelectedNavItem("Settings");
         PageTitle = "Settings";
         CurrentView = new SettingsView();
     }
@@ -372,6 +409,7 @@ public partial class MainViewModel : ObservableObject
         if (!IsSuperadmin)
             return;
 
+        SyncSelectedNavItem("Backup");
         PageTitle = "Backup";
         CurrentView = new BackupView();
     }
@@ -387,11 +425,7 @@ public partial class MainViewModel : ObservableObject
         if (!IsSuperadmin)
             return;
 
-        var auditLogsNav = NavItems.FirstOrDefault(x =>
-            (x.Title ?? "").IndexOf("Audit Logs", StringComparison.OrdinalIgnoreCase) >= 0);
-
-        if (auditLogsNav is not null && !ReferenceEquals(SelectedNavItem, auditLogsNav))
-            SelectedNavItem = auditLogsNav;
+        SyncSelectedNavItem("Audit Logs");
 
         PageTitle = "Audit Logs";
         CurrentView = focusedAuditLogId > 0
