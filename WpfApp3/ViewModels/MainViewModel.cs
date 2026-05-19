@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using WpfApp3.Models;
 using WpfApp3.Services;
 using WpfApp3.Views.Allotment;
+using WpfApp3.Views.Analytics;
 using WpfApp3.Views.Backup;
 using WpfApp3.Views.Beneficiaries;
 using WpfApp3.Views.Dashboard;
@@ -42,6 +43,10 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private bool isNotificationsOpen;
     [ObservableProperty] private int unreadNotificationCount;
+    [ObservableProperty] private bool isLogoutConfirmOpen;
+    [ObservableProperty] private bool isNotificationCenterOpen;
+    [ObservableProperty] private bool isSystemInfoOpen;
+    [ObservableProperty] private bool isWelcomeOpen;
 
     public ObservableCollection<NavItem> NavItems { get; }
     public ObservableCollection<AuditLogRecord> Notifications { get; } = new();
@@ -54,6 +59,17 @@ public partial class MainViewModel : ObservableObject
         ? "99+"
         : UnreadNotificationCount.ToString();
 
+    public string SystemName => "E-Kalinga Management System";
+    public string SystemCreatorText => "Created by ArjunCode Technologies";
+    public string SystemDescription =>
+        "A desktop management system for organizing social assistance projects, validating beneficiaries, tracking allotments, managing releases, reviewing audit logs, and keeping administrative records in one place.";
+
+    public string WelcomeTitle => $"Welcome, {CurrentUserLabel}!";
+
+    public string WelcomeNotificationText => UnreadNotificationCount > 0
+        ? $"You have {NotificationBadgeText} unread notification{(UnreadNotificationCount == 1 ? "" : "s")} from other users. Review them before you continue your work."
+        : "You have no unread notifications right now. New alerts from other users will appear in the bell icon and notifications tile.";
+
     [ObservableProperty]
     private NavItem? selectedNavItem;
 
@@ -65,6 +81,7 @@ public partial class MainViewModel : ObservableObject
         NavItems = new ObservableCollection<NavItem>
         {
             new NavItem("📊 Dashboard", NavigateDashboardCommand),
+            new NavItem("📈 Analytics", NavigateAnalyticsCommand),
             new NavItem("🔀 Allotment", NavigateAllotmentCommand),
             new NavItem("👥 Beneficiaries", NavigateBeneficiariesCommand),
             new NavItem("📦 Distribution", NavigateDistributionCommand),
@@ -80,10 +97,11 @@ public partial class MainViewModel : ObservableObject
         }
 
         SelectedNavItem = NavItems[0];
-        LogoutCommand = new RelayCommand(Logout);
+        LogoutCommand = new RelayCommand(OpenLogoutConfirm);
 
         LoadCurrentUser();
         LoadAppLogo();
+        IsWelcomeOpen = true;
         InitializeNotifications();
     }
 
@@ -95,9 +113,15 @@ public partial class MainViewModel : ObservableObject
             ? CurrentUserLabel
             : SessionService.Username.Trim();
 
+    partial void OnCurrentUserLabelChanged(string value)
+    {
+        OnPropertyChanged(nameof(WelcomeTitle));
+    }
+
     partial void OnUnreadNotificationCountChanged(int value)
     {
         OnPropertyChanged(nameof(NotificationBadgeText));
+        OnPropertyChanged(nameof(WelcomeNotificationText));
     }
 
     private void InitializeNotifications()
@@ -157,8 +181,29 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        IsWelcomeOpen = false;
+        IsNotificationCenterOpen = false;
+        IsSystemInfoOpen = false;
+        IsLogoutConfirmOpen = false;
         IsNotificationsOpen = true;
         await RefreshNotificationsAsync();
+    }
+
+    [RelayCommand]
+    private async Task OpenNotificationCenter()
+    {
+        IsWelcomeOpen = false;
+        IsNotificationsOpen = false;
+        IsSystemInfoOpen = false;
+        IsLogoutConfirmOpen = false;
+        IsNotificationCenterOpen = true;
+        await RefreshNotificationsAsync();
+    }
+
+    [RelayCommand]
+    private void CloseNotificationCenter()
+    {
+        IsNotificationCenterOpen = false;
     }
 
     [RelayCommand]
@@ -186,6 +231,8 @@ public partial class MainViewModel : ObservableObject
             return;
 
         IsNotificationsOpen = false;
+        IsNotificationCenterOpen = false;
+        IsSystemInfoOpen = false;
 
         try
         {
@@ -349,6 +396,14 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void NavigateAnalytics()
+    {
+        SyncSelectedNavItem("Analytics");
+        PageTitle = "Analytics";
+        CurrentView = new AnalyticsView();
+    }
+
+    [RelayCommand]
     private void NavigateAllotment()
     {
         SyncSelectedNavItem("Allotment");
@@ -448,8 +503,55 @@ public partial class MainViewModel : ObservableObject
         };
     }
 
-    private void Logout()
+    [RelayCommand]
+    private void CloseWelcome()
     {
+        IsWelcomeOpen = false;
+    }
+
+    [RelayCommand]
+    private async Task ViewWelcomeNotifications()
+    {
+        IsWelcomeOpen = false;
+        await OpenNotificationCenter();
+    }
+
+    [RelayCommand]
+    private void OpenSystemInfo()
+    {
+        IsWelcomeOpen = false;
+        IsNotificationsOpen = false;
+        IsNotificationCenterOpen = false;
+        IsLogoutConfirmOpen = false;
+        IsSystemInfoOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseSystemInfo()
+    {
+        IsSystemInfoOpen = false;
+    }
+
+    private void OpenLogoutConfirm()
+    {
+        IsWelcomeOpen = false;
+        IsNotificationsOpen = false;
+        IsNotificationCenterOpen = false;
+        IsSystemInfoOpen = false;
+        IsLogoutConfirmOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelLogout()
+    {
+        IsLogoutConfirmOpen = false;
+    }
+
+    [RelayCommand]
+    private void ConfirmLogout()
+    {
+        IsWelcomeOpen = false;
+        IsLogoutConfirmOpen = false;
         _notificationTimer.Stop();
         SessionService.Clear();
         LogoutRequested?.Invoke();
