@@ -619,60 +619,373 @@
         <!-- Welcome popup shown once after successful login -->
         <Grid Grid.ColumnSpan="2"
               Panel.ZIndex="120"
-              Background="#80000000"
+              Background="#990F172A"
               Visibility="{Binding IsWelcomeOpen, Converter={StaticResource BoolToVis}}">
-            <Border Width="760"
+            <Grid.Resources>
+                <Style x:Key="WelcomePrimaryButtonStyle"
+                       TargetType="Button">
+                    <Setter Property="Height" Value="44"/>
+                    <Setter Property="MinWidth" Value="164"/>
+                    <Setter Property="Padding" Value="18,0"/>
+                    <Setter Property="Background" Value="#1F2A44"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="#1F2A44"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="ButtonChrome"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="13"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ButtonChrome"
+                                                Property="Background"
+                                                Value="#162038"/>
+                                        <Setter TargetName="ButtonChrome"
+                                                Property="BorderBrush"
+                                                Value="#162038"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="ButtonChrome"
+                                                Property="Opacity"
+                                                Value="0.86"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <Style x:Key="WelcomeSecondaryButtonStyle"
+                       TargetType="Button"
+                       BasedOn="{StaticResource WelcomePrimaryButtonStyle}">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Foreground" Value="#1F2A44"/>
+                    <Setter Property="BorderBrush" Value="#DCE5F2"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="ButtonChrome"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="13"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ButtonChrome"
+                                                Property="Background"
+                                                Value="#F8FAFC"/>
+                                        <Setter TargetName="ButtonChrome"
+                                                Property="BorderBrush"
+                                                Value="#CBD5E1"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="ButtonChrome"
+                                                Property="Background"
+                                                Value="#F1F5F9"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <Style x:Key="WelcomeCloseButtonStyle"
+                       TargetType="Button">
+                    <Setter Property="Width" Value="36"/>
+                    <Setter Property="Height" Value="36"/>
+                    <Setter Property="Background" Value="#F8FAFC"/>
+                    <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="CloseChrome"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="11">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="CloseChrome"
+                                                Property="Background"
+                                                Value="#FFF1F2"/>
+                                        <Setter TargetName="CloseChrome"
+                                                Property="BorderBrush"
+                                                Value="#FECDD3"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <Style x:Key="WelcomeNotificationRowStyle"
+                       TargetType="Button">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="BorderBrush" Value="#E8EEF6"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Padding" Value="13"/>
+                    <Setter Property="Margin" Value="0,0,0,9"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="RowChrome"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="14"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Stretch"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="RowChrome"
+                                                Property="Background"
+                                                Value="#F8FAFF"/>
+                                        <Setter TargetName="RowChrome"
+                                                Property="BorderBrush"
+                                                Value="#CBD8F0"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="RowChrome"
+                                                Property="Background"
+                                                Value="#EEF2FF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsUnread}" Value="True">
+                            <Setter Property="Background" Value="#F5F8FF"/>
+                            <Setter Property="BorderBrush" Value="#C7D7FE"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Resources>
+
+            <Border Width="900"
+                    MaxHeight="610"
                     Background="White"
-                    BorderBrush="#E6ECF7"
+                    BorderBrush="#DCE5F2"
                     BorderThickness="1"
-                    CornerRadius="0"
+                    CornerRadius="24"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    SnapsToDevicePixels="True">
+                    ClipToBounds="True">
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="34"
-                                      ShadowDepth="10"
-                                      Opacity="0.24"/>
+                    <DropShadowEffect BlurRadius="42"
+                                      ShadowDepth="12"
+                                      Opacity="0.28"/>
                 </Border.Effect>
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="290"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
+                    <!-- Welcome identity panel -->
                     <Border Grid.Column="0"
-                            Background="#2E3A59"
                             Padding="28">
-                        <StackPanel VerticalAlignment="Center">
-                            <Border Width="92"
-                                    Height="92"
-                                    Background="White"
-                                    CornerRadius="0"
-                                    HorizontalAlignment="Left"
-                                    Margin="0,0,0,22">
-                                <Image Source="{Binding AppLogo}"
-                                       Stretch="Uniform"
-                                       Margin="12"/>
-                            </Border>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="1,1">
+                                <GradientStop Color="#253454"
+                                              Offset="0"/>
+                                <GradientStop Color="#1F2A44"
+                                              Offset="0.58"/>
+                                <GradientStop Color="#162038"
+                                              Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
 
-                            <TextBlock Text="Welcome Back"
-                                       Foreground="White"
-                                       FontSize="28"
-                                       FontWeight="Bold"
-                                       TextWrapping="Wrap"
-                                       Margin="0,0,0,8"/>
+                        <Grid>
+                            <Ellipse Width="220"
+                                     Height="220"
+                                     Fill="#0DFFFFFF"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     Margin="-105,-105,0,0"/>
 
-                            <TextBlock Text="You have successfully logged in to the system."
-                                       Foreground="#DDE6F7"
-                                       FontSize="14"
-                                       LineHeight="22"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
+                            <Ellipse Width="180"
+                                     Height="180"
+                                     Fill="#0AFFFFFF"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Bottom"
+                                     Margin="0,0,-95,-90"/>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="42"
+                                            Height="42"
+                                            Background="White"
+                                            CornerRadius="13"
+                                            Padding="5">
+                                        <Image Source="{Binding AppLogo}"
+                                               Stretch="Uniform"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+
+                                    <StackPanel Margin="11,0,0,0"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="E-KALINGA"
+                                                   Foreground="White"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"/>
+                                        <TextBlock Text="Management System"
+                                                   Foreground="#CAD6EA"
+                                                   FontSize="9"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1"
+                                            VerticalAlignment="Center">
+                                    <Grid Width="74"
+                                          Height="74"
+                                          HorizontalAlignment="Left">
+                                        <Ellipse Fill="#314261"
+                                                 Stroke="#5D7095"
+                                                 StrokeThickness="1"/>
+
+                                        <Ellipse>
+                                            <Ellipse.Fill>
+                                                <ImageBrush ImageSource="{Binding CurrentUserProfileImage}"
+                                                            Stretch="UniformToFill"/>
+                                            </Ellipse.Fill>
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrentUserProfileImageEmpty}"
+                                                                     Value="False">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+
+                                        <TextBlock Text="&#xE77B;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   Foreground="White"
+                                                   FontSize="27"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Visibility="{Binding IsCurrentUserProfileImageEmpty, Converter={StaticResource BoolToVis}}"/>
+                                    </Grid>
+
+                                    <TextBlock Text="Welcome back"
+                                               Foreground="#BFD0EE"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Margin="0,20,0,0"/>
+
+                                    <TextBlock Text="{Binding CurrentUserLabel}"
+                                               Foreground="White"
+                                               FontSize="25"
+                                               FontWeight="Bold"
+                                               TextWrapping="Wrap"
+                                               Margin="0,5,0,0"/>
+
+                                    <TextBlock Text="Your workspace is ready. Review recent activity or continue to the dashboard."
+                                               Foreground="#D7E1EF"
+                                               FontSize="11"
+                                               LineHeight="18"
+                                               TextWrapping="Wrap"
+                                               Margin="0,12,0,0"/>
+
+                                    <Border Height="1"
+                                            Background="#2DFFFFFF"
+                                            Margin="0,22,0,18"/>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="30"
+                                                Height="30"
+                                                Background="#20FFFFFF"
+                                                CornerRadius="10">
+                                            <TextBlock Text="&#xE73E;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       Foreground="#86EFAC"
+                                                       FontSize="12"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <StackPanel Margin="10,0,0,0"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="Signed in successfully"
+                                                       Foreground="White"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"/>
+                                            <TextBlock Text="Secure session active"
+                                                       Foreground="#BFD0DF"
+                                                       FontSize="9"
+                                                       Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border Grid.Row="2"
+                                        Padding="12,10"
+                                        Background="#16FFFFFF"
+                                        BorderBrush="#2EFFFFFF"
+                                        BorderThickness="1"
+                                        CornerRadius="13">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE72E;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   Foreground="#A7F3D0"
+                                                   FontSize="12"
+                                                   Margin="0,0,8,0"
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBlock Text="Authorized personnel only"
+                                                   Foreground="#D7E1EF"
+                                                   FontSize="9"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
                     </Border>
 
+                    <!-- Notifications panel -->
                     <Border Grid.Column="1"
-                            Padding="30">
+                            Padding="30,26,30,28"
+                            Background="#FCFDFE">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -681,55 +994,92 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Row="0">
-                                <TextBlock Text="{Binding WelcomeTitle}"
-                                           Foreground="#2E3A59"
-                                           FontSize="25"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,6"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="{Binding SystemName}"
-                                           Foreground="#8B96AA"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"/>
-                            </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding WelcomeTitle}"
+                                               Foreground="#1E293B"
+                                               FontSize="25"
+                                               FontWeight="Bold"/>
+
+                                    <TextBlock Text="{Binding SystemName}"
+                                               Foreground="#64748B"
+                                               FontSize="11"
+                                               Margin="0,5,0,0"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource WelcomeCloseButtonStyle}"
+                                        Command="{Binding CloseWelcomeCommand}"
+                                        ToolTip="Close">
+                                    <TextBlock Text="&#xE8BB;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               Foreground="#64748B"
+                                               FontSize="11"/>
+                                </Button>
+                            </Grid>
 
                             <Border Grid.Row="1"
-                                    Background="#F3F7FF"
-                                    BorderBrush="#E1E9F7"
+                                    Margin="0,20,0,17"
+                                    Padding="15"
+                                    Background="#F3F6FC"
+                                    BorderBrush="#DCE5F2"
                                     BorderThickness="1"
-                                    Padding="16"
-                                    Margin="0,22,0,18">
+                                    CornerRadius="16">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="48"/>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Border Width="46"
-                                            Height="46"
-                                            Background="#E9F0FF"
-                                            Margin="0,0,14,0">
-                                        <TextBlock Text="🔔"
+                                    <Border Width="40"
+                                            Height="40"
+                                            Background="#E5ECFF"
+                                            CornerRadius="12">
+                                        <TextBlock Text="&#xE7F4;"
+                                                   FontFamily="Segoe MDL2 Assets"
                                                    Foreground="#2E3A59"
-                                                   FontSize="24"
+                                                   FontSize="17"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center"/>
                                     </Border>
 
-                                    <StackPanel Grid.Column="1">
-                                        <TextBlock Text="Notifications"
-                                                   Foreground="#2E3A59"
-                                                   FontSize="17"
-                                                   FontWeight="Bold"
-                                                   Margin="0,0,0,4"/>
+                                    <StackPanel Grid.Column="1"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="Notification overview"
+                                                   Foreground="#1E293B"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"/>
 
                                         <TextBlock Text="{Binding WelcomeNotificationText}"
-                                                   Foreground="#5F6B80"
-                                                   FontSize="13"
-                                                   LineHeight="20"
-                                                   TextWrapping="Wrap"/>
+                                                   Foreground="#64748B"
+                                                   FontSize="10"
+                                                   LineHeight="16"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,4,12,0"/>
                                     </StackPanel>
+
+                                    <Border Grid.Column="2"
+                                            MinWidth="42"
+                                            Height="28"
+                                            Padding="9,0"
+                                            Background="White"
+                                            BorderBrush="#CDD9F0"
+                                            BorderThickness="1"
+                                            CornerRadius="14"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding NotificationBadgeText}"
+                                                   Foreground="#1F2A44"
+                                                   FontSize="11"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
                                 </Grid>
                             </Border>
 
@@ -739,138 +1089,203 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Text="Latest alerts from other users"
-                                           Foreground="#2E3A59"
-                                           FontSize="16"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,10"/>
+                                <Grid Margin="0,0,0,10">
+                                    <TextBlock Text="Recent activity"
+                                               Foreground="#1E293B"
+                                               FontSize="14"
+                                               FontWeight="Bold"/>
 
-                                <TextBlock Grid.Row="1"
-                                           Text="{Binding NotificationEmptyText}"
-                                           Foreground="#8B96AA"
-                                           FontSize="14"
-                                           TextAlignment="Center"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Margin="0,24">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Notifications.Count}" Value="0">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                    <Border HorizontalAlignment="Right"
+                                            Height="25"
+                                            Padding="9,0"
+                                            Background="#EEF2FF"
+                                            BorderBrush="#D7E0F4"
+                                            BorderThickness="1"
+                                            CornerRadius="12">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Width="6"
+                                                     Height="6"
+                                                     Fill="#2563EB"
+                                                     Margin="0,0,6,0"
+                                                     VerticalAlignment="Center"/>
+                                            <TextBlock Text="Latest alerts"
+                                                       Foreground="#334E8A"
+                                                       FontSize="9"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
 
-                                <ScrollViewer Grid.Row="1"
-                                              MaxHeight="190"
-                                              VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemsSource="{Binding Notifications}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Style="{StaticResource NotificationItemButtonStyle}"
-                                                        Command="{Binding DataContext.OpenNotificationCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        ToolTip="Open this audit log">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
+                                <Grid Grid.Row="1">
+                                    <Border Padding="26"
+                                            Background="#F8FAFC"
+                                            BorderBrush="#E8EEF6"
+                                            BorderThickness="1"
+                                            CornerRadius="16">
+                                        <StackPanel HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <Border Width="46"
+                                                    Height="46"
+                                                    Background="#EEF2FF"
+                                                    CornerRadius="14">
+                                                <TextBlock Text="&#xE7F4;"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           Foreground="#6B7CA8"
+                                                           FontSize="18"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
 
-                                                        <Border Width="42"
-                                                                Height="42"
-                                                                Background="#EEF2FF"
-                                                                Margin="0,0,12,0"
-                                                                VerticalAlignment="Top">
-                                                            <TextBlock Text="{Binding OperationType}"
-                                                                       Foreground="#2E3A59"
-                                                                       FontSize="8"
-                                                                       FontWeight="Bold"
-                                                                       TextAlignment="Center"
-                                                                       TextWrapping="Wrap"
-                                                                       HorizontalAlignment="Center"
-                                                                       VerticalAlignment="Center"/>
-                                                        </Border>
+                                            <TextBlock Text="{Binding NotificationEmptyText}"
+                                                       Foreground="#64748B"
+                                                       FontSize="11"
+                                                       TextAlignment="Center"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,11,0,0"/>
+                                        </StackPanel>
 
-                                                        <StackPanel Grid.Column="1">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Notifications.Count}" Value="0">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
 
+                                    <ScrollViewer MaxHeight="245"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsControl ItemsSource="{Binding Notifications}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Style="{StaticResource WelcomeNotificationRowStyle}"
+                                                            Command="{Binding DataContext.OpenNotificationCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Open this audit log">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="44"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <Border Width="36"
+                                                                    Height="36"
+                                                                    Background="#EEF2FF"
+                                                                    BorderBrush="#D8E2F6"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="11"
+                                                                    VerticalAlignment="Top">
+                                                                <TextBlock Text="{Binding OperationType}"
+                                                                           Foreground="#334E8A"
+                                                                           FontSize="7"
+                                                                           FontWeight="Bold"
+                                                                           TextAlignment="Center"
+                                                                           TextWrapping="Wrap"
+                                                                           HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Border>
+
+                                                            <StackPanel Grid.Column="1"
+                                                                        Margin="0,0,12,0">
                                                                 <TextBlock Text="{Binding Description}"
-                                                                           Foreground="#2E3A59"
-                                                                           FontSize="13"
+                                                                           Foreground="#26324A"
+                                                                           FontSize="11"
                                                                            FontWeight="SemiBold"
+                                                                           LineHeight="16"
                                                                            TextWrapping="Wrap"/>
 
-                                                                <Border Grid.Column="1"
-                                                                        Background="#DBEAFE"
-                                                                        Padding="8,2"
-                                                                        Margin="10,0,0,0"
-                                                                        VerticalAlignment="Top">
-                                                                    <Border.Style>
-                                                                        <Style TargetType="Border">
-                                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding IsUnread}" Value="True">
-                                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </Border.Style>
-                                                                    <TextBlock Text="NEW"
-                                                                               Foreground="#1D4ED8"
-                                                                               FontSize="10"
-                                                                               FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
+                                                                <TextBlock Foreground="#7A8699"
+                                                                           FontSize="9"
+                                                                           Margin="0,6,0,0">
+                                                                    <Run Text="By "/>
+                                                                    <Run Text="{Binding ActorName}"/>
+                                                                    <Run Text=" • "/>
+                                                                    <Run Text="{Binding CreatedAtText, Mode=OneWay}"/>
+                                                                </TextBlock>
+                                                            </StackPanel>
 
-                                                            <TextBlock Foreground="#6B7280"
-                                                                       FontSize="12"
-                                                                       Margin="0,5,0,0">
-                                                                <Run Text="By "/>
-                                                                <Run Text="{Binding ActorName}"/>
-                                                                <Run Text=" • "/>
-                                                                <Run Text="{Binding CreatedAtText, Mode=OneWay}"/>
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
+                                                            <Border Grid.Column="2"
+                                                                    Height="22"
+                                                                    Padding="8,0"
+                                                                    Background="#DBEAFE"
+                                                                    BorderBrush="#BFDBFE"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="11"
+                                                                    VerticalAlignment="Top">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsUnread}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+
+                                                                <TextBlock Text="NEW"
+                                                                           Foreground="#1D4ED8"
+                                                                           FontSize="8"
+                                                                           FontWeight="Bold"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Grid>
                             </Grid>
 
-                            <StackPanel Grid.Row="3"
-                                        Orientation="Horizontal"
-                                        HorizontalAlignment="Right"
-                                        Margin="0,24,0,0">
-                                <Button Content="Continue"
-                                        Style="{StaticResource LogoutModalButtonStyle}"
-                                        Command="{Binding CloseWelcomeCommand}"
-                                        Margin="0,0,10,0"/>
+                            <Grid Grid.Row="3"
+                                  Margin="0,20,0,0">
+                                <TextBlock Text="You can review all activity later from the notification center."
+                                           Foreground="#94A3B8"
+                                           FontSize="9"
+                                           VerticalAlignment="Center"/>
 
-                                <Button Content="View Notifications"
-                                        Style="{StaticResource LogoutModalButtonStyle}"
-                                        Command="{Binding ViewWelcomeNotificationsCommand}"
-                                        Background="#2E3A59"
-                                        BorderBrush="#2E3A59"
-                                        Foreground="White"/>
-                            </StackPanel>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource WelcomeSecondaryButtonStyle}"
+                                            Command="{Binding ViewWelcomeNotificationsCommand}"
+                                            Margin="0,0,10,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE7F4;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="11"
+                                                       Margin="0,0,7,0"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="View notifications"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Style="{StaticResource WelcomePrimaryButtonStyle}"
+                                            Command="{Binding CloseWelcomeCommand}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Continue to dashboard"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="&#xE72A;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="11"
+                                                       Margin="9,0,0,0"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Border>
                 </Grid>
             </Border>
-        </Grid>
-
-        <!-- System information overlay opened from Dashboard tile -->
+        </Grid>        <!-- System information overlay opened from Dashboard tile -->
         <Grid Grid.ColumnSpan="2"
               Panel.ZIndex="96"
               Background="#80000000"

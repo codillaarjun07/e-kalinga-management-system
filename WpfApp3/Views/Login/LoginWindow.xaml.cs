@@ -93,5 +93,23 @@ namespace WpfApp3.Views.Login
             main.Show();
             Close();
         }
+        private void Window_MouseLeftButtonDown(
+            object sender,
+            System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (
+                e.ChangedButton ==
+                System.Windows.Input.MouseButton.Left)
+            {
+                DragMove();
+            }
+        }
+
+        private void CloseButton_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }
