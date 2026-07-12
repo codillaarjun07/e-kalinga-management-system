@@ -16,6 +16,9 @@ namespace WpfApp3.Views.Beneficiaries
         private static readonly Regex DigitsOnly = new(@"^\d+$");
         private static readonly Regex MoneyChars = new(@"^[0-9.,]+$");
 
+        private CheckBox? _addSelectAllHeaderCheckBox;
+        private BeneficiariesViewModel? _addSelectAllViewModel;
+        private bool _syncingAddSelectAllHeader;
         public BeneficiariesView()
         {
             InitializeComponent();
@@ -200,6 +203,138 @@ namespace WpfApp3.Views.Beneficiaries
             e.Handled = !MoneyChars.IsMatch(e.Text);
         }
 
+
+        private void AttachAddSelectAllViewModel(
+            BeneficiariesViewModel? viewModel)
+        {
+            if (ReferenceEquals(_addSelectAllViewModel, viewModel))
+            {
+                SyncAddSelectAllHeader();
+                return;
+            }
+
+            if (_addSelectAllViewModel is not null)
+            {
+                _addSelectAllViewModel.PropertyChanged -=
+                    AddSelectAllViewModel_PropertyChanged;
+            }
+
+            _addSelectAllViewModel = viewModel;
+
+            if (_addSelectAllViewModel is not null)
+            {
+                _addSelectAllViewModel.PropertyChanged +=
+                    AddSelectAllViewModel_PropertyChanged;
+            }
+
+            SyncAddSelectAllHeader();
+        }
+
+        private void AddSelectAllViewModel_PropertyChanged(
+            object? sender,
+            System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName !=
+                nameof(BeneficiariesViewModel.IsAddAllSelected))
+            {
+                return;
+            }
+
+            Dispatcher.BeginInvoke(
+                new System.Action(SyncAddSelectAllHeader));
+        }
+
+        private void AddSelectAllCheckBox_Loaded(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (sender is not CheckBox checkBox)
+                return;
+
+            _addSelectAllHeaderCheckBox = checkBox;
+
+            AttachAddSelectAllViewModel(
+                DataContext as BeneficiariesViewModel);
+
+            SyncAddSelectAllHeader();
+        }
+
+        private void AddSelectAllCheckBox_Unloaded(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (!ReferenceEquals(
+                _addSelectAllHeaderCheckBox,
+                sender))
+            {
+                return;
+            }
+
+            _addSelectAllHeaderCheckBox = null;
+
+            if (_addSelectAllViewModel is not null)
+            {
+                _addSelectAllViewModel.PropertyChanged -=
+                    AddSelectAllViewModel_PropertyChanged;
+            }
+
+            _addSelectAllViewModel = null;
+        }
+
+        private void AddSelectAllCheckBox_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            if (_syncingAddSelectAllHeader)
+                return;
+
+            if (sender is not CheckBox checkBox)
+                return;
+
+            if (DataContext is not BeneficiariesViewModel viewModel)
+                return;
+
+            // Capture the state selected by the user before attaching or
+            // synchronizing. The old handler synchronized first, which reset
+            // the checkbox to the previous ViewModel value and made the click
+            // appear to do nothing.
+            var shouldSelectAll =
+                checkBox.IsChecked == true;
+
+            if (!ReferenceEquals(
+                _addSelectAllViewModel,
+                viewModel))
+            {
+                AttachAddSelectAllViewModel(viewModel);
+            }
+
+            viewModel.IsAddAllSelected =
+                shouldSelectAll;
+
+            SyncAddSelectAllHeader();
+            e.Handled = true;
+        }
+
+        private void SyncAddSelectAllHeader()
+        {
+            if (_addSelectAllHeaderCheckBox is null ||
+                _addSelectAllViewModel is null)
+            {
+                return;
+            }
+
+            _syncingAddSelectAllHeader = true;
+
+            try
+            {
+                _addSelectAllHeaderCheckBox.IsChecked =
+                    _addSelectAllViewModel.IsAddAllSelected;
+            }
+            finally
+            {
+                _syncingAddSelectAllHeader = false;
+            }
+        }
         private void BeneficiaryRow_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (e.OriginalSource is not DependencyObject source) return;

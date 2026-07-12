@@ -19,7 +19,14 @@ namespace WpfApp3.ViewModels.Distribution
         private readonly ReleaseReportService _reportService = new();
 
         private List<BeneficiaryRecord> _cache = new();
-
+        [RelayCommand]
+        private void SetDistributionStatus(string? status)
+        {
+            SelectedDistributionStatus =
+                string.IsNullOrWhiteSpace(status)
+                    ? "All"
+                    : status.Trim();
+        }
         // paging (main page)
         [ObservableProperty] private int currentPage = 1;
         [ObservableProperty] private bool isLoading;
@@ -40,6 +47,34 @@ namespace WpfApp3.ViewModels.Distribution
         public int TotalRecords => Filtered().Count;
         public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalRecords / (double)PageSize));
         public string FoundText => $"Found {TotalRecords} records";
+
+        // DISTRIBUTION COMMAND CENTER
+        public int TotalBeneficiariesCount => _cache.Count;
+        public int ReleasedCount => _cache.Count(x => x.IsReleased);
+        public int RemainingCount => Math.Max(0, TotalBeneficiariesCount - ReleasedCount);
+
+        public double CompletionPercentage =>
+            TotalBeneficiariesCount == 0
+                ? 0d
+                : Math.Round(ReleasedCount * 100d / TotalBeneficiariesCount, 1);
+
+        public string CompletionText => $"{CompletionPercentage:0.#}% complete";
+
+        public string SelectedProjectSummary =>
+            SelectedProject is null
+                ? "Select an allotment to begin distribution."
+                : $"{SelectedProject.Department} • {SelectedProject.SourceOfFund}";
+
+        public int ReleaseReleasedCount => ReleaseItems.Count(x => x.IsReleased);
+        public int ReleaseRemainingCount => Math.Max(0, ReleaseItems.Count - ReleaseReleasedCount);
+
+        public double ReleaseCompletionPercentage =>
+            ReleaseItems.Count == 0
+                ? 0d
+                : Math.Round(ReleaseReleasedCount * 100d / ReleaseItems.Count, 1);
+
+        public string ReleaseCompletionText =>
+            $"{ReleaseReleasedCount} of {ReleaseItems.Count} released";
 
         public string TotalBudgetText =>
             SelectedProject is null ? "Total Budget: -" : $"Total Budget: {SelectedProject.TotalBudgetText}";
@@ -78,6 +113,15 @@ namespace WpfApp3.ViewModels.Distribution
 
         public ObservableCollection<string> ClassificationOptions { get; } = new();
         [ObservableProperty] private string? selectedClassification;
+
+        public ObservableCollection<string> DistributionStatusOptions { get; } = new()
+        {
+            "All",
+            "Waiting",
+            "Released"
+        };
+
+        [ObservableProperty] private string? selectedDistributionStatus = "All";
 
         // ===== Release modal paging =====
         [ObservableProperty] private int releaseCurrentPage = 1;
@@ -171,24 +215,45 @@ namespace WpfApp3.ViewModels.Distribution
             IEnumerable<BeneficiaryRecord> src = _cache;
 
             var cls = (SelectedClassification ?? "").Trim();
-            if (!string.IsNullOrWhiteSpace(cls) && !cls.Equals("All", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(cls) &&
+                !cls.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
                 if (cls.Equals("None", StringComparison.OrdinalIgnoreCase))
                 {
                     src = src.Where(x =>
                     {
-                        var v = (x.Classification ?? "").Trim();
-                        return string.IsNullOrWhiteSpace(v) || v.Equals("None", StringComparison.OrdinalIgnoreCase);
+                        var value = (x.Classification ?? "").Trim();
+                        return string.IsNullOrWhiteSpace(value) ||
+                               value.Equals("None", StringComparison.OrdinalIgnoreCase);
                     });
                 }
                 else
                 {
                     src = src.Where(x =>
-                        string.Equals((x.Classification ?? "").Trim(), cls, StringComparison.OrdinalIgnoreCase));
+                        string.Equals(
+                            (x.Classification ?? "").Trim(),
+                            cls,
+                            StringComparison.OrdinalIgnoreCase));
                 }
             }
 
+            var status = (SelectedDistributionStatus ?? "All").Trim();
+
+            if (status.Equals("Released", StringComparison.OrdinalIgnoreCase))
+                src = src.Where(x => x.IsReleased);
+            else if (status.Equals("Waiting", StringComparison.OrdinalIgnoreCase))
+                src = src.Where(x => !x.IsReleased);
+
             return src.ToList();
+        }
+
+        partial void OnSelectedDistributionStatusChanged(string? value)
+        {
+            if (!_ready)
+                return;
+
+            CurrentPage = 1;
+            ApplyPaging();
         }
 
         partial void OnSelectedProjectChanged(AllotmentProjectOption? value)
@@ -197,6 +262,7 @@ namespace WpfApp3.ViewModels.Distribution
             OnPropertyChanged(nameof(TotalBudgetText));
             OnPropertyChanged(nameof(ReleaseProjectText));
             OnPropertyChanged(nameof(ReleaseBudgetText));
+            OnPropertyChanged(nameof(SelectedProjectSummary));
 
             if (!_ready) return;
             CurrentPage = 1;
@@ -309,20 +375,51 @@ namespace WpfApp3.ViewModels.Distribution
         {
             var filtered = Filtered();
 
-            if (CurrentPage < 1) CurrentPage = 1;
-            var totalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)PageSize));
-            if (CurrentPage > totalPages) CurrentPage = totalPages;
+            if (CurrentPage < 1)
+                CurrentPage = 1;
+
+            var totalPages = Math.Max(
+                1,
+                (int)Math.Ceiling(filtered.Count / (double)PageSize));
+
+            if (CurrentPage > totalPages)
+                CurrentPage = totalPages;
 
             Items.Clear();
-            foreach (var it in filtered.Skip((CurrentPage - 1) * PageSize).Take(PageSize))
-                Items.Add(it);
+
+            foreach (var item in filtered
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize))
+            {
+                Items.Add(item);
+            }
 
             PageNumbers.Clear();
-            for (int i = 1; i <= totalPages; i++) PageNumbers.Add(i);
+
+            for (var page = 1; page <= totalPages; page++)
+                PageNumbers.Add(page);
 
             OnPropertyChanged(nameof(TotalRecords));
             OnPropertyChanged(nameof(TotalPages));
             OnPropertyChanged(nameof(FoundText));
+
+            NotifyCommandCenterState();
+        }
+
+        private void NotifyCommandCenterState()
+        {
+            OnPropertyChanged(nameof(TotalBeneficiariesCount));
+            OnPropertyChanged(nameof(ReleasedCount));
+            OnPropertyChanged(nameof(RemainingCount));
+            OnPropertyChanged(nameof(CompletionPercentage));
+            OnPropertyChanged(nameof(CompletionText));
+            OnPropertyChanged(nameof(SelectedProjectSummary));
+
+            OnPropertyChanged(nameof(ReleaseReleasedCount));
+            OnPropertyChanged(nameof(ReleaseRemainingCount));
+            OnPropertyChanged(nameof(ReleaseCompletionPercentage));
+            OnPropertyChanged(nameof(ReleaseCompletionText));
+            OnPropertyChanged(nameof(ReleaseProgressText));
         }
 
         private void ApplyProjectFilter(string? query)
@@ -407,16 +504,22 @@ namespace WpfApp3.ViewModels.Distribution
         private void ReloadReleaseItems()
         {
             ReleaseItems.Clear();
-            if (SelectedProject is null) return;
 
-            foreach (var r in _assignRepo.GetAssignedEndorsed(SelectedProject.Id))
-                ReleaseItems.Add(r);
+            if (SelectedProject is null)
+            {
+                ApplyReleasePaging();
+                NotifyCommandCenterState();
+                return;
+            }
+
+            foreach (var record in _assignRepo.GetAssignedEndorsed(SelectedProject.Id))
+                ReleaseItems.Add(record);
 
             if (ReleaseCurrentPage > ReleaseTotalPages)
                 ReleaseCurrentPage = ReleaseTotalPages;
 
             ApplyReleasePaging();
-            OnPropertyChanged(nameof(ReleaseProgressText));
+            NotifyCommandCenterState();
         }
 
         private async void ShowToast(string msg, string kind)
@@ -686,19 +789,34 @@ namespace WpfApp3.ViewModels.Distribution
         {
             var filtered = ReleaseFiltered().ToList();
 
-            if (ReleaseCurrentPage < 1) ReleaseCurrentPage = 1;
-            var totalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)ReleasePageSize));
-            if (ReleaseCurrentPage > totalPages) ReleaseCurrentPage = totalPages;
+            if (ReleaseCurrentPage < 1)
+                ReleaseCurrentPage = 1;
+
+            var totalPages = Math.Max(
+                1,
+                (int)Math.Ceiling(filtered.Count / (double)ReleasePageSize));
+
+            if (ReleaseCurrentPage > totalPages)
+                ReleaseCurrentPage = totalPages;
 
             ReleasePagedItems.Clear();
-            foreach (var it in filtered.Skip((ReleaseCurrentPage - 1) * ReleasePageSize).Take(ReleasePageSize))
-                ReleasePagedItems.Add(it);
+
+            foreach (var item in filtered
+                .Skip((ReleaseCurrentPage - 1) * ReleasePageSize)
+                .Take(ReleasePageSize))
+            {
+                ReleasePagedItems.Add(item);
+            }
 
             ReleasePageNumbers.Clear();
-            for (int i = 1; i <= totalPages; i++) ReleasePageNumbers.Add(i);
+
+            for (var page = 1; page <= totalPages; page++)
+                ReleasePageNumbers.Add(page);
 
             OnPropertyChanged(nameof(ReleaseTotalRecords));
             OnPropertyChanged(nameof(ReleaseTotalPages));
+
+            NotifyCommandCenterState();
         }
 
         partial void OnReleaseSelectedClassificationChanged(string? value)
@@ -732,7 +850,6 @@ namespace WpfApp3.ViewModels.Distribution
 
             return src;
         }
-
 
 
         // paging (main page)

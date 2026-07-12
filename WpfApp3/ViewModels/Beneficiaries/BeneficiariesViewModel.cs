@@ -56,7 +56,25 @@ namespace WpfApp3.ViewModels.Beneficiaries
         public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalRecords / (double)PageSize));
         public string FoundText => $"Found {TotalRecords} records";
 
-        public string TotalBudgetText =>
+        
+        // BENEFICIARY REGISTRY REVAMP
+        public int AssignedCount => _assignedCache.Count;
+        public int ReleasedCount => _assignedCache.Count(x => x.IsReleased);
+        public int WaitingCount => Math.Max(0, AssignedCount - ReleasedCount);
+        public int ClassificationCount => _assignedCache
+            .Select(x => string.IsNullOrWhiteSpace(x.Classification) ? "None" : x.Classification.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count();
+
+        public string BudgetValueText =>
+            SelectedProject is null ? "₱ 0.00" : SelectedProject.TotalBudgetText;
+
+        public string SelectedProjectSummary =>
+            SelectedProject is null
+                ? "Select an allotment to view assigned beneficiaries."
+                : $"{SelectedProject.Department} • {SelectedProject.SourceOfFund}";
+
+public string TotalBudgetText =>
             SelectedProject is null ? "Total Budget: ₱ 0.00" : $"Total Budget: {SelectedProject.TotalBudgetText}";
 
         public string AddBeneficiariesTitle =>
@@ -109,6 +127,16 @@ namespace WpfApp3.ViewModels.Beneficiaries
 
         public ObservableCollection<string> ClassificationOptions { get; } = new();
         [ObservableProperty] private string? selectedClassification;
+
+        public ObservableCollection<string> ReleaseStatusOptions { get; } = new()
+        {
+            "All",
+            "Waiting",
+            "Released"
+        };
+
+        [ObservableProperty] private string? selectedReleaseStatus = "All";
+
 
         // ===== Add modal paging =====
         [ObservableProperty] private int addCurrentPage = 1;
@@ -163,7 +191,15 @@ namespace WpfApp3.ViewModels.Beneficiaries
             Apply();
         }
 
-        partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
+        
+        partial void OnSelectedReleaseStatusChanged(string? value)
+        {
+            if (!_ready) return;
+            CurrentPage = 1;
+            Apply();
+        }
+
+partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
         partial void OnCurrentPageChanged(int value) { Apply(); }
 
         partial void OnSelectedProjectChanged(AllotmentProjectOption? value)
@@ -192,7 +228,7 @@ namespace WpfApp3.ViewModels.Beneficiaries
         partial void OnAddSearchTextChanged(string value)
         {
             AddCurrentPage = 1;
-            _ = RefreshAddListAsync();
+            ApplyAddPaging();
         }
 
         partial void OnIsAddAllSelectedChanged(bool value)
@@ -200,10 +236,12 @@ namespace WpfApp3.ViewModels.Beneficiaries
             if (_syncingAddSelectAll)
                 return;
 
+            var matchingRows = AddFiltered().ToList();
+
             _syncingAddSelectAll = true;
             try
             {
-                foreach (var item in AddItems)
+                foreach (var item in matchingRows)
                     item.IsSelected = value;
             }
             finally
@@ -298,61 +336,88 @@ namespace WpfApp3.ViewModels.Beneficiaries
         {
             IEnumerable<BeneficiaryRecord> src = _assignedCache;
 
-            // classification filter (optional)
-            var cls = (SelectedClassification ?? "").Trim();
-            if (!string.IsNullOrWhiteSpace(cls) && !cls.Equals("All", StringComparison.OrdinalIgnoreCase))
+            var classification = (SelectedClassification ?? "").Trim();
+            if (!string.IsNullOrWhiteSpace(classification) &&
+                !classification.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
-                if (cls.Equals("None", StringComparison.OrdinalIgnoreCase))
+                if (classification.Equals("None", StringComparison.OrdinalIgnoreCase))
                 {
                     src = src.Where(x =>
                     {
-                        var v = (x.Classification ?? "").Trim();
-                        return string.IsNullOrWhiteSpace(v) || v.Equals("None", StringComparison.OrdinalIgnoreCase);
+                        var value = (x.Classification ?? "").Trim();
+                        return string.IsNullOrWhiteSpace(value) ||
+                               value.Equals("None", StringComparison.OrdinalIgnoreCase);
                     });
                 }
                 else
                 {
                     src = src.Where(x =>
-                        string.Equals((x.Classification ?? "").Trim(), cls, StringComparison.OrdinalIgnoreCase));
+                        string.Equals(
+                            (x.Classification ?? "").Trim(),
+                            classification,
+                            StringComparison.OrdinalIgnoreCase));
                 }
             }
 
-            var q = (SearchText ?? "").Trim().ToLowerInvariant();
-            if (!string.IsNullOrWhiteSpace(q))
+            var releaseStatus = (SelectedReleaseStatus ?? "All").Trim();
+            if (releaseStatus.Equals("Released", StringComparison.OrdinalIgnoreCase))
+                src = src.Where(x => x.IsReleased);
+            else if (releaseStatus.Equals("Waiting", StringComparison.OrdinalIgnoreCase))
+                src = src.Where(x => !x.IsReleased);
+
+            var query = (SearchText ?? "").Trim().ToLowerInvariant();
+            if (!string.IsNullOrWhiteSpace(query))
             {
                 src = src.Where(x =>
-                    x.Id.ToString(CultureInfo.InvariantCulture).Contains(q) ||
-                    (x.FirstName ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.LastName ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Barangay ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Classification ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Gender ?? "").ToLowerInvariant().Contains(q));
-                ;
+                    x.Id.ToString(CultureInfo.InvariantCulture).Contains(query) ||
+                    (x.BeneficiaryId ?? "").ToLowerInvariant().Contains(query) ||
+                    (x.FirstName ?? "").ToLowerInvariant().Contains(query) ||
+                    (x.LastName ?? "").ToLowerInvariant().Contains(query) ||
+                    (x.Barangay ?? "").ToLowerInvariant().Contains(query) ||
+                    (x.Classification ?? "").ToLowerInvariant().Contains(query) ||
+                    (x.Gender ?? "").ToLowerInvariant().Contains(query));
             }
 
             return src.ToList();
         }
 
+
         private void Apply()
         {
+            var filtered = Filtered();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)PageSize));
+
             if (CurrentPage < 1) CurrentPage = 1;
-            if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+            if (CurrentPage > totalPages) CurrentPage = totalPages;
 
             Items.Clear();
-            foreach (var it in Filtered()
+            foreach (var item in filtered
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize))
             {
-                Items.Add(it);
+                Items.Add(item);
             }
 
             PageNumbers.Clear();
-            for (int i = 1; i <= TotalPages; i++) PageNumbers.Add(i);
+            for (var page = 1; page <= totalPages; page++)
+                PageNumbers.Add(page);
 
             OnPropertyChanged(nameof(TotalRecords));
             OnPropertyChanged(nameof(TotalPages));
             OnPropertyChanged(nameof(FoundText));
+            NotifyRegistryState();
         }
+
+        private void NotifyRegistryState()
+        {
+            OnPropertyChanged(nameof(AssignedCount));
+            OnPropertyChanged(nameof(ReleasedCount));
+            OnPropertyChanged(nameof(WaitingCount));
+            OnPropertyChanged(nameof(ClassificationCount));
+            OnPropertyChanged(nameof(BudgetValueText));
+            OnPropertyChanged(nameof(SelectedProjectSummary));
+        }
+
 
         private void ApplyProjectFilter(string? query)
         {
@@ -436,29 +501,38 @@ namespace WpfApp3.ViewModels.Beneficiaries
         private async Task BuildAddListAsync()
         {
             AddItems.Clear();
-            IsAddAllSelected = false;
+
+            _syncingAddSelectAll = true;
+            try
+            {
+                IsAddAllSelected = false;
+            }
+            finally
+            {
+                _syncingAddSelectAll = false;
+            }
 
             if (SelectedProject is null)
             {
+                AddPagedItems.Clear();
+                AddPageNumbers.Clear();
                 OnPropertyChanged(nameof(AddSelectedCount));
                 OnPropertyChanged(nameof(AddButtonText));
                 OnPropertyChanged(nameof(AddFoundText));
                 return;
             }
 
-            var q = (AddSearchText ?? "").Trim().ToLowerInvariant();
+            // Load the complete available set once. Search and paging are local so
+            // selected rows remain selected while moving between pages or searches.
+            var source = await Task.Run(() =>
+                _assignRepo.GetAvailableEndorsedNotAssigned(SelectedProject.Id, ""));
 
-            // ✅ Endorsed beneficiaries NOT yet assigned to this project
-            var src = await Task.Run(() => _assignRepo.GetAvailableEndorsedNotAssigned(SelectedProject.Id, q));
-
-            foreach (var r in src)
+            foreach (var row in source)
             {
-                r.IsSelected = false;
-
-                r.PropertyChanged -= AddRow_PropertyChanged;
-                r.PropertyChanged += AddRow_PropertyChanged;
-
-                AddItems.Add(r);
+                row.IsSelected = false;
+                row.PropertyChanged -= AddRow_PropertyChanged;
+                row.PropertyChanged += AddRow_PropertyChanged;
+                AddItems.Add(row);
             }
 
             OnPropertyChanged(nameof(AddSelectedCount));
@@ -468,23 +542,27 @@ namespace WpfApp3.ViewModels.Beneficiaries
 
         private void AddRow_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(BeneficiaryRecord.IsSelected))
-            {
-                OnPropertyChanged(nameof(AddSelectedCount));
-                OnPropertyChanged(nameof(AddButtonText));
+            if (e.PropertyName != nameof(BeneficiaryRecord.IsSelected))
+                return;
 
-                if (!_syncingAddSelectAll && AddItems.Count > 0)
-                {
-                    _syncingAddSelectAll = true;
-                    try
-                    {
-                        IsAddAllSelected = AddItems.All(x => x.IsSelected);
-                    }
-                    finally
-                    {
-                        _syncingAddSelectAll = false;
-                    }
-                }
+            OnPropertyChanged(nameof(AddSelectedCount));
+            OnPropertyChanged(nameof(AddButtonText));
+
+            if (_syncingAddSelectAll)
+                return;
+
+            var matchingRows = AddFiltered().ToList();
+
+            _syncingAddSelectAll = true;
+            try
+            {
+                IsAddAllSelected =
+                    matchingRows.Count > 0 &&
+                    matchingRows.All(item => item.IsSelected);
+            }
+            finally
+            {
+                _syncingAddSelectAll = false;
             }
         }
 
@@ -689,18 +767,42 @@ namespace WpfApp3.ViewModels.Beneficiaries
         private void ApplyAddPaging()
         {
             var filtered = AddFiltered().ToList();
-            var totalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)AddPageSize));
+            var totalPages = Math.Max(
+                1,
+                (int)Math.Ceiling(filtered.Count / (double)AddPageSize));
 
-            if (AddCurrentPage < 1) AddCurrentPage = 1;
-            if (AddCurrentPage > totalPages) AddCurrentPage = totalPages;
+            if (AddCurrentPage < 1)
+                AddCurrentPage = 1;
+
+            if (AddCurrentPage > totalPages)
+                AddCurrentPage = totalPages;
 
             AddPagedItems.Clear();
-            foreach (var it in filtered.Skip((AddCurrentPage - 1) * AddPageSize).Take(AddPageSize))
-                AddPagedItems.Add(it);
+            foreach (var item in filtered
+                .Skip((AddCurrentPage - 1) * AddPageSize)
+                .Take(AddPageSize))
+            {
+                AddPagedItems.Add(item);
+            }
 
             AddPageNumbers.Clear();
-            for (int i = 1; i <= totalPages; i++) AddPageNumbers.Add(i);
+            for (var page = 1; page <= totalPages; page++)
+                AddPageNumbers.Add(page);
 
+            _syncingAddSelectAll = true;
+            try
+            {
+                IsAddAllSelected =
+                    filtered.Count > 0 &&
+                    filtered.All(item => item.IsSelected);
+            }
+            finally
+            {
+                _syncingAddSelectAll = false;
+            }
+
+            OnPropertyChanged(nameof(AddSelectedCount));
+            OnPropertyChanged(nameof(AddButtonText));
             OnPropertyChanged(nameof(AddFoundText));
         }
 
