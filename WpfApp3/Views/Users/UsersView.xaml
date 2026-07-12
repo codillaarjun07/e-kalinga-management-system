@@ -140,11 +140,430 @@
                 </Setter.Value>
             </Setter>
         </Style>
+<!-- USERS REGISTRY REVAMP STYLES -->
+<SolidColorBrush x:Key="UserSuccessBrush" Color="#16A34A"/>
+<SolidColorBrush x:Key="UserSuccessSoftBrush" Color="#ECFDF3"/>
+<SolidColorBrush x:Key="UserInfoBrush" Color="#2563EB"/>
+<SolidColorBrush x:Key="UserInfoSoftBrush" Color="#EFF6FF"/>
+<SolidColorBrush x:Key="UserPurpleBrush" Color="#7C3AED"/>
+<SolidColorBrush x:Key="UserPurpleSoftBrush" Color="#F5F3FF"/>
+<SolidColorBrush x:Key="UserNeutralSoftBrush" Color="#F1F5F9"/>
+
+<Style x:Key="UserMetricCardStyle"
+       TargetType="Border">
+    <Setter Property="Background" Value="White"/>
+    <Setter Property="BorderBrush" Value="#E8EEF6"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="18"/>
+    <Setter Property="Padding" Value="15"/>
+    <Setter Property="Margin" Value="0,0,12,0"/>
+    <Setter Property="Effect">
+        <Setter.Value>
+            <DropShadowEffect BlurRadius="18"
+                              ShadowDepth="2"
+                              Opacity="0.06"/>
+        </Setter.Value>
+    </Setter>
+</Style>
+
+<Style x:Key="UserSearchHostStyle"
+       TargetType="Border">
+    <Setter Property="Height" Value="42"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Background" Value="#FCFDFE"/>
+    <Setter Property="BorderBrush" Value="#DDE6F5"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Style.Triggers>
+        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+            <Setter Property="BorderBrush" Value="#1F2A44"/>
+        </Trigger>
+    </Style.Triggers>
+</Style>
+
+<Style x:Key="UserFilterHostStyle"
+       TargetType="Border">
+    <Setter Property="Height" Value="42"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Background" Value="#FCFDFE"/>
+    <Setter Property="BorderBrush" Value="#DDE6F5"/>
+    <Setter Property="BorderThickness" Value="1"/>
+</Style>
+
+<Style x:Key="UserFilterComboBoxStyle"
+       TargetType="ComboBox">
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="#2E3A59"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    <Setter Property="FontSize" Value="12"/>
+</Style>
+
+<Style x:Key="UserColumnHeaderStyle"
+       TargetType="{x:Type DataGridColumnHeader}">
+    <Setter Property="Height" Value="48"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="Background" Value="#F8FAFC"/>
+    <Setter Property="Foreground" Value="#64748B"/>
+    <Setter Property="BorderBrush" Value="#E8EEF6"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="Padding" Value="14,0"/>
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Cursor" Value="Arrow"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                <Border x:Name="HeaderBorder"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        SnapsToDevicePixels="True">
+                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="True"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="HeaderBorder"
+                                Property="Background"
+                                Value="#F8FAFC"/>
+                        <Setter Property="Foreground"
+                                Value="#334155"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter TargetName="HeaderBorder"
+                                Property="Background"
+                                Value="#F1F5F9"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
+
+<Style x:Key="UserLeftColumnHeaderStyle"
+       TargetType="{x:Type DataGridColumnHeader}"
+       BasedOn="{StaticResource UserColumnHeaderStyle}">
+    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+</Style>
+
+<Style x:Key="UserRowStyle"
+       TargetType="DataGridRow">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="#E8EEF6"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+    <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+            <Setter Property="Background" Value="#F8FAFF"/>
+        </Trigger>
+        <Trigger Property="IsSelected" Value="True">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#E8EEF6"/>
+        </Trigger>
+    </Style.Triggers>
+</Style>
+
+<Style x:Key="UserCellStyle"
+       TargetType="DataGridCell">
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="#2E3A59"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Trigger>
+    </Style.Triggers>
+</Style>
+
+<Style x:Key="UserSelectionCheckBoxStyle"
+       TargetType="CheckBox">
+    <Setter Property="Width" Value="20"/>
+    <Setter Property="Height" Value="20"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="CheckBox">
+                <Grid Width="20" Height="20">
+                    <Border x:Name="Box"
+                            Background="White"
+                            BorderBrush="#CBD5E1"
+                            BorderThickness="1.5"
+                            CornerRadius="6"/>
+                    <TextBlock x:Name="CheckGlyph"
+                               Text="&#xE73E;"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Visibility="Collapsed"/>
+                    <TextBlock x:Name="PartialGlyph"
+                               Text="&#xE738;"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Visibility="Collapsed"/>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="Box"
+                                Property="BorderBrush"
+                                Value="#1F2A44"/>
+                        <Setter TargetName="Box"
+                                Property="Background"
+                                Value="#EEF2FF"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="Box"
+                                Property="Background"
+                                Value="#1F2A44"/>
+                        <Setter TargetName="Box"
+                                Property="BorderBrush"
+                                Value="#1F2A44"/>
+                        <Setter TargetName="CheckGlyph"
+                                Property="Visibility"
+                                Value="Visible"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="{x:Null}">
+                        <Setter TargetName="Box"
+                                Property="Background"
+                                Value="#1F2A44"/>
+                        <Setter TargetName="Box"
+                                Property="BorderBrush"
+                                Value="#1F2A44"/>
+                        <Setter TargetName="PartialGlyph"
+                                Property="Visibility"
+                                Value="Visible"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Opacity" Value="0.35"/>
+                        <Setter Property="Cursor" Value="Arrow"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
+
+<Style x:Key="UserRowSelectionCheckBoxStyle"
+       TargetType="CheckBox"
+       BasedOn="{StaticResource UserSelectionCheckBoxStyle}">
+    <Style.Triggers>
+        <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+            <Setter Property="IsEnabled" Value="False"/>
+        </DataTrigger>
+    </Style.Triggers>
+</Style>
+
+<Style x:Key="UserActionButtonStyle"
+       TargetType="Button">
+    <Setter Property="Width" Value="32"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Margin" Value="2,0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="Button">
+                <Border x:Name="ActionBorder"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="10">
+                    <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="ActionBorder"
+                                Property="Background"
+                                Value="#EEF2FF"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter TargetName="ActionBorder"
+                                Property="Opacity"
+                                Value="0.85"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
+<!-- END USERS REGISTRY REVAMP STYLES -->
     </UserControl.Resources>
 
     <Grid Background="#F3F5F9">
 
-        <!-- MAIN CONTENT LAYER -->
+<!-- MAIN CONTENT LAYER -->
+<Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="14"/>
+        <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+
+    <UniformGrid Grid.Row="0"
+                 Columns="4">
+        <Border Style="{StaticResource UserMetricCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="46"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="38"
+                        Height="38"
+                        CornerRadius="12"
+                        Background="{StaticResource UserInfoSoftBrush}">
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE77B;"
+                               Foreground="{StaticResource UserInfoBrush}"
+                               FontSize="17"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="TOTAL USERS"
+                               Foreground="#6B778C"
+                               FontSize="10"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding TotalUsers, Mode=OneWay}"
+                               Foreground="#2E3A59"
+                               FontSize="23"
+                               FontWeight="Bold"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource UserMetricCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="46"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="38"
+                        Height="38"
+                        CornerRadius="12"
+                        Background="{StaticResource UserPurpleSoftBrush}">
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE7EF;"
+                               Foreground="{StaticResource UserPurpleBrush}"
+                               FontSize="17"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="SUPERADMINS"
+                               Foreground="#6B778C"
+                               FontSize="10"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding SuperAdminCount, Mode=OneWay}"
+                               Foreground="{StaticResource UserPurpleBrush}"
+                               FontSize="23"
+                               FontWeight="Bold"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource UserMetricCardStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="46"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="38"
+                        Height="38"
+                        CornerRadius="12"
+                        Background="{StaticResource UserSuccessSoftBrush}">
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE72E;"
+                               Foreground="{StaticResource UserSuccessBrush}"
+                               FontSize="17"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="ADMINS"
+                               Foreground="#6B778C"
+                               FontSize="10"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding AdminCount, Mode=OneWay}"
+                               Foreground="{StaticResource UserSuccessBrush}"
+                               FontSize="23"
+                               FontWeight="Bold"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource UserMetricCardStyle}"
+                Margin="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="46"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Width="38"
+                        Height="38"
+                        CornerRadius="12"
+                        Background="{StaticResource UserNeutralSoftBrush}">
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               Text="&#xE80F;"
+                               Foreground="#64748B"
+                               FontSize="17"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="OFFICES"
+                               Foreground="#6B778C"
+                               FontSize="10"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding OfficeCount, Mode=OneWay}"
+                               Foreground="#475569"
+                               FontSize="23"
+                               FontWeight="Bold"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </UniformGrid>
+
+    <Border Grid.Row="2"
+            Background="White"
+            BorderBrush="#E8EEF6"
+            BorderThickness="1"
+            CornerRadius="22"
+            Padding="18">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="18"
+                              ShadowDepth="2"
+                              Opacity="0.06"/>
+        </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -154,252 +573,552 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="1" Margin="0,16,0,10">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="360"/>
-                    <ColumnDefinition Width="52"/>
-                    <ColumnDefinition Width="52"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="12"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Border CornerRadius="12" Background="White" Padding="12,8">
-                    <Grid>
-                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 BorderThickness="0"
-                                 Background="Transparent"
-                                 Foreground="#2E3A59"
-                                 FontSize="13"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="User Registry"
+                               Foreground="#2E3A59"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="{Binding FoundText, Mode=OneWay}"
+                               Foreground="#6B778C"
+                               FontSize="11"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
 
-                        <TextBlock Text="Search Here"
-                                   Foreground="#A3AEC2"
+                <Border Grid.Column="1"
+                        Style="{StaticResource UserSearchHostStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="28"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                   Text="&#xE721;"
                                    FontSize="13"
-                                   IsHitTestVisible="False">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SearchText}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                                   Foreground="#64748B"
+                                   VerticalAlignment="Center"/>
+                        <Grid Grid.Column="1">
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     Foreground="#2E3A59"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center"/>
+                            <TextBlock Text="Search name, username, office..."
+                                       Foreground="#94A3B8"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SearchText}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SearchText}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                     </Grid>
                 </Border>
 
-                <Button Grid.Column="1" Style="{StaticResource IconButton}" Margin="10,0,0,0" Content="🔍"/>
-                <Button Grid.Column="2"
-                        Style="{StaticResource IconButton}"
-                        Margin="10,0,0,0"
-                        Background="#EEF2FF"
-                        Foreground="#1F2A44"
-                        Content="≡"/>
+                <Border Grid.Column="3"
+                        Style="{StaticResource UserFilterHostStyle}">
+                    <ComboBox ItemsSource="{Binding OfficeFilterOptions}"
+                              SelectedItem="{Binding SelectedOfficeFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource UserFilterComboBoxStyle}"
+                              ToolTip="Filter by office"/>
+                </Border>
 
-                <StackPanel Grid.Column="4"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-                    <Button Width="176"
-                            Height="40"
-                            Margin="0,0,10,0"
-                            Style="{StaticResource RoundedDangerConfirm}"
-                            Content="{Binding DeleteSelectedText}"
-                            Command="{Binding DeleteSelectedCommand}"
-                            Visibility="{Binding HasSelectedUsers, Converter={StaticResource BoolToVis}}"/>
+                <Border Grid.Column="5"
+                        Style="{StaticResource UserFilterHostStyle}">
+                    <ComboBox ItemsSource="{Binding RoleFilterOptions}"
+                              SelectedItem="{Binding SelectedRoleFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource UserFilterComboBoxStyle}"
+                              ToolTip="Filter by role"/>
+                </Border>
 
-                    <Button Style="{StaticResource PrimaryButton}"
-                            Command="{Binding AddUserCommand}"
-                            Content="＋  Add User"/>
-                </StackPanel>
+                <Button Grid.Column="7"
+                        MinWidth="138"
+                        Height="42"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding AddUserCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                   Text="&#xE710;"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Add User"
+                                   Margin="8,0,0,0"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </Grid>
 
-            <TextBlock Grid.Row="2"
-                       Text="{Binding FoundText}"
-                       Foreground="#6B778C"
-                       FontSize="12"
-                       Margin="2,0,0,10"/>
+            <Border Grid.Row="1"
+                    Height="1"
+                    Background="#E8EEF6"
+                    Margin="0,14,0,8"/>
 
-            <Border Grid.Row="3"
-                    CornerRadius="20"
-                    Background="White"
-                    Padding="12"
-                    Margin="0,6,0,0">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.06"/>
-                </Border.Effect>
+            <Border Grid.Row="2"
+                    Margin="0,0,0,8"
+                    Padding="12,8"
+                    CornerRadius="12"
+                    Background="#EEF2FF"
+                    Visibility="{Binding HasSelectedUsers, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                   Text="&#xE73E;"
+                                   Foreground="#1F2A44"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SelectedCount, Mode=OneWay}"
+                                   Foreground="#1F2A44"
+                                   FontWeight="Bold"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text=" user(s) selected"
+                                   Foreground="#6B778C"
+                                   Margin="4,0,0,0"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
 
-                <DataGrid ItemsSource="{Binding Items}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="None"
-                          RowHeaderWidth="0"
-                          Background="Transparent"
-                          BorderThickness="0"
-                          FontSize="12"
-                          Foreground="#2E3A59"
-                          ColumnHeaderHeight="46"
-                          RowHeight="50"
-                          IsReadOnly="True"
-                          CanUserResizeRows="False"
-                          CanUserReorderColumns="False"
-                          CanUserSortColumns="False"
-                          CanUserResizeColumns="False"
-                          HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollBarVisibility="Auto"
-                          SelectionUnit="FullRow"
-                          SelectionMode="Single">
+                    <Button HorizontalAlignment="Right"
+                            Width="176"
+                            Height="34"
+                            Style="{StaticResource RoundedDangerConfirm}"
+                            Content="{Binding DeleteSelectedText}"
+                            Command="{Binding DeleteSelectedCommand}"/>
+                </Grid>
+            </Border>
 
-                    <DataGrid.Resources>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#2E3A59"/>
+            <DataGrid Grid.Row="3"
+                      ItemsSource="{Binding Items}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="False"
+                      CanUserResizeRows="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="None"
+                      RowHeaderWidth="0"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      FontSize="12"
+                      Foreground="#2E3A59"
+                      ColumnHeaderHeight="48"
+                      RowHeight="58"
+                      IsReadOnly="True"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      SelectionUnit="FullRow"
+                      SelectionMode="Single"
+                      FocusVisualStyle="{x:Null}"
+                      ColumnHeaderStyle="{StaticResource UserColumnHeaderStyle}"
+                      RowStyle="{StaticResource UserRowStyle}"
+                      CellStyle="{StaticResource UserCellStyle}">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#2E3A59"/>
+                </DataGrid.Resources>
 
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Foreground" Value="#6B86D6"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="BorderBrush" Value="#EEF2FF"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            <Setter Property="Padding" Value="8,0"/>
-                        </Style>
-
-                        <Style TargetType="DataGridRow">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="#EEF2FF"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="SnapsToDevicePixels" Value="True"/>
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridRow">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}">
-                                            <DataGridCellsPresenter/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="8,0"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridCell">
-                                        <Border Background="Transparent" SnapsToDevicePixels="True">
-                                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-
-                        <Style x:Key="GridTextStyle" TargetType="TextBlock">
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                            <Setter Property="TextAlignment" Value="Center"/>
-                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                        </Style>
-                    </DataGrid.Resources>
-
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="48">
-                            <DataGridTemplateColumn.Header>
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          IsThreeState="True"
-                                          IsChecked="{Binding DataContext.IsAllSelected,
-                                                              RelativeSource={RelativeSource AncestorType=DataGrid},
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.Header>
+                            <CheckBox Style="{StaticResource UserSelectionCheckBoxStyle}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      IsThreeState="True"
+                                      IsChecked="{Binding DataContext.IsAllSelected,
+                                                          RelativeSource={RelativeSource AncestorType=DataGrid},
+                                                          Mode=TwoWay,
+                                                          UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox Style="{StaticResource UserRowSelectionCheckBoxStyle}"
+                                          IsChecked="{Binding IsSelected,
                                                               Mode=TwoWay,
-                                                              UpdateSourceTrigger=PropertyChanged}"/>
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Focusable="False">
-                                        <CheckBox.Style>
-                                            <Style TargetType="CheckBox">
-                                                <Setter Property="IsEnabled" Value="True"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                        <Setter Property="Opacity" Value="0.40"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </CheckBox.Style>
-                                    </CheckBox>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                                                              UpdateSourceTrigger=PropertyChanged}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Focusable="False"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="0.55*" ElementStyle="{StaticResource GridTextStyle}"/>
-                        <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Width="1.2*" ElementStyle="{StaticResource GridTextStyle}"/>
-                        <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Width="1.2*" ElementStyle="{StaticResource GridTextStyle}"/>
-                        <DataGridTextColumn Header="Office" Binding="{Binding Office}" Width="1.15*" ElementStyle="{StaticResource GridTextStyle}"/>
-                        <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="1.1*" ElementStyle="{StaticResource GridTextStyle}"/>
-                        <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="1.15*" ElementStyle="{StaticResource GridTextStyle}"/>
+                    <DataGridTemplateColumn Header="User"
+                                            Width="2.1*"
+                                            HeaderStyle="{StaticResource UserLeftColumnHeaderStyle}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="42"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                        <DataGridTemplateColumn Header="Actions" Width="0.9*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center">
-                                        <Button Style="{StaticResource RowActionButton}"
-                                                Width="30"
-                                                Height="30"
-                                                Margin="0,0,8,0"
-                                                Foreground="#2E3A59"
-                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}">
-                                            <TextBlock Text="✎" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Button>
-
-                                        <Button Width="30"
-                                                Height="30"
-                                                Foreground="#E11D48"
-                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}">
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource RowActionButton}">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                    <Setter Property="Width" Value="30"/>
-                                                    <Setter Property="Height" Value="30"/>
-                                                    <Setter Property="Foreground" Value="#E11D48"/>
+                                    <Grid Width="34"
+                                          Height="34"
+                                          VerticalAlignment="Center">
+                                        <Ellipse Fill="#EEF2FF"/>
+                                        <Ellipse>
+                                            <Ellipse.Fill>
+                                                <ImageBrush ImageSource="{Binding ProfileImagePreview}"
+                                                            Stretch="UniformToFill"/>
+                                            </Ellipse.Fill>
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                        <DataTrigger Binding="{Binding HasProfileImage}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                   Text="&#xE77B;"
+                                                   Foreground="#1F2A44"
+                                                   FontSize="15"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasProfileImage}" Value="True">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </Button.Style>
-                                            <TextBlock Text="🗑" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Button>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <StackPanel Grid.Column="1"
+                                                VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Foreground="#2E3A59"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0} {1}">
+                                                        <Binding Path="FirstName"/>
+                                                        <Binding Path="LastName"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+
+                                            <Border Height="20"
+                                                    Padding="7,0"
+                                                    Margin="8,0,0,0"
+                                                    CornerRadius="10"
+                                                    Background="{StaticResource UserSuccessSoftBrush}"
+                                                    BorderBrush="#BBF7D0"
+                                                    BorderThickness="1">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="You"
+                                                           Foreground="#15803D"
+                                                           FontSize="9"
+                                                           FontWeight="Bold"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock Foreground="#6B778C"
+                                                   FontSize="10"
+                                                   Margin="0,2,0,0">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}ID {0} • @{1}">
+                                                    <Binding Path="Id"/>
+                                                    <Binding Path="Username"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                     </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
-                <Button Content="Previous" Style="{StaticResource PageButton}" Command="{Binding PreviousPageCommand}"/>
+                    <DataGridTemplateColumn Header="Office"
+                                            Width="1.0*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Height="26"
+                                        MinWidth="66"
+                                        MaxWidth="135"
+                                        Padding="10,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{StaticResource UserInfoSoftBrush}"
+                                        BorderBrush="#BFDBFE"
+                                        BorderThickness="1"
+                                        CornerRadius="13">
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <Ellipse Width="6"
+                                                 Height="6"
+                                                 Fill="{StaticResource UserInfoBrush}"
+                                                 Margin="0,0,7,0"
+                                                 VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Office, TargetNullValue=None}"
+                                                   Foreground="#1D4ED8"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                <ItemsControl ItemsSource="{Binding PageNumbers}" Margin="6,0">
+                    <DataGridTemplateColumn Header="Role"
+                                            Width="1.0*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Height="26"
+                                        MinWidth="78"
+                                        Padding="10,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        BorderThickness="1"
+                                        CornerRadius="13">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{StaticResource UserNeutralSoftBrush}"/>
+                                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Role}" Value="Superadmin">
+                                                    <Setter Property="Background" Value="{StaticResource UserPurpleSoftBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="#DDD6FE"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Role}" Value="Admin">
+                                                    <Setter Property="Background" Value="{StaticResource UserInfoSoftBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="#BFDBFE"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <Ellipse Width="6"
+                                                 Height="6"
+                                                 Margin="0,0,7,0"
+                                                 VerticalAlignment="Center">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="#94A3B8"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Role}" Value="Superadmin">
+                                                            <Setter Property="Fill" Value="{StaticResource UserPurpleBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Role}" Value="Admin">
+                                                            <Setter Property="Fill" Value="{StaticResource UserInfoBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <TextBlock Text="{Binding Role}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#64748B"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Role}" Value="Superadmin">
+                                                            <Setter Property="Foreground" Value="{StaticResource UserPurpleBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Role}" Value="Admin">
+                                                            <Setter Property="Foreground" Value="#1D4ED8"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Username"
+                                            Width="1.05*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                               Text="&#xE77B;"
+                                               Foreground="#94A3B8"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Username}"
+                                               Foreground="#2E3A59"
+                                               FontWeight="SemiBold"
+                                               Margin="7,0,0,0"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Session"
+                                            Width="0.95*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Height="26"
+                                        MinWidth="82"
+                                        Padding="10,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        BorderThickness="1"
+                                        CornerRadius="13">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{StaticResource UserNeutralSoftBrush}"/>
+                                            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource UserSuccessSoftBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="#BBF7D0"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <Ellipse Width="6"
+                                                 Height="6"
+                                                 Margin="0,0,7,0"
+                                                 VerticalAlignment="Center">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="#94A3B8"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                            <Setter Property="Fill" Value="{StaticResource UserSuccessBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <TextBlock FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Account"/>
+                                                    <Setter Property="Foreground" Value="#64748B"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                            <Setter Property="Text" Value="Active"/>
+                                                            <Setter Property="Foreground" Value="#15803D"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header=""
+                                            Width="92">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <Button Style="{StaticResource UserActionButtonStyle}"
+                                            ToolTip="Edit user"
+                                            Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                   Text="&#xE70F;"
+                                                   FontSize="14"
+                                                   Foreground="#2E3A59"/>
+                                    </Button>
+
+                                    <Button ToolTip="Delete user"
+                                            Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Style>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource UserActionButtonStyle}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FFF1F2"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                   Text="&#xE74D;"
+                                                   FontSize="14"
+                                                   Foreground="#E11D48"/>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="4"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,14,0,0">
+                <Button Content="Previous"
+                        Style="{StaticResource PageButton}"
+                        Command="{Binding PreviousPageCommand}"/>
+
+                <ItemsControl ItemsSource="{Binding PageNumbers}"
+                              Margin="6,0">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal"/>
@@ -412,7 +1131,8 @@
                                     Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}">
                                 <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource PageButton}">
+                                    <Style TargetType="Button"
+                                           BasedOn="{StaticResource PageButton}">
                                         <Style.Triggers>
                                             <DataTrigger Value="True">
                                                 <DataTrigger.Binding>
@@ -423,6 +1143,7 @@
                                                     </MultiBinding>
                                                 </DataTrigger.Binding>
                                                 <Setter Property="Background" Value="#1F2A44"/>
+                                                <Setter Property="BorderBrush" Value="#1F2A44"/>
                                                 <Setter Property="Foreground" Value="White"/>
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -433,11 +1154,15 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Button Content="Next" Style="{StaticResource PageButton}" Command="{Binding NextPageCommand}"/>
+                <Button Content="Next"
+                        Style="{StaticResource PageButton}"
+                        Command="{Binding NextPageCommand}"/>
             </StackPanel>
         </Grid>
+    </Border>
+</Grid>
 
-        <!-- ABSOLUTE TOAST OVERLAY -->
+                <!-- ABSOLUTE TOAST OVERLAY -->
         <Border Panel.ZIndex="900"
                 Width="340"
                 HorizontalAlignment="Right"

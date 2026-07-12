@@ -25,6 +25,41 @@ namespace WpfApp3.ViewModels.Users
         [ObservableProperty] private bool isLoading;
         [ObservableProperty] private bool? isAllSelected = false;
 
+        // USERS REGISTRY REVAMP STATE
+        [ObservableProperty] private string selectedOfficeFilter = "All";
+        [ObservableProperty] private string selectedRoleFilter = "All";
+
+        public ObservableCollection<string> OfficeFilterOptions { get; } = new()
+        {
+            "All"
+        };
+
+        public ObservableCollection<string> RoleFilterOptions { get; } = new()
+        {
+            "All"
+        };
+
+        public int TotalUsers => _all.Count;
+
+        public int SuperAdminCount =>
+            _all.Count(x => string.Equals(
+                x.Role,
+                "Superadmin",
+                StringComparison.OrdinalIgnoreCase));
+
+        public int AdminCount =>
+            _all.Count(x => string.Equals(
+                x.Role,
+                "Admin",
+                StringComparison.OrdinalIgnoreCase));
+
+        public int OfficeCount =>
+            _all
+                .Select(x => (x.Office ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count();
+        // END USERS REGISTRY REVAMP STATE
         [ObservableProperty] private bool isToastVisible;
         [ObservableProperty] private string toastMessage = "";
         [ObservableProperty] private string toastBackground = "#2E3A59";
@@ -167,6 +202,8 @@ namespace WpfApp3.ViewModels.Users
                     _all.Add(record);
                 }
 
+                RefreshUserFilterOptions();
+                NotifyUserRegistrySummary();
                 CurrentPage = 1;
                 Apply();
             }
@@ -272,26 +309,117 @@ namespace WpfApp3.ViewModels.Users
             Apply();
         }
 
+        // USERS REGISTRY REVAMP FILTER HANDLERS
+        partial void OnSelectedOfficeFilterChanged(string value)
+        {
+            CurrentPage = 1;
+            Apply();
+        }
+
+        partial void OnSelectedRoleFilterChanged(string value)
+        {
+            CurrentPage = 1;
+            Apply();
+        }
+        // END USERS REGISTRY REVAMP FILTER HANDLERS
         partial void OnCurrentPageChanged(int value)
         {
             Apply();
         }
 
+        // USERS REGISTRY REVAMP HELPERS
+        private void RefreshUserFilterOptions()
+        {
+            var offices = _all
+                .Select(x => (x.Office ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            OfficeFilterOptions.Clear();
+            OfficeFilterOptions.Add("All");
+
+            foreach (var office in offices)
+                OfficeFilterOptions.Add(office);
+
+            var roles = _all
+                .Select(x => (x.Role ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            RoleFilterOptions.Clear();
+            RoleFilterOptions.Add("All");
+
+            foreach (var role in roles)
+                RoleFilterOptions.Add(role);
+
+            if (!OfficeFilterOptions.Contains(SelectedOfficeFilter))
+                SelectedOfficeFilter = "All";
+
+            if (!RoleFilterOptions.Contains(SelectedRoleFilter))
+                SelectedRoleFilter = "All";
+        }
+
+        private void NotifyUserRegistrySummary()
+        {
+            OnPropertyChanged(nameof(TotalUsers));
+            OnPropertyChanged(nameof(SuperAdminCount));
+            OnPropertyChanged(nameof(AdminCount));
+            OnPropertyChanged(nameof(OfficeCount));
+        }
+        // END USERS REGISTRY REVAMP HELPERS
         private List<UserRecord> Filtered()
         {
-            var q = (SearchText ?? "").Trim().ToLowerInvariant();
+            var queryText = (SearchText ?? "").Trim();
 
-            var query = _all.AsEnumerable();
+            IEnumerable<UserRecord> query = _all;
 
-            if (!string.IsNullOrWhiteSpace(q))
+            if (!string.IsNullOrWhiteSpace(queryText))
             {
                 query = query.Where(x =>
-                    x.Id.ToString(CultureInfo.InvariantCulture).Contains(q) ||
-                    (x.FirstName ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.LastName ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Office ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Role ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Username ?? "").ToLowerInvariant().Contains(q));
+                    x.Id.ToString(CultureInfo.InvariantCulture).Contains(
+                        queryText,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.FirstName ?? "").Contains(
+                        queryText,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.LastName ?? "").Contains(
+                        queryText,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.Office ?? "").Contains(
+                        queryText,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.Role ?? "").Contains(
+                        queryText,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.Username ?? "").Contains(
+                        queryText,
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.Equals(
+                SelectedOfficeFilter,
+                "All",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(x => string.Equals(
+                    x.Office,
+                    SelectedOfficeFilter,
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.Equals(
+                SelectedRoleFilter,
+                "All",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(x => string.Equals(
+                    x.Role,
+                    SelectedRoleFilter,
+                    StringComparison.OrdinalIgnoreCase));
             }
 
             return query
@@ -321,6 +449,7 @@ namespace WpfApp3.ViewModels.Users
             OnPropertyChanged(nameof(TotalPages));
             OnPropertyChanged(nameof(FoundText));
             OnPropertyChanged(nameof(IsSuperAdmin));
+            NotifyUserRegistrySummary();
             UpdateSelectionState();
         }
 

@@ -379,382 +379,948 @@
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#0F172A"/>
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0F172A"/>
+        <!-- ALLOTMENT REGISTRY REVAMP STYLES -->
+        <SolidColorBrush x:Key="RegistrySuccessBrush" Color="#16A34A"/>
+        <SolidColorBrush x:Key="RegistrySuccessSoftBrush" Color="#ECFDF3"/>
+        <SolidColorBrush x:Key="RegistryWarningBrush" Color="#D97706"/>
+        <SolidColorBrush x:Key="RegistryWarningSoftBrush" Color="#FFF7E8"/>
+        <SolidColorBrush x:Key="RegistryInfoBrush" Color="#2563EB"/>
+        <SolidColorBrush x:Key="RegistryInfoSoftBrush" Color="#EFF6FF"/>
+        <SolidColorBrush x:Key="RegistryPurpleBrush" Color="#7C3AED"/>
+        <SolidColorBrush x:Key="RegistryPurpleSoftBrush" Color="#F5F3FF"/>
+
+        <Style x:Key="RegistryMetricCardStyle"
+               TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="Effect" Value="{StaticResource SoftShadow}"/>
+        </Style>
+
+        <Style x:Key="RegistrySearchHostStyle"
+               TargetType="Border">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="#FCFDFE"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="RegistryFilterHostStyle"
+               TargetType="Border">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="#FCFDFE"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="AllotmentColumnHeaderStyle"
+               TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="MinHeight" Value="48"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="BorderBrush" Value="#E8EEF6"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+                        <Border x:Name="HeaderBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HeaderBorder"
+                                        Property="Background"
+                                        Value="#F8FAFC"/>
+                                <Setter Property="Foreground"
+                                        Value="#334155"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HeaderBorder"
+                                        Property="Background"
+                                        Value="#F1F5F9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AllotmentLeftColumnHeaderStyle"
+               TargetType="{x:Type DataGridColumnHeader}"
+               BasedOn="{StaticResource AllotmentColumnHeaderStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="AllotmentCellStyle"
+               TargetType="DataGridCell">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="AllotmentRowStyle"
+               TargetType="DataGridRow">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F8FAFF"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="AllotmentSelectionCheckBoxStyle"
+               TargetType="CheckBox">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Width="20" Height="20">
+                            <Border x:Name="Box"
+                                    Background="White"
+                                    BorderBrush="#CBD5E1"
+                                    BorderThickness="1.5"
+                                    CornerRadius="6"/>
+                            <TextBlock x:Name="CheckGlyph"
+                                       Text="&#xE73E;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                            <TextBlock x:Name="PartialGlyph"
+                                       Text="&#xE738;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box"
+                                        Property="BorderBrush"
+                                        Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="Box"
+                                        Property="Background"
+                                        Value="{StaticResource AccentSoftBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box"
+                                        Property="Background"
+                                        Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="Box"
+                                        Property="BorderBrush"
+                                        Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="CheckGlyph"
+                                        Property="Visibility"
+                                        Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="{x:Null}">
+                                <Setter TargetName="Box"
+                                        Property="Background"
+                                        Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="Box"
+                                        Property="BorderBrush"
+                                        Value="{StaticResource AccentBrush}"/>
+                                <Setter TargetName="PartialGlyph"
+                                        Property="Visibility"
+                                        Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AllotmentActionButton"
+               TargetType="Button">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd"
+                                        Property="Background"
+                                        Value="{StaticResource AccentSoftBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd"
+                                        Property="Opacity"
+                                        Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AllotmentDangerActionButton"
+               TargetType="Button"
+               BasedOn="{StaticResource AllotmentActionButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFF1F2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- END ALLOTMENT REGISTRY REVAMP STYLES -->
     </UserControl.Resources>
 
     <Grid >
 
         <!-- PAGE CONTENT -->
-        <Grid >
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="14"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- TOP CARD -->
-            <Border Grid.Row="0"
-                    Style="{StaticResource CardBorder}"
-                    Margin="0,0,0,12">
+            <!-- SUMMARY -->
+            <UniformGrid Grid.Row="0"
+                         Columns="4">
+                <Border Style="{StaticResource RegistryMetricCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="38"
+                                Height="38"
+                                CornerRadius="12"
+                                Background="{StaticResource RegistryInfoSoftBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE8FD;"
+                                       Foreground="{StaticResource RegistryInfoBrush}"
+                                       FontSize="17"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="TOTAL ALLOTMENTS"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="10"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding TotalAllotments, Mode=OneWay}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="23"
+                                       FontWeight="Bold"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RegistryMetricCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="38"
+                                Height="38"
+                                CornerRadius="12"
+                                Background="{StaticResource RegistrySuccessSoftBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE716;"
+                                       Foreground="{StaticResource RegistrySuccessBrush}"
+                                       FontSize="17"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="PLANNED BENEFICIARIES"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="10"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding PlannedBeneficiaries, Mode=OneWay}"
+                                       Foreground="{StaticResource RegistrySuccessBrush}"
+                                       FontSize="23"
+                                       FontWeight="Bold"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RegistryMetricCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="38"
+                                Height="38"
+                                CornerRadius="12"
+                                Background="{StaticResource RegistryWarningSoftBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE8C7;"
+                                       Foreground="{StaticResource RegistryWarningBrush}"
+                                       FontSize="17"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="MONETARY BUDGET"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="10"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding MoneyBudgetText, Mode=OneWay}"
+                                       Foreground="{StaticResource RegistryWarningBrush}"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Margin="0,4,0,0"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource RegistryMetricCardStyle}"
+                        Margin="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="38"
+                                Height="38"
+                                CornerRadius="12"
+                                Background="{StaticResource RegistryPurpleSoftBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE8EC;"
+                                       Foreground="{StaticResource RegistryPurpleBrush}"
+                                       FontSize="17"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="IN-KIND ALLOTMENTS"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="10"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding InKindAllotments, Mode=OneWay}"
+                                       Foreground="{StaticResource RegistryPurpleBrush}"
+                                       FontSize="23"
+                                       FontWeight="Bold"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </UniformGrid>
+
+            <!-- ALLOTMENT REGISTRY -->
+            <Border Grid.Row="2"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrushLighter}"
+                    BorderThickness="1"
+                    CornerRadius="22"
+                    Padding="18"
+                    Effect="{StaticResource SoftShadow}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0"
-                               Text="Allotment List"
-                               Style="{StaticResource SectionTitleText}"
-                               Margin="0,0,0,16"/>
-
-                    <Grid Grid.Row="1">
+                    <!-- HEADER / FILTERS -->
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="360"/>
-                            <ColumnDefinition Width="52"/>
-                            <ColumnDefinition Width="52"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="300"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Search -->
-                        <Border CornerRadius="14"
-                                Background="{StaticResource InputBackgroundBrush}"
-                                BorderBrush="{StaticResource BorderBrushSoft}"
-                                BorderThickness="1"
-                                Height="42"
-                                Padding="14,0">
-                            <Grid>
-                                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource PlainInputTextBox}"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Allotment Registry"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="18"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding FoundText, Mode=OneWay}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
 
-                                <TextBlock Text="Search here"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
+                        <Border Grid.Column="1"
+                                Style="{StaticResource RegistrySearchHostStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           Text="&#xE721;"
                                            FontSize="13"
-                                           VerticalAlignment="Center"
-                                           IsHitTestVisible="False">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SearchText}" Value="">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding SearchText}" Value="{x:Null}">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center"/>
+                                <Grid Grid.Column="1">
+                                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource PlainInputTextBox}"
+                                             FontSize="12"/>
+                                    <TextBlock Text="Search project, company, ID..."
+                                               Foreground="#94A3B8"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"
+                                               IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SearchText}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding SearchText}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
                             </Grid>
                         </Border>
 
-                        <Button Grid.Column="1"
-                                Style="{StaticResource IconButton}"
-                                Margin="10,0,0,0">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       Text="&#xE721;"
-                                       FontSize="15"
-                                       Foreground="White"/>
-                        </Button>
+                        <Border Grid.Column="3"
+                                Style="{StaticResource RegistryFilterHostStyle}">
+                            <ComboBox ItemsSource="{Binding DepartmentFilterOptions}"
+                                      SelectedItem="{Binding SelectedDepartmentFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource ModernComboBox}"
+                                      ToolTip="Filter by department"/>
+                        </Border>
 
-                        <Button Grid.Column="2"
-                                Style="{StaticResource SoftIconButton}"
-                                Margin="10,0,0,0">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       Text="&#xE71C;"
-                                       FontSize="15"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                        </Button>
+                        <Border Grid.Column="5"
+                                Style="{StaticResource RegistryFilterHostStyle}">
+                            <ComboBox ItemsSource="{Binding SourceOfFundFilterOptions}"
+                                      SelectedItem="{Binding SelectedSourceOfFundFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource ModernComboBox}"
+                                      ToolTip="Filter by source of fund"/>
+                        </Border>
 
-                        <StackPanel Grid.Column="4"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Right">
-                            <Button MinWidth="180"
-                                    Height="42"
-                                    Margin="0,0,12,0"
+                        <Border Grid.Column="7"
+                                Style="{StaticResource RegistryFilterHostStyle}">
+                            <ComboBox ItemsSource="{Binding BudgetTypeFilterOptions}"
+                                      SelectedItem="{Binding SelectedBudgetTypeFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource ModernComboBox}"
+                                      ToolTip="Filter by budget type"/>
+                        </Border>
+
+                        <Button Grid.Column="9"
+                                MinWidth="148"
+                                Height="42"
+                                Style="{StaticResource PrimaryButton}"
+                                Command="{Binding AddAllotmentCommand}"
+                                Content="Add Allotment"/>
+                    </Grid>
+
+                    <Border Grid.Row="1"
+                            Height="1"
+                            Background="{StaticResource BorderBrushLighter}"
+                            Margin="0,14,0,8"/>
+
+                    <!-- BULK ACTION -->
+                    <Border Grid.Row="2"
+                            Margin="0,0,0,8"
+                            Padding="12,8"
+                            CornerRadius="12"
+                            Background="{StaticResource AccentSoftBrush}"
+                            Visibility="{Binding HasSelectedItems, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           Text="&#xE73E;"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="12"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SelectedCount, Mode=OneWay}"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontWeight="Bold"
+                                           Margin="8,0,0,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text=" allotment(s) selected"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           Margin="4,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <Button HorizontalAlignment="Right"
+                                    MinWidth="170"
+                                    Height="34"
                                     Style="{StaticResource DangerButton}"
                                     Command="{Binding OpenDeleteSelectedCommand}"
-                                    Content="{Binding DeleteSelectedButtonText}"
-                                    Visibility="{Binding HasSelectedItems, Converter={StaticResource BoolToVis}}"/>
+                                    Content="{Binding DeleteSelectedButtonText}"/>
+                        </Grid>
+                    </Border>
 
-                            <Button Style="{StaticResource PrimaryButton}"
-                                    Command="{Binding AddAllotmentCommand}"
-                                    Content="Add Allotment"/>
-                        </StackPanel>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- Found text -->
-            <TextBlock Grid.Row="1"
-                       Text="{Binding FoundText}"
-                       Foreground="{StaticResource TextSecondaryBrush}"
-                       FontSize="12"
-                       Margin="4,0,0,12"/>
-
-            <!-- TABLE -->
-            <Border Grid.Row="2"
-                    Style="{StaticResource CardBorder}"
-                    Padding="12">
-                <DataGrid ItemsSource="{Binding Items}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="None"
-                          RowHeaderWidth="0"
-                          Background="Transparent"
-                          BorderThickness="0"
-                          FontSize="12"
-                          Foreground="{StaticResource TextPrimaryBrush}"
-                          ColumnHeaderHeight="44"
-                          RowHeight="50"
-                          IsReadOnly="True"
-                          CanUserResizeRows="False"
-                          CanUserReorderColumns="False"
-                          CanUserSortColumns="False"
-                          SelectionUnit="Cell"
-                          SelectionMode="Single"
-                          FocusVisualStyle="{x:Null}">
-
-                    <DataGrid.Resources>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Setter Property="Padding" Value="10,0"/>
-                        </Style>
-
-                        <Style TargetType="DataGridRow">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="SnapsToDevicePixels" Value="True"/>
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridRow">
-                                        <Border Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}">
-                                            <DataGridCellsPresenter/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#FAFBFF"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="8,0"/>
-                            <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridCell">
-                                        <Border Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-                                            <ContentPresenter VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </DataGrid.Resources>
-
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="44">
-                            <DataGridTemplateColumn.Header>
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          IsThreeState="True"
-                                          IsChecked="{Binding DataContext.IsAllSelected,
-                                                              RelativeSource={RelativeSource AncestorType=DataGrid},
-                                                              Mode=TwoWay,
-                                                              UpdateSourceTrigger=PropertyChanged}"/>
-                            </DataGridTemplateColumn.Header>
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected,
-                                                               Mode=TwoWay,
-                                                               UpdateSourceTrigger=PropertyChanged}"
+                    <!-- TABLE -->
+                    <DataGrid Grid.Row="3"
+                              ItemsSource="{Binding Items}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeRows="False"
+                              CanUserSortColumns="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              RowHeaderWidth="0"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              FontSize="12"
+                              Foreground="{StaticResource TextPrimaryBrush}"
+                              ColumnHeaderHeight="48"
+                              RowHeight="56"
+                              IsReadOnly="True"
+                              SelectionUnit="FullRow"
+                              SelectionMode="Single"
+                              FocusVisualStyle="{x:Null}"
+                              ColumnHeaderStyle="{StaticResource AllotmentColumnHeaderStyle}"
+                              RowStyle="{StaticResource AllotmentRowStyle}"
+                              CellStyle="{StaticResource AllotmentCellStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="48">
+                                <DataGridTemplateColumn.Header>
+                                    <CheckBox Style="{StaticResource AllotmentSelectionCheckBoxStyle}"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center"
-                                              Focusable="False"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                                              IsThreeState="True"
+                                              IsChecked="{Binding DataContext.IsAllSelected,
+                                                                  RelativeSource={RelativeSource AncestorType=DataGrid},
+                                                                  Mode=TwoWay,
+                                                                  UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource AllotmentSelectionCheckBoxStyle}"
+                                                  IsChecked="{Binding IsSelected,
+                                                                      Mode=TwoWay,
+                                                                      UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Focusable="False"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="ID"
-                                            Binding="{Binding Id}"
-                                            Width="60"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+                            <DataGridTemplateColumn Header="Project"
+                                                    Width="2.15*"
+                                                    HeaderStyle="{StaticResource AllotmentLeftColumnHeaderStyle}">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
 
-                        <DataGridTextColumn Header="Project Name"
-                                            Binding="{Binding ProjectName}"
-                                            Width="180"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+                                            <Border Width="32"
+                                                    Height="32"
+                                                    CornerRadius="10"
+                                                    Background="{StaticResource AccentSoftBrush}"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                           Text="&#xE8F1;"
+                                                           Foreground="{StaticResource AccentBrush}"
+                                                           FontSize="15"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
 
-                        <DataGridTextColumn Header="Description"
-                                            Binding="{Binding Company}"
-                                            Width="150"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
+                                            <StackPanel Grid.Column="1"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding ProjectName}"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="10"
+                                                           Margin="0,2,0,0"
+                                                           TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} • {1}">
+                                                            <Binding Path="Id"/>
+                                                            <Binding Path="Company"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="Department"
-                                            Binding="{Binding Department}"
-                                            Width="150"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
-
-                        <DataGridTextColumn Header="Source of Fund"
-                                            Binding="{Binding SourceOfFund}"
-                                            Width="150"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
-
-                        <DataGridTextColumn Header="No. of Ben."
-                                            Binding="{Binding BeneficiariesCount}"
-                                            Width="110"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
-
-                        <DataGridTextColumn Header="Budget"
-                                            Binding="{Binding BudgetDisplay}"
-                                            Width="180"
-                                            CellStyle="{StaticResource CenteredCellStyle}"
-                                            ElementStyle="{StaticResource CenteredTextBlockStyle}"/>
-
-                        <DataGridTemplateColumn Width="96" Header="">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center">
-
-                                        <Button Style="{StaticResource RowActionButton}"
-                                                Margin="0,0,8,0"
-                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                                       Text="&#xE70F;"
-                                                       FontSize="14"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        </Button>
-
-                                        <Button Style="{StaticResource RowActionButton}"
-                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}">
-                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                                       Text="&#xE74D;"
-                                                       FontSize="14"
-                                                       Foreground="{StaticResource DangerBrush}"/>
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-
-            <!-- Pagination -->
-            <StackPanel Grid.Row="3"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Center"
-                        Margin="0,18,0,0">
-                <Button Content="Previous"
-                        Style="{StaticResource PageButton}"
-                        Command="{Binding PreviousPageCommand}"/>
-
-                <ItemsControl ItemsSource="{Binding PageNumbers}" Margin="8,0">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding}"
-                                    Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource PageButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Value="True">
-                                                <DataTrigger.Binding>
-                                                    <MultiBinding Converter="{StaticResource EqualsToBoolConverter}">
-                                                        <Binding/>
-                                                        <Binding Path="DataContext.CurrentPage"
-                                                                 RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                                                    </MultiBinding>
-                                                </DataTrigger.Binding>
-                                                <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
+                            <DataGridTextColumn Header="Department"
+                                                Binding="{Binding Department}"
+                                                Width="1.0*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                                     </Style>
-                                </Button.Style>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
 
-                <Button Content="Next"
-                        Style="{StaticResource PageButton}"
-                        Command="{Binding NextPageCommand}"/>
-            </StackPanel>
+                            <DataGridTemplateColumn Header="Source of Fund"
+                                                    Width="1.0*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Height="26"
+                                                MinWidth="58"
+                                                MaxWidth="130"
+                                                Padding="10,0"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Background="{StaticResource RegistryInfoSoftBrush}"
+                                                BorderBrush="#BFDBFE"
+                                                BorderThickness="1"
+                                                CornerRadius="13">
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                <Ellipse Width="6"
+                                                         Height="6"
+                                                         Fill="{StaticResource RegistryInfoBrush}"
+                                                         Margin="0,0,7,0"/>
+                                                <TextBlock Text="{Binding SourceOfFund, TargetNullValue=None}"
+                                                           Foreground="#1D4ED8"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Beneficiaries"
+                                                    Width="0.85*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Height="28"
+                                                MinWidth="46"
+                                                Padding="10,0"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Background="#F8FAFC"
+                                                BorderBrush="{StaticResource BorderBrushSoft}"
+                                                BorderThickness="1"
+                                                CornerRadius="14">
+                                            <TextBlock Text="{Binding BeneficiariesCount}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="11"
+                                                       FontWeight="Bold"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Budget Type"
+                                                    Width="0.90*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Height="26"
+                                                MinWidth="68"
+                                                Padding="10,0"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                BorderThickness="1"
+                                                CornerRadius="13">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{StaticResource RegistryWarningSoftBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="#FED7AA"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding BudgetType}" Value="InKind">
+                                                            <Setter Property="Background" Value="{StaticResource RegistryPurpleSoftBrush}"/>
+                                                            <Setter Property="BorderBrush" Value="#DDD6FE"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                <Ellipse Width="6"
+                                                         Height="6"
+                                                         Margin="0,0,7,0">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="{StaticResource RegistryWarningBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding BudgetType}" Value="InKind">
+                                                                    <Setter Property="Fill" Value="{StaticResource RegistryPurpleBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                <TextBlock Text="{Binding BudgetType}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#B45309"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding BudgetType}" Value="InKind">
+                                                                    <Setter Property="Foreground" Value="{StaticResource RegistryPurpleBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Budget"
+                                                Binding="{Binding BudgetDisplay}"
+                                                Width="1.10*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTemplateColumn Width="92"
+                                                    Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <Button Style="{StaticResource AllotmentActionButton}"
+                                                    ToolTip="Edit allotment"
+                                                    Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}">
+                                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                           Text="&#xE70F;"
+                                                           FontSize="14"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            </Button>
+
+                                            <Button Style="{StaticResource AllotmentDangerActionButton}"
+                                                    ToolTip="Delete allotment"
+                                                    Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}">
+                                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                           Text="&#xE74D;"
+                                                           FontSize="14"
+                                                           Foreground="{StaticResource DangerBrush}"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- PAGINATION -->
+                    <StackPanel Grid.Row="4"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,14,0,0">
+                        <Button Content="Previous"
+                                Style="{StaticResource PageButton}"
+                                Command="{Binding PreviousPageCommand}"/>
+
+                        <ItemsControl ItemsSource="{Binding PageNumbers}"
+                                      Margin="8,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding}"
+                                            Command="{Binding DataContext.GoToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Style>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource PageButton}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Value="True">
+                                                        <DataTrigger.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualsToBoolConverter}">
+                                                                <Binding/>
+                                                                <Binding Path="DataContext.CurrentPage"
+                                                                         RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                                            </MultiBinding>
+                                                        </DataTrigger.Binding>
+                                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Button Content="Next"
+                                Style="{StaticResource PageButton}"
+                                Command="{Binding NextPageCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
-
         <!-- ADD / EDIT MODAL -->
         <Grid Panel.ZIndex="900"
               Visibility="{Binding IsFormOpen, Converter={StaticResource BoolToVis}}"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
-            <Border Background="#660F172A"/>
-            <Button Style="{StaticResource BackdropButton}" Command="{Binding CloseFormCommand}"/>
+            <Border Background="#800F172A"/>
 
-            <Border Width="940"
+            <Border Background="Transparent">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick"
+                                  Command="{Binding CloseFormCommand}"/>
+                </Border.InputBindings>
+            </Border>
+
+            <Border Width="980"
+                    MaxHeight="760"
                     CornerRadius="24"
                     Background="White"
                     BorderBrush="{StaticResource BorderBrushLighter}"
                     BorderThickness="1"
-                    Padding="28"
+                    Padding="26"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Effect="{StaticResource ModalShadow}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="20"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Header -->
+                    <!-- HEADER -->
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{Binding FormTitle}"
-                                   FontSize="22"
-                                   FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                        <Border Width="44"
+                                Height="44"
+                                CornerRadius="13"
+                                Background="{StaticResource AccentSoftBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE8F1;"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontSize="18"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
 
-                        <Button Grid.Column="1"
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding FormTitle}"
+                                       FontSize="21"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Configure project information, beneficiary capacity, and budget allocation."
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="3"
                                 Style="{StaticResource CloseButtonStyle}"
                                 Command="{Binding CloseFormCommand}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
@@ -764,222 +1330,344 @@
                         </Button>
                     </Grid>
 
-                    <!-- Form -->
-                    <Grid Grid.Row="1" Margin="0,22,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="32"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
+                    <ScrollViewer Grid.Row="2"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Left column -->
-                        <StackPanel Grid.Column="0">
+                            <!-- PROJECT INFORMATION -->
+                            <Border Grid.Column="0"
+                                    Padding="20"
+                                    CornerRadius="18"
+                                    Background="#F8FAFC"
+                                    BorderBrush="{StaticResource BorderBrushSoft}"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="Project Information"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="16"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="Basic identity and ownership of the allotment."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               Margin="0,4,0,18"/>
 
-                            <TextBlock Text="Project Name" Style="{StaticResource FieldLabelText}"/>
-                            <Border Style="{StaticResource InputBorderStyle}">
-                                <TextBox Text="{Binding ProjectNameInput, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource PlainInputTextBox}"/>
+                                    <TextBlock Text="Project Name"
+                                               Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding ProjectNameInput, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding ProjectNameError}"
+                                               Foreground="{StaticResource DangerBrush}"
+                                               FontSize="11"
+                                               Margin="2,6,0,0"
+                                               Visibility="{Binding HasProjectNameError, Converter={StaticResource BoolToVis}}"/>
+
+                                    <TextBlock Text="Company"
+                                               Style="{StaticResource FieldLabelText}"
+                                               Margin="0,18,0,8"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding CompanyInput, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding CompanyError}"
+                                               Foreground="{StaticResource DangerBrush}"
+                                               FontSize="11"
+                                               Margin="2,6,0,0"
+                                               Visibility="{Binding HasCompanyError, Converter={StaticResource BoolToVis}}"/>
+
+                                    <TextBlock Text="Department"
+                                               Style="{StaticResource FieldLabelText}"
+                                               Margin="0,18,0,8"/>
+                                    <ComboBox ItemsSource="{Binding Departments}"
+                                              SelectedItem="{Binding DepartmentInput}"
+                                              Style="{StaticResource ModernComboBox}"/>
+                                    <TextBlock Text="{Binding DepartmentError}"
+                                               Foreground="{StaticResource DangerBrush}"
+                                               FontSize="11"
+                                               Margin="2,6,0,0"
+                                               Visibility="{Binding HasDepartmentError, Converter={StaticResource BoolToVis}}"/>
+
+                                    <TextBlock Text="Source of Fund"
+                                               Style="{StaticResource FieldLabelText}"
+                                               Margin="0,18,0,8"/>
+                                    <ComboBox ItemsSource="{Binding SourcesOfFund}"
+                                              SelectedItem="{Binding SourceOfFundInput}"
+                                              Style="{StaticResource ModernComboBox}"/>
+                                    <TextBlock Text="{Binding SourceOfFundError}"
+                                               Foreground="{StaticResource DangerBrush}"
+                                               FontSize="11"
+                                               Margin="2,6,0,0"
+                                               Visibility="{Binding HasSourceOfFundError, Converter={StaticResource BoolToVis}}"/>
+                                </StackPanel>
                             </Border>
-                            <TextBlock Text="{Binding ProjectNameError}"
-                                       Foreground="{StaticResource DangerBrush}"
-                                       FontSize="11"
-                                       Margin="2,6,0,0"
-                                       Visibility="{Binding HasProjectNameError, Converter={StaticResource BoolToVis}}"/>
 
-                            <TextBlock Text="Department" Style="{StaticResource FieldLabelText}" Margin="0,18,0,8"/>
-                            <ComboBox ItemsSource="{Binding Departments}"
-                                      SelectedItem="{Binding DepartmentInput}"
-                                      Style="{StaticResource ModernComboBox}"/>
-                            <TextBlock Text="{Binding DepartmentError}"
-                                       Foreground="{StaticResource DangerBrush}"
-                                       FontSize="11"
-                                       Margin="2,6,0,0"
-                                       Visibility="{Binding HasDepartmentError, Converter={StaticResource BoolToVis}}"/>
+                            <!-- CAPACITY / BUDGET -->
+                            <Border Grid.Column="2"
+                                    Padding="20"
+                                    CornerRadius="18"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrushSoft}"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="Capacity and Budget"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="16"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="Set the planned beneficiary count and allocation type."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               Margin="0,4,0,18"/>
 
-                            <TextBlock Text="No of Beneficiaries" Style="{StaticResource FieldLabelText}" Margin="0,18,0,8"/>
-                            <Border Style="{StaticResource InputBorderStyle}">
-                                <TextBox Text="{Binding BeneficiariesInput, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource PlainInputTextBox}"
-                                         PreviewTextInput="DigitsOnly_PreviewTextInput"
-                                         PreviewKeyDown="BlockSpace_PreviewKeyDown"
-                                         Tag="digits"/>
-                            </Border>
-                            <TextBlock Text="{Binding BeneficiariesError}"
-                                       Foreground="{StaticResource DangerBrush}"
-                                       FontSize="11"
-                                       Margin="2,6,0,0"
-                                       Visibility="{Binding HasBeneficiariesError, Converter={StaticResource BoolToVis}}"/>
-                        </StackPanel>
-
-                        <!-- Right column -->
-                        <StackPanel Grid.Column="2">
-
-                            <TextBlock Text="Description" Style="{StaticResource FieldLabelText}"/>
-                            <Border Style="{StaticResource InputBorderStyle}">
-                                <TextBox Text="{Binding CompanyInput, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource PlainInputTextBox}"/>
-                            </Border>
-                            <TextBlock Text="{Binding Error}"
-                                       Foreground="{StaticResource DangerBrush}"
-                                       FontSize="11"
-                                       Margin="2,6,0,0"
-                                       Visibility="{Binding HasCompanyError, Converter={StaticResource BoolToVis}}"/>
-
-                            <TextBlock Text="Source of Fund" Style="{StaticResource FieldLabelText}" Margin="0,18,0,8"/>
-                            <ComboBox ItemsSource="{Binding SourcesOfFund}"
-                                      SelectedItem="{Binding SourceOfFundInput}"
-                                      Style="{StaticResource ModernComboBox}"/>
-                            <TextBlock Text="{Binding SourceOfFundError}"
-                                       Foreground="{StaticResource DangerBrush}"
-                                       FontSize="11"
-                                       Margin="2,6,0,0"
-                                       Visibility="{Binding HasSourceOfFundError, Converter={StaticResource BoolToVis}}"/>
-
-                            <TextBlock Text="Budget Type" Style="{StaticResource FieldLabelText}" Margin="0,18,0,8"/>
-                            <ComboBox ItemsSource="{Binding BudgetTypes}"
-                                      SelectedItem="{Binding BudgetTypeInput}"
-                                      Style="{StaticResource ModernComboBox}"/>
-
-                            <!-- MONEY PANEL -->
-                            <StackPanel Margin="0,14,0,0">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding BudgetTypeInput}" Value="Money">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <TextBlock Text="Budget Amount (₱)" Style="{StaticResource FieldLabelText}"/>
-                                <Border Style="{StaticResource InputBorderStyle}">
-                                    <TextBox Text="{Binding BudgetAmountInput, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource PlainInputTextBox}"
-                                             PreviewTextInput="Money_PreviewTextInput"
-                                             PreviewKeyDown="BlockSpace_PreviewKeyDown"
-                                             Tag="money"/>
-                                </Border>
-                                <TextBlock Text="{Binding BudgetAmountError}"
-                                           Foreground="{StaticResource DangerBrush}"
-                                           FontSize="11"
-                                           Margin="2,6,0,0"
-                                           Visibility="{Binding HasBudgetAmountError, Converter={StaticResource BoolToVis}}"/>
-                            </StackPanel>
-
-                            <!-- IN-KIND PANEL -->
-                            <StackPanel Margin="0,14,0,0">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding BudgetTypeInput}" Value="InKind">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <TextBlock Text="In-kind Budget" Style="{StaticResource FieldLabelText}"/>
-
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding BudgetQtyInput, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBlock Text="Number of Beneficiaries"
+                                               Style="{StaticResource FieldLabelText}"/>
+                                    <Border Style="{StaticResource InputBorderStyle}">
+                                        <TextBox Text="{Binding BeneficiariesInput, UpdateSourceTrigger=PropertyChanged}"
                                                  Style="{StaticResource PlainInputTextBox}"
                                                  PreviewTextInput="DigitsOnly_PreviewTextInput"
                                                  PreviewKeyDown="BlockSpace_PreviewKeyDown"
                                                  Tag="digits"/>
                                     </Border>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0"
-                                               Text="{Binding BudgetQtyError}"
+                                    <TextBlock Text="{Binding BeneficiariesError}"
                                                Foreground="{StaticResource DangerBrush}"
                                                FontSize="11"
                                                Margin="2,6,0,0"
-                                               Visibility="{Binding HasBudgetQtyError, Converter={StaticResource BoolToVis}}"/>
+                                               Visibility="{Binding HasBeneficiariesError, Converter={StaticResource BoolToVis}}"/>
 
-                                    <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource InputBorderStyle}">
-                                        <TextBox Text="{Binding BudgetUnitInput, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource PlainInputTextBox}"/>
-                                    </Border>
+                                    <TextBlock Text="Budget Type"
+                                               Style="{StaticResource FieldLabelText}"
+                                               Margin="0,18,0,8"/>
+                                    <ComboBox ItemsSource="{Binding BudgetTypes}"
+                                              SelectedItem="{Binding BudgetTypeInput}"
+                                              Style="{StaticResource ModernComboBox}"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="2"
-                                               Text="{Binding BudgetUnitError}"
-                                               Foreground="{StaticResource DangerBrush}"
-                                               FontSize="11"
-                                               Margin="2,6,0,0"
-                                               Visibility="{Binding HasBudgetUnitError, Converter={StaticResource BoolToVis}}"/>
-                                </Grid>
+                                    <!-- MONEY -->
+                                    <StackPanel Margin="0,18,0,0">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding BudgetTypeInput}" Value="Money">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
 
-                                <TextBlock Text="Example: 100 | sacks of rice"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                           FontSize="11"
-                                           Margin="0,8,0,0"/>
-                            </StackPanel>
+                                        <Border Padding="14"
+                                                CornerRadius="14"
+                                                Background="{StaticResource RegistryWarningSoftBrush}"
+                                                BorderBrush="#FED7AA"
+                                                BorderThickness="1">
+                                            <StackPanel>
+                                                <TextBlock Text="Monetary Allocation"
+                                                           Foreground="#B45309"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="Enter the total approved amount."
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="11"
+                                                           Margin="0,3,0,12"/>
+
+                                                <TextBlock Text="Budget Amount (₱)"
+                                                           Style="{StaticResource FieldLabelText}"/>
+                                                <Border Style="{StaticResource InputBorderStyle}">
+                                                    <TextBox Text="{Binding BudgetAmountInput, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource PlainInputTextBox}"
+                                                             PreviewTextInput="Money_PreviewTextInput"
+                                                             PreviewKeyDown="BlockSpace_PreviewKeyDown"
+                                                             Tag="money"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding BudgetAmountError}"
+                                                           Foreground="{StaticResource DangerBrush}"
+                                                           FontSize="11"
+                                                           Margin="2,6,0,0"
+                                                           Visibility="{Binding HasBudgetAmountError, Converter={StaticResource BoolToVis}}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- IN-KIND -->
+                                    <StackPanel Margin="0,18,0,0">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding BudgetTypeInput}" Value="InKind">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+
+                                        <Border Padding="14"
+                                                CornerRadius="14"
+                                                Background="{StaticResource RegistryPurpleSoftBrush}"
+                                                BorderBrush="#DDD6FE"
+                                                BorderThickness="1">
+                                            <StackPanel>
+                                                <TextBlock Text="In-Kind Allocation"
+                                                           Foreground="{StaticResource RegistryPurpleBrush}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="Enter the quantity and item or unit."
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="11"
+                                                           Margin="0,3,0,12"/>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="120"/>
+                                                        <ColumnDefinition Width="12"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <Border Grid.Row="0"
+                                                            Grid.Column="0"
+                                                            Style="{StaticResource InputBorderStyle}">
+                                                        <TextBox Text="{Binding BudgetQtyInput, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Style="{StaticResource PlainInputTextBox}"
+                                                                 PreviewTextInput="DigitsOnly_PreviewTextInput"
+                                                                 PreviewKeyDown="BlockSpace_PreviewKeyDown"
+                                                                 Tag="digits"/>
+                                                    </Border>
+
+                                                    <TextBlock Grid.Row="1"
+                                                               Grid.Column="0"
+                                                               Text="{Binding BudgetQtyError}"
+                                                               Foreground="{StaticResource DangerBrush}"
+                                                               FontSize="11"
+                                                               Margin="2,6,0,0"
+                                                               Visibility="{Binding HasBudgetQtyError, Converter={StaticResource BoolToVis}}"/>
+
+                                                    <Border Grid.Row="0"
+                                                            Grid.Column="2"
+                                                            Style="{StaticResource InputBorderStyle}">
+                                                        <TextBox Text="{Binding BudgetUnitInput, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Style="{StaticResource PlainInputTextBox}"/>
+                                                    </Border>
+
+                                                    <TextBlock Grid.Row="1"
+                                                               Grid.Column="2"
+                                                               Text="{Binding BudgetUnitError}"
+                                                               Foreground="{StaticResource DangerBrush}"
+                                                               FontSize="11"
+                                                               Margin="2,6,0,0"
+                                                               Visibility="{Binding HasBudgetUnitError, Converter={StaticResource BoolToVis}}"/>
+                                                </Grid>
+
+                                                <TextBlock Text="Example: 100 | sacks of rice"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="11"
+                                                           Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- FOOTER -->
+                    <Grid Grid.Row="4">
+                        <TextBlock Text="Complete all required fields before saving."
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"/>
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                            <Button Content="Cancel"
+                                    Width="132"
+                                    Height="44"
+                                    Style="{StaticResource LightButton}"
+                                    Command="{Binding CloseFormCommand}"/>
+
+                            <Button Content="Save Allotment"
+                                    MinWidth="164"
+                                    Height="44"
+                                    Margin="12,0,0,0"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding SaveFormCommand}"
+                                    IsEnabled="{Binding CanSave}"/>
                         </StackPanel>
-                    </Grid>
-
-                    <!-- Save -->
-                    <Grid Grid.Row="2" Margin="0,28,0,0">
-                        <Button Content="Save"
-                                Width="180"
-                                Height="44"
-                                HorizontalAlignment="Right"
-                                Style="{StaticResource PrimaryButton}"
-                                Command="{Binding SaveFormCommand}"
-                                IsEnabled="{Binding CanSave}"/>
                     </Grid>
                 </Grid>
             </Border>
         </Grid>
-
         <!-- DELETE MODAL -->
         <Grid Panel.ZIndex="910"
               Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVis}}"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
-            <Border Background="#660F172A"/>
-            <Button Style="{StaticResource BackdropButton}" Command="{Binding CancelDeleteCommand}"/>
+            <Border Background="#800F172A"/>
 
-            <Border Width="540"
+            <Border Background="Transparent">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick"
+                                  Command="{Binding CancelDeleteCommand}"/>
+                </Border.InputBindings>
+            </Border>
+
+            <Border Width="560"
                     CornerRadius="24"
                     Background="White"
                     BorderBrush="{StaticResource BorderBrushLighter}"
                     BorderThickness="1"
-                    Padding="22"
+                    Padding="24"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Effect="{StaticResource ModalShadow}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="22"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{Binding DeleteTitle}"
-                                   Foreground="{StaticResource DangerBrush}"
-                                   FontSize="20"
-                                   FontWeight="Bold"/>
+                        <Border Width="44"
+                                Height="44"
+                                CornerRadius="14"
+                                Background="#FFF1F2">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE74D;"
+                                       Foreground="{StaticResource DangerBrush}"
+                                       FontSize="18"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
 
-                        <Button Grid.Column="1"
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DeleteTitle}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="20"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="This operation cannot be undone."
+                                       Foreground="{StaticResource DangerBrush}"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="3"
                                 Style="{StaticResource CloseButtonStyle}"
                                 Command="{Binding CancelDeleteCommand}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
@@ -989,33 +1677,37 @@
                         </Button>
                     </Grid>
 
-                    <TextBlock Grid.Row="1"
-                               Text="{Binding DeleteMessage}"
-                               Margin="0,14,0,0"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               TextWrapping="Wrap"/>
+                    <Border Grid.Row="2"
+                            Padding="16"
+                            CornerRadius="14"
+                            Background="#F8FAFC"
+                            BorderBrush="{StaticResource BorderBrushSoft}"
+                            BorderThickness="1">
+                        <TextBlock Text="{Binding DeleteMessage}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   TextWrapping="Wrap"
+                                   LineHeight="20"/>
+                    </Border>
 
-                    <StackPanel Grid.Row="2"
+                    <StackPanel Grid.Row="4"
                                 Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0,18,0,0">
+                                HorizontalAlignment="Right">
                         <Button Content="Cancel"
-                                Width="140"
-                                Height="42"
+                                Width="132"
+                                Height="44"
                                 Style="{StaticResource LightButton}"
                                 Command="{Binding CancelDeleteCommand}"/>
 
-                        <Button Content="Confirm"
+                        <Button Content="Delete"
                                 Width="140"
-                                Height="42"
-                                Margin="14,0,0,0"
+                                Height="44"
+                                Margin="12,0,0,0"
                                 Style="{StaticResource DangerButton}"
                                 Command="{Binding ConfirmDeleteCommand}"/>
                     </StackPanel>
                 </Grid>
             </Border>
         </Grid>
-
         <!-- LOADING OVERLAY -->
         <Grid Panel.ZIndex="950"
       Background="#66FFFFFF"

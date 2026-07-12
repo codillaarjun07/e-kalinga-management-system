@@ -90,6 +90,30 @@ namespace WpfApp3.ViewModels.Validators
         [ObservableProperty] private bool isSaveConfirmOpen = false;
         [ObservableProperty] private bool isLoading = false;
 
+        // VALIDATION WORKSPACE REVAMP STATE
+        private int _awaitingReviewCount;
+
+        public int AwaitingReviewCount =>
+            _awaitingReviewCount;
+
+        public int EndorsedCount =>
+            _validatedByStatus.TryGetValue("Endorsed", out var rows)
+                ? rows.Count
+                : 0;
+
+        public int PendingCount =>
+            _validatedByStatus.TryGetValue("Pending", out var rows)
+                ? rows.Count
+                : 0;
+
+        public int RejectedCount =>
+            _validatedByStatus.TryGetValue("Rejected", out var rows)
+                ? rows.Count
+                : 0;
+
+        public int ValidatedRecordsCount =>
+            EndorsedCount + PendingCount + RejectedCount;
+        // END VALIDATION WORKSPACE REVAMP STATE
         [ObservableProperty] private string validateSelectedStatus = "";
 
         private bool _isAddingProfile;
@@ -169,6 +193,7 @@ namespace WpfApp3.ViewModels.Validators
                         ExternalRows = externalRows,
                         NotYetPage = safeNotYetPage,
                         NotYetTotalPages = notYetPages,
+                        NotYetTotalCount = externalCount,
                         Endorsed = endorsedAll,
                         Pending = pendingAll,
                         Rejected = rejectedAll
@@ -182,6 +207,7 @@ namespace WpfApp3.ViewModels.Validators
                 _externalPeoplePage = result.ExternalRows;
                 NotYetCurrentPage = result.NotYetPage;
                 NotYetTotalPages = result.NotYetTotalPages;
+                _awaitingReviewCount = result.NotYetTotalCount;
 
                 BuildCaches(
                     result.SavedByIds,
@@ -191,6 +217,7 @@ namespace WpfApp3.ViewModels.Validators
 
                 ApplyAllFilters();
                 RestoreSelection(preferredBeneficiaryId);
+                NotifyValidationSummary();
                 UpdatePaginationState();
             }
             finally
@@ -199,6 +226,16 @@ namespace WpfApp3.ViewModels.Validators
             }
         }
 
+        // VALIDATION WORKSPACE REVAMP HELPERS
+        private void NotifyValidationSummary()
+        {
+            OnPropertyChanged(nameof(AwaitingReviewCount));
+            OnPropertyChanged(nameof(EndorsedCount));
+            OnPropertyChanged(nameof(PendingCount));
+            OnPropertyChanged(nameof(RejectedCount));
+            OnPropertyChanged(nameof(ValidatedRecordsCount));
+        }
+        // END VALIDATION WORKSPACE REVAMP HELPERS
         private void BuildCaches(
     Dictionary<string, ValidatorRecord> savedByIds,
     List<ValidatorRecord> endorsed,
@@ -805,6 +842,7 @@ namespace WpfApp3.ViewModels.Validators
             public List<ValidatorRecord> ExternalRows { get; set; } = new();
             public int NotYetPage { get; set; } = 1;
             public int NotYetTotalPages { get; set; } = 1;
+            public int NotYetTotalCount { get; set; }
             public List<ValidatorRecord> Endorsed { get; set; } = new();
             public List<ValidatorRecord> Pending { get; set; } = new();
             public List<ValidatorRecord> Rejected { get; set; } = new();

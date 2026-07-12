@@ -11,40 +11,100 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <Style x:Key="AnalyticsActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#2E3A59"/>
-            <Setter Property="BorderBrush" Value="#E6ECF7"/>
+        <SolidColorBrush x:Key="AnalyticsPrimaryBrush" Color="#1F2A44"/>
+        <SolidColorBrush x:Key="AnalyticsPrimaryHoverBrush" Color="#162038"/>
+        <SolidColorBrush x:Key="AnalyticsPageBrush" Color="#F3F5F9"/>
+        <SolidColorBrush x:Key="AnalyticsCardBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="AnalyticsTextBrush" Color="#2E3A59"/>
+        <SolidColorBrush x:Key="AnalyticsMutedBrush" Color="#6B778C"/>
+        <SolidColorBrush x:Key="AnalyticsBorderBrush" Color="#E8EEF6"/>
+        <SolidColorBrush x:Key="AnalyticsSoftBrush" Color="#EEF2FF"/>
+        <SolidColorBrush x:Key="AnalyticsBlueBrush" Color="#2563EB"/>
+        <SolidColorBrush x:Key="AnalyticsBlueSoftBrush" Color="#EFF6FF"/>
+        <SolidColorBrush x:Key="AnalyticsGreenBrush" Color="#16A34A"/>
+        <SolidColorBrush x:Key="AnalyticsGreenSoftBrush" Color="#ECFDF3"/>
+        <SolidColorBrush x:Key="AnalyticsAmberBrush" Color="#D97706"/>
+        <SolidColorBrush x:Key="AnalyticsAmberSoftBrush" Color="#FFF7E8"/>
+        <SolidColorBrush x:Key="AnalyticsPurpleBrush" Color="#7C3AED"/>
+        <SolidColorBrush x:Key="AnalyticsPurpleSoftBrush" Color="#F5F3FF"/>
+        <SolidColorBrush x:Key="AnalyticsRoseBrush" Color="#E11D48"/>
+        <SolidColorBrush x:Key="AnalyticsRoseSoftBrush" Color="#FFF1F2"/>
+
+        <DropShadowEffect x:Key="AnalyticsCardShadow"
+                          BlurRadius="18"
+                          ShadowDepth="2"
+                          Opacity="0.06"/>
+
+        <DropShadowEffect x:Key="AnalyticsModalShadow"
+                          BlurRadius="34"
+                          ShadowDepth="8"
+                          Opacity="0.18"/>
+
+        <Style x:Key="AnalyticsCardStyle"
+               TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource AnalyticsCardBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="16,9"/>
-            <Setter Property="MinWidth" Value="98"/>
-            <Setter Property="Height" Value="42"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="Effect" Value="{StaticResource AnalyticsCardShadow}"/>
+        </Style>
+
+        <Style x:Key="AnalyticsMetricCardStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource AnalyticsCardStyle}">
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+
+        <Style x:Key="AnalyticsInsightCardStyle"
+               TargetType="Border">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="14,11"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+
+        <Style x:Key="AnalyticsSecondaryButtonStyle"
+               TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="112"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource AnalyticsTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
+                        <Border x:Name="ButtonBorder"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="0"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2E3A59"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#2E3A59"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#F8FAFC"/>
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#CBD5E1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1F2A44"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#1F2A44"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#F1F5F9"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.55"/>
@@ -55,264 +115,598 @@
             </Setter>
         </Style>
 
-        <Style x:Key="FlatAnalyticsCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E7ECF5"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="0"/>
-            <Setter Property="Padding" Value="18"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F8FAFD"/>
-                    <Setter Property="BorderBrush" Value="#CBD5E1"/>
-                </Trigger>
-            </Style.Triggers>
+        <Style x:Key="AnalyticsPrimaryButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource AnalyticsSecondaryButtonStyle}">
+            <Setter Property="MinWidth" Value="132"/>
+            <Setter Property="Background" Value="{StaticResource AnalyticsPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsPrimaryBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{StaticResource AnalyticsPrimaryHoverBrush}"/>
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="{StaticResource AnalyticsPrimaryHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Opacity"
+                                        Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AnalyticsSectionTitleStyle"
+               TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AnalyticsTextBrush}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style x:Key="AnalyticsSectionDescriptionStyle"
+               TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AnalyticsMutedBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#F3F5F9">
+    <Grid Background="{StaticResource AnalyticsPageBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,18">
 
-                <!-- Header row -->
-                <Grid Margin="0,0,0,18">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- COMMAND BAR -->
+                <Border Style="{StaticResource AnalyticsCardStyle}"
+                        Padding="18,15"
+                        Margin="0,0,0,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Reports, KPIs, and chart summaries"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="#2E3A59"/>
-                        <TextBlock Text="{Binding LastUpdatedText}"
-                                   Foreground="#8A94A6"
-                                   FontSize="13"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
+                        <Border Width="42"
+                                Height="42"
+                                CornerRadius="13"
+                                Background="{StaticResource AnalyticsSoftBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE9D2;"
+                                       Foreground="{StaticResource AnalyticsPrimaryBrush}"
+                                       FontSize="18"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
 
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center">
-                        <Button Content="Refresh"
-                                Style="{StaticResource AnalyticsActionButtonStyle}"
-                                Command="{Binding RefreshCommand}"
-                                Margin="0,0,8,0"/>
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="Reports, KPIs, and operational insights"
+                                       Foreground="{StaticResource AnalyticsTextBrush}"
+                                       FontSize="17"
+                                       FontWeight="Bold"/>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,4,0,0">
+                                <TextBlock Text="{Binding LastUpdatedText, Mode=OneWay}"
+                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           FontSize="11"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="Refreshing analytics..."
+                                           Foreground="{StaticResource AnalyticsBlueBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+                            </StackPanel>
+                        </StackPanel>
 
-                        <Button Content="Export PDF"
-                                Style="{StaticResource AnalyticsActionButtonStyle}"
-                                Command="{Binding ExportPdfCommand}"
-                                Background="#2E3A59"
-                                Foreground="White"
-                                BorderBrush="#2E3A59"
-                                MinWidth="116"/>
-                    </StackPanel>
-                </Grid>
+                        <StackPanel Grid.Column="3"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Button Style="{StaticResource AnalyticsSecondaryButtonStyle}"
+                                    Command="{Binding RefreshCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                               Text="&#xE72C;"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Refresh"
+                                               Margin="7,0,0,0"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
 
-                <!-- KPI tablets -->
-                <UniformGrid Columns="4" Margin="0,0,0,16">
-                    <Border Style="{StaticResource FlatAnalyticsCardStyle}">
+                            <Button Style="{StaticResource AnalyticsPrimaryButtonStyle}"
+                                    Command="{Binding ExportPdfCommand}"
+                                    Margin="10,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                               Text="&#xE749;"
+                                               FontSize="12"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Export PDF"
+                                               Margin="7,0,0,0"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- KPI CARDS -->
+                <UniformGrid Columns="4"
+                             Margin="0,0,0,14">
+                    <Border Style="{StaticResource AnalyticsMetricCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="48"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-                            <Border Width="50" Height="50" Background="#E9FFF8" VerticalAlignment="Center">
-                                <TextBlock Text="₱" FontSize="21" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Border Width="40"
+                                    Height="40"
+                                    CornerRadius="13"
+                                    Background="{StaticResource AnalyticsGreenSoftBrush}">
+                                <TextBlock Text="₱"
+                                           Foreground="{StaticResource AnalyticsGreenBrush}"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
                             </Border>
-
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Total Allotment Amount" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding TotalAllotmentAmount}" Foreground="#2E3A59" FontSize="19" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="MONETARY ALLOTMENT"
+                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           FontSize="9"
+                                           FontWeight="Bold"/>
+                                <TextBlock Text="{Binding TotalAllotmentAmount, Mode=OneWay}"
+                                           Foreground="{StaticResource AnalyticsTextBrush}"
+                                           FontSize="19"
+                                           FontWeight="Bold"
+                                           Margin="0,4,0,0"
+                                           TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource FlatAnalyticsCardStyle}">
+                    <Border Style="{StaticResource AnalyticsMetricCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="48"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-                            <Border Width="50" Height="50" Background="#EEF2FF" VerticalAlignment="Center">
-                                <TextBlock Text="👥" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Border Width="40"
+                                    Height="40"
+                                    CornerRadius="13"
+                                    Background="{StaticResource AnalyticsBlueSoftBrush}">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           Text="&#xE716;"
+                                           Foreground="{StaticResource AnalyticsBlueBrush}"
+                                           FontSize="17"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
                             </Border>
-
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Number of Beneficiaries" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding BeneficiariesCount}" Foreground="#2E3A59" FontSize="19" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="TOTAL BENEFICIARIES"
+                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           FontSize="9"
+                                           FontWeight="Bold"/>
+                                <TextBlock Text="{Binding BeneficiariesCount, Mode=OneWay}"
+                                           Foreground="{StaticResource AnalyticsBlueBrush}"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           Margin="0,3,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource FlatAnalyticsCardStyle}">
+                    <Border Style="{StaticResource AnalyticsMetricCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="48"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-                            <Border Width="50" Height="50" Background="#FFF3E6" VerticalAlignment="Center">
-                                <TextBlock Text="🛠" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Border Width="40"
+                                    Height="40"
+                                    CornerRadius="13"
+                                    Background="{StaticResource AnalyticsPurpleSoftBrush}">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           Text="&#xE8F1;"
+                                           Foreground="{StaticResource AnalyticsPurpleBrush}"
+                                           FontSize="17"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
                             </Border>
-
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Number of Projects" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding ProjectsCount}" Foreground="#2E3A59" FontSize="19" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="TOTAL PROJECTS"
+                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           FontSize="9"
+                                           FontWeight="Bold"/>
+                                <TextBlock Text="{Binding ProjectsCount, Mode=OneWay}"
+                                           Foreground="{StaticResource AnalyticsPurpleBrush}"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           Margin="0,3,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
-                    <Border Style="{StaticResource FlatAnalyticsCardStyle}">
+                    <Border Style="{StaticResource AnalyticsMetricCardStyle}"
+                            Margin="0">
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="7"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                            <Border Width="50" Height="50" Background="#FDECEC" VerticalAlignment="Center">
-                                <TextBlock Text="✓" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="40"
+                                        Height="40"
+                                        CornerRadius="13"
+                                        Background="{StaticResource AnalyticsAmberSoftBrush}">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                               Text="&#xE73E;"
+                                               Foreground="{StaticResource AnalyticsAmberBrush}"
+                                               FontSize="17"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="RELEASE COMPLETION"
+                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               FontSize="9"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding ReleaseRateText, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsTextBrush}"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Margin="0,3,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ReleasedSummaryText, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsGreenBrush}"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"
+                                               HorizontalAlignment="Right"/>
+                                    <TextBlock Text="{Binding PendingSummaryText, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsAmberBrush}"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"
+                                               Margin="0,3,0,0"
+                                               HorizontalAlignment="Right"/>
+                                </StackPanel>
+                            </Grid>
 
-                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Release Status" Foreground="#8A94A6" FontSize="12"/>
-                                <TextBlock Text="{Binding StatusSummary}" Foreground="#2E3A59" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,0"/>
-                            </StackPanel>
+                            <ProgressBar Grid.Row="2"
+                                         Height="7"
+                                         Minimum="0"
+                                         Maximum="100"
+                                         Value="{Binding ReleaseRateValue, Mode=OneWay}"
+                                         Foreground="{StaticResource AnalyticsGreenBrush}"
+                                         Background="#E8EEF6"
+                                         BorderThickness="0"/>
                         </Grid>
                     </Border>
                 </UniformGrid>
 
-                <!-- Charts -->
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="320"/>
-                        <RowDefinition Height="320"/>
-                    </Grid.RowDefinitions>
+                <!-- OPERATIONAL INSIGHTS -->
+                <Border Style="{StaticResource AnalyticsCardStyle}"
+                        Padding="16"
+                        Margin="0,0,0,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="18"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Operational Snapshot"
+                                       Foreground="{StaticResource AnalyticsTextBrush}"
+                                       FontSize="14"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="Quick indicators derived from the current report."
+                                       Foreground="{StaticResource AnalyticsMutedBrush}"
+                                       FontSize="10"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+
+                        <UniformGrid Grid.Column="2"
+                                     Columns="4">
+                            <Border Style="{StaticResource AnalyticsInsightCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="AVERAGE PER PROJECT"
+                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               FontSize="9"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding AverageAllocationText, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsTextBrush}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Margin="0,4,0,0"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource AnalyticsInsightCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="BENEFICIARIES / PROJECT"
+                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               FontSize="9"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding BeneficiariesPerProjectText, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsBlueBrush}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource AnalyticsInsightCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="RELEASED ASSISTANCE"
+                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               FontSize="9"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding ReleasedCount, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsGreenBrush}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource AnalyticsInsightCardStyle}"
+                                    Margin="0">
+                                <StackPanel>
+                                    <TextBlock Text="PENDING ASSISTANCE"
+                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               FontSize="9"
+                                               FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding PendingReleaseCount, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsAmberBrush}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                    </Grid>
+                </Border>
+
+                <!-- PRIMARY CHARTS -->
+                <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="430"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.92*"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="1.38*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Pie -->
-                    <Border Grid.Row="0" Grid.Column="0"
-                            Style="{StaticResource FlatAnalyticsCardStyle}">
+                    <Border Grid.Column="0"
+                            Height="310"
+                            Style="{StaticResource AnalyticsCardStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="Beneficiary Classification"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#2E3A59"/>
+                            <StackPanel>
+                                <TextBlock Text="Beneficiary Classification"
+                                           Style="{StaticResource AnalyticsSectionTitleStyle}"/>
+                                <TextBlock Text="Distribution of beneficiaries across the leading classifications."
+                                           Style="{StaticResource AnalyticsSectionDescriptionStyle}"/>
+                            </StackPanel>
 
-                            <lvc:PieChart Grid.Row="1"
-                                          Series="{Binding BeneficiariesPieSeries}"
-                                          DataTooltip="{x:Null}"
-                                          LegendLocation="Right"
-                                          HoverPushOut="8"/>
+                            <Grid Grid.Row="1"
+                                  Margin="0,10,0,0">
+                                <lvc:PieChart Series="{Binding BeneficiariesPieSeries}"
+                                              LegendLocation="Bottom"
+                                              InnerRadius="62"
+                                              HoverPushOut="0"
+                                              DataTooltip="{x:Null}"/>
+
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Margin="0,-28,0,0"
+                                            IsHitTestVisible="False">
+                                    <TextBlock Text="{Binding BeneficiariesCount, Mode=OneWay}"
+                                               Foreground="{StaticResource AnalyticsTextBrush}"
+                                               FontSize="24"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="beneficiaries"
+                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               FontSize="9"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Border>
 
-                    <!-- Yearly -->
-                    <Border Grid.Row="0" Grid.Column="1"
-                            Style="{StaticResource FlatAnalyticsCardStyle}">
+                    <Border Grid.Column="2"
+                            Height="310"
+                            Style="{StaticResource AnalyticsCardStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="Yearly Total Money Allotment"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#2E3A59"/>
+                            <StackPanel>
+                                <TextBlock Text="Yearly Monetary Allotment"
+                                           Style="{StaticResource AnalyticsSectionTitleStyle}"/>
+                                <TextBlock Text="Total approved monetary allocation grouped by year."
+                                           Style="{StaticResource AnalyticsSectionDescriptionStyle}"/>
+                            </StackPanel>
 
                             <lvc:CartesianChart Grid.Row="1"
                                                 Series="{Binding YearlyAllotmentSeries}"
                                                 LegendLocation="None"
-                                                Background="Transparent">
+                                                DataTooltip="{x:Null}"
+                                                Background="Transparent"
+                                                Margin="0,12,0,0">
                                 <lvc:CartesianChart.AxisX>
                                     <lvc:Axis Labels="{Binding YearlyLabels}"
+                                              Foreground="{StaticResource AnalyticsMutedBrush}"
+                                              FontSize="10"
                                               Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
                                 </lvc:CartesianChart.AxisX>
                                 <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis LabelFormatter="{Binding MoneyFormatter}"/>
-                                </lvc:CartesianChart.AxisY>
-                            </lvc:CartesianChart>
-                        </Grid>
-                    </Border>
-
-                    <!-- Monthly area -->
-                    <Border Grid.Row="1" Grid.ColumnSpan="2"
-                            Style="{StaticResource FlatAnalyticsCardStyle}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Text="Projects Created Per Month"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="#2E3A59"/>
-
-                            <lvc:CartesianChart Grid.Row="1"
-                                                Series="{Binding ProjectHistorySeries}"
-                                                LegendLocation="None"
-                                                Background="Transparent">
-                                <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Labels="{Binding MonthLabels}"
-                                              Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
-                                </lvc:CartesianChart.AxisX>
-                                <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis LabelFormatter="{Binding CountFormatter}"/>
+                                    <lvc:Axis LabelFormatter="{Binding MoneyFormatter}"
+                                              Foreground="{StaticResource AnalyticsMutedBrush}"
+                                              FontSize="10"
+                                              MinValue="0"/>
                                 </lvc:CartesianChart.AxisY>
                             </lvc:CartesianChart>
                         </Grid>
                     </Border>
                 </Grid>
+
+                <!-- MONTHLY ACTIVITY -->
+                <Border Height="280"
+                        Style="{StaticResource AnalyticsCardStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Monthly Project Activity"
+                                           Style="{StaticResource AnalyticsSectionTitleStyle}"/>
+                                <TextBlock Text="Projects created during the most recent reporting months."
+                                           Style="{StaticResource AnalyticsSectionDescriptionStyle}"/>
+                            </StackPanel>
+
+                            <Border HorizontalAlignment="Right"
+                                    Height="28"
+                                    Padding="10,0"
+                                    CornerRadius="14"
+                                    Background="{StaticResource AnalyticsBlueSoftBrush}"
+                                    BorderBrush="#BFDBFE"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="6"
+                                             Height="6"
+                                             Fill="{StaticResource AnalyticsBlueBrush}"
+                                             Margin="0,0,7,0"
+                                             VerticalAlignment="Center"/>
+                                    <TextBlock Text="Project creation trend"
+                                               Foreground="#1D4ED8"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <lvc:CartesianChart Grid.Row="1"
+                                            Series="{Binding ProjectHistorySeries}"
+                                            LegendLocation="None"
+                                            DataTooltip="{x:Null}"
+                                            Background="Transparent"
+                                            Margin="0,12,0,0">
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Labels="{Binding MonthLabels}"
+                                          Foreground="{StaticResource AnalyticsMutedBrush}"
+                                          FontSize="10"
+                                          Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
+                            </lvc:CartesianChart.AxisX>
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis LabelFormatter="{Binding CountFormatter}"
+                                          Foreground="{StaticResource AnalyticsMutedBrush}"
+                                          FontSize="10"
+                                          MinValue="0"/>
+                            </lvc:CartesianChart.AxisY>
+                        </lvc:CartesianChart>
+                    </Grid>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Loading Overlay -->
+        <!-- LOADING OVERLAY -->
         <Grid Panel.ZIndex="50"
-              Background="#66FFFFFF"
+              Background="#660F172A"
               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-            <Border Width="260"
-                    Padding="20"
-                    CornerRadius="0"
+            <Border Width="330"
+                    Padding="24"
+                    CornerRadius="22"
                     Background="White"
-                    BorderBrush="#E7ECF5"
+                    BorderBrush="{StaticResource AnalyticsBorderBrush}"
                     BorderThickness="1"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    Effect="{StaticResource AnalyticsModalShadow}">
                 <StackPanel>
-                    <TextBlock Text="Loading analytics..."
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               Foreground="#2E3A59"
+                    <Border Width="48"
+                            Height="48"
+                            CornerRadius="15"
+                            Background="{StaticResource AnalyticsSoftBrush}"
+                            HorizontalAlignment="Center">
+                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                   Text="&#xE9D2;"
+                                   Foreground="{StaticResource AnalyticsPrimaryBrush}"
+                                   FontSize="21"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <TextBlock Text="Refreshing analytics"
+                               Foreground="{StaticResource AnalyticsTextBrush}"
+                               FontSize="17"
+                               FontWeight="Bold"
+                               Margin="0,14,0,0"
                                HorizontalAlignment="Center"/>
 
-                    <ProgressBar IsIndeterminate="True"
-                                 Height="8"
-                                 Margin="0,16,0,0"
-                                 Foreground="#2E3A59"
-                                 Background="#E9EEF7"/>
+                    <TextBlock Text="Please wait while the latest report data is loaded."
+                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                               FontSize="11"
+                               Margin="0,6,0,0"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"/>
 
-                    <TextBlock Text="Please wait while data is being fetched."
-                               FontSize="12"
-                               Foreground="#8A94A6"
-                               Margin="0,12,0,0"
-                               TextAlignment="Center"/>
+                    <ProgressBar IsIndeterminate="True"
+                                 Height="7"
+                                 Margin="0,18,0,0"
+                                 Foreground="{StaticResource AnalyticsPrimaryBrush}"
+                                 Background="{StaticResource AnalyticsSoftBrush}"
+                                 BorderThickness="0"/>
                 </StackPanel>
             </Border>
         </Grid>

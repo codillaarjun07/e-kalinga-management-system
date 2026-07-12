@@ -37,6 +37,50 @@ namespace WpfApp3.ViewModels.Allotment
         [ObservableProperty] private string deleteTitle = "Delete Allotment";
         [ObservableProperty] private bool? isAllSelected = false;
 
+        // ALLOTMENT REGISTRY REVAMP STATE
+        [ObservableProperty] private string selectedDepartmentFilter = "All";
+        [ObservableProperty] private string selectedSourceOfFundFilter = "All";
+        [ObservableProperty] private string selectedBudgetTypeFilter = "All";
+
+        public ObservableCollection<string> DepartmentFilterOptions { get; } = new()
+        {
+            "All"
+        };
+
+        public ObservableCollection<string> SourceOfFundFilterOptions { get; } = new()
+        {
+            "All"
+        };
+
+        public ObservableCollection<string> BudgetTypeFilterOptions { get; } = new()
+        {
+            "All",
+            "Money",
+            "InKind"
+        };
+
+        public int TotalAllotments => _all.Count;
+
+        public long PlannedBeneficiaries =>
+            _all.Sum(x => (long)x.BeneficiariesCount);
+
+        public decimal MoneyBudgetTotal =>
+            _all
+                .Where(x => string.Equals(
+                    x.BudgetType,
+                    "Money",
+                    StringComparison.OrdinalIgnoreCase))
+                .Sum(x => x.BudgetAmount ?? 0m);
+
+        public string MoneyBudgetText =>
+            $"₱ {MoneyBudgetTotal:N2}";
+
+        public int InKindAllotments =>
+            _all.Count(x => string.Equals(
+                x.BudgetType,
+                "InKind",
+                StringComparison.OrdinalIgnoreCase));
+        // END ALLOTMENT REGISTRY REVAMP STATE
         private bool _syncingSelection;
 
         public int SelectedCount => _all.Count(x => x.IsSelected);
@@ -194,6 +238,8 @@ namespace WpfApp3.ViewModels.Allotment
                 _all.Add(item);
             }
 
+            RefreshFilterOptions();
+            NotifyRegistrySummary();
             UpdateSelectionState();
         }
 
@@ -295,6 +341,25 @@ namespace WpfApp3.ViewModels.Allotment
             Apply();
         }
 
+        // ALLOTMENT REGISTRY REVAMP FILTER HANDLERS
+        partial void OnSelectedDepartmentFilterChanged(string value)
+        {
+            CurrentPage = 1;
+            Apply();
+        }
+
+        partial void OnSelectedSourceOfFundFilterChanged(string value)
+        {
+            CurrentPage = 1;
+            Apply();
+        }
+
+        partial void OnSelectedBudgetTypeFilterChanged(string value)
+        {
+            CurrentPage = 1;
+            Apply();
+        }
+        // END ALLOTMENT REGISTRY REVAMP FILTER HANDLERS
         partial void OnCurrentPageChanged(int value)
         {
             Apply();
@@ -310,20 +375,117 @@ namespace WpfApp3.ViewModels.Allotment
         partial void OnBudgetQtyInputChanged(string value) => ValidateForm();
         partial void OnBudgetUnitInputChanged(string value) => ValidateForm();
 
+        // ALLOTMENT REGISTRY REVAMP HELPERS
+        private void RefreshFilterOptions()
+        {
+            var departments = _all
+                .Select(x => (x.Department ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            DepartmentFilterOptions.Clear();
+            DepartmentFilterOptions.Add("All");
+
+            foreach (var department in departments)
+                DepartmentFilterOptions.Add(department);
+
+            var sources = _all
+                .Select(x => (x.SourceOfFund ?? "").Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x)
+                .ToList();
+
+            SourceOfFundFilterOptions.Clear();
+            SourceOfFundFilterOptions.Add("All");
+
+            foreach (var source in sources)
+                SourceOfFundFilterOptions.Add(source);
+
+            if (!DepartmentFilterOptions.Contains(SelectedDepartmentFilter))
+                SelectedDepartmentFilter = "All";
+
+            if (!SourceOfFundFilterOptions.Contains(SelectedSourceOfFundFilter))
+                SelectedSourceOfFundFilter = "All";
+
+            if (!BudgetTypeFilterOptions.Contains(SelectedBudgetTypeFilter))
+                SelectedBudgetTypeFilter = "All";
+        }
+
+        private void NotifyRegistrySummary()
+        {
+            OnPropertyChanged(nameof(TotalAllotments));
+            OnPropertyChanged(nameof(PlannedBeneficiaries));
+            OnPropertyChanged(nameof(MoneyBudgetTotal));
+            OnPropertyChanged(nameof(MoneyBudgetText));
+            OnPropertyChanged(nameof(InKindAllotments));
+        }
+        // END ALLOTMENT REGISTRY REVAMP HELPERS
         private System.Collections.Generic.List<AllotmentRecord> Filtered()
         {
-            var q = (SearchText ?? "").Trim().ToLowerInvariant();
-            if (string.IsNullOrWhiteSpace(q))
-                return _all.ToList();
+            var query = (SearchText ?? "").Trim();
 
-            return _all.Where(x =>
-                    (x.ProjectName ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Company ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.Department ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.SourceOfFund ?? "").ToLowerInvariant().Contains(q) ||
-                    (x.BudgetDisplay ?? "").ToLowerInvariant().Contains(q) ||
-                    x.Id.ToString(CultureInfo.InvariantCulture).Contains(q))
-                .ToList();
+            System.Collections.Generic.IEnumerable<AllotmentRecord> result = _all;
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                result = result.Where(x =>
+                    (x.ProjectName ?? "").Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.Company ?? "").Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.Department ?? "").Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.SourceOfFund ?? "").Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    (x.BudgetDisplay ?? "").Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    x.Id.ToString(CultureInfo.InvariantCulture).Contains(
+                        query,
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.Equals(
+                SelectedDepartmentFilter,
+                "All",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                result = result.Where(x => string.Equals(
+                    x.Department,
+                    SelectedDepartmentFilter,
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.Equals(
+                SelectedSourceOfFundFilter,
+                "All",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                result = result.Where(x => string.Equals(
+                    x.SourceOfFund,
+                    SelectedSourceOfFundFilter,
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.Equals(
+                SelectedBudgetTypeFilter,
+                "All",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                result = result.Where(x => string.Equals(
+                    x.BudgetType,
+                    SelectedBudgetTypeFilter,
+                    StringComparison.OrdinalIgnoreCase));
+            }
+
+            return result.ToList();
         }
 
         private void Apply()
