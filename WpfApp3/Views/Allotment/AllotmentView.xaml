@@ -467,10 +467,21 @@
                                        Foreground="{StaticResource TextPrimaryBrush}"/>
                         </Button>
 
-                        <Button Grid.Column="4"
-                                Style="{StaticResource PrimaryButton}"
-                                Command="{Binding AddAllotmentCommand}"
-                                Content="Add Allotment"/>
+                        <StackPanel Grid.Column="4"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                            <Button MinWidth="180"
+                                    Height="42"
+                                    Margin="0,0,12,0"
+                                    Style="{StaticResource DangerButton}"
+                                    Command="{Binding OpenDeleteSelectedCommand}"
+                                    Content="{Binding DeleteSelectedButtonText}"
+                                    Visibility="{Binding HasSelectedItems, Converter={StaticResource BoolToVis}}"/>
+
+                            <Button Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding AddAllotmentCommand}"
+                                    Content="Add Allotment"/>
+                        </StackPanel>
                     </Grid>
                 </Grid>
             </Border>
@@ -562,13 +573,22 @@
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="44">
                             <DataGridTemplateColumn.Header>
-                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          IsThreeState="True"
+                                          IsChecked="{Binding DataContext.IsAllSelected,
+                                                              RelativeSource={RelativeSource AncestorType=DataGrid},
+                                                              Mode=TwoWay,
+                                                              UpdateSourceTrigger=PropertyChanged}"/>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected}"
+                                    <CheckBox IsChecked="{Binding IsSelected,
+                                                               Mode=TwoWay,
+                                                               UpdateSourceTrigger=PropertyChanged}"
                                               HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center"
+                                              Focusable="False"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -954,7 +974,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Delete Allotment"
+                        <TextBlock Text="{Binding DeleteTitle}"
                                    Foreground="{StaticResource DangerBrush}"
                                    FontSize="20"
                                    FontWeight="Bold"/>

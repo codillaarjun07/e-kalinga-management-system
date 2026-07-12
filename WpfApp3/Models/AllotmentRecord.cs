@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 
 namespace WpfApp3.Models
 {
-    public class AllotmentRecord
+    public partial class AllotmentRecord : ObservableObject
     {
-        public bool IsSelected { get; set; }
+        [ObservableProperty] private bool isSelected;
 
         public int Id { get; set; }
         public string ProjectName { get; set; } = "";

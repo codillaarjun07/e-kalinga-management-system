@@ -815,6 +815,9 @@
                                 <Setter Property="BorderThickness" Value="0,0,0,1"/>
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <EventSetter Event="PreviewMouseLeftButtonUp"
+                                             Handler="BeneficiaryRow_PreviewMouseLeftButtonUp"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#FAFBFF"/>

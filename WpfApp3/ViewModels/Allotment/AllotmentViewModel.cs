@@ -34,6 +34,14 @@ namespace WpfApp3.ViewModels.Allotment
 
         [ObservableProperty] private string formTitle = "Add Allotment";
         [ObservableProperty] private string deleteMessage = "";
+        [ObservableProperty] private string deleteTitle = "Delete Allotment";
+        [ObservableProperty] private bool? isAllSelected = false;
+
+        private bool _syncingSelection;
+
+        public int SelectedCount => _all.Count(x => x.IsSelected);
+        public bool HasSelectedItems => SelectedCount > 0;
+        public string DeleteSelectedButtonText => $"Delete Selected ({SelectedCount})";
 
         [ObservableProperty] private string projectNameInput = "";
         [ObservableProperty] private string companyInput = "";
@@ -73,7 +81,7 @@ namespace WpfApp3.ViewModels.Allotment
         [ObservableProperty] private bool hasBudgetUnitError;
 
         private int? _editingId;
-        private int? _deleteId;
+        private readonly System.Collections.Generic.List<int> _deleteIds = new();
 
         public int PageSize { get; } = 8;
 
@@ -155,8 +163,7 @@ namespace WpfApp3.ViewModels.Allotment
                 foreach (var item in result.Sources)
                     SourcesOfFund.Add(item);
 
-                _all.Clear();
-                _all.AddRange(result.Records);
+                ReplaceAllotments(result.Records);
 
                 CurrentPage = 1;
                 Apply();
@@ -165,13 +172,29 @@ namespace WpfApp3.ViewModels.Allotment
             {
                 Departments.Clear();
                 SourcesOfFund.Clear();
-                _all.Clear();
+                ReplaceAllotments(Array.Empty<AllotmentRecord>());
                 Apply();
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        private void ReplaceAllotments(System.Collections.Generic.IEnumerable<AllotmentRecord> records)
+        {
+            foreach (var item in _all)
+                item.PropertyChanged -= Allotment_PropertyChanged;
+
+            _all.Clear();
+
+            foreach (var item in records)
+            {
+                item.PropertyChanged += Allotment_PropertyChanged;
+                _all.Add(item);
+            }
+
+            UpdateSelectionState();
         }
 
         private void LoadSettingsOptions()
@@ -198,6 +221,72 @@ namespace WpfApp3.ViewModels.Allotment
 
             foreach (var item in sourceOfFundOptions)
                 SourcesOfFund.Add(item);
+        }
+
+        partial void OnIsAllSelectedChanged(bool? value)
+        {
+            if (_syncingSelection || !value.HasValue)
+                return;
+
+            var targets = Filtered();
+            if (targets.Count == 0)
+            {
+                UpdateSelectionState();
+                return;
+            }
+
+            _syncingSelection = true;
+            try
+            {
+                foreach (var item in targets)
+                    item.IsSelected = value.Value;
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+
+            NotifySelectionProperties();
+        }
+
+        private void Allotment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(AllotmentRecord.IsSelected) || _syncingSelection)
+                return;
+
+            UpdateSelectionState();
+        }
+
+        private void UpdateSelectionState()
+        {
+            var filtered = Filtered();
+
+            bool? nextState;
+            if (filtered.Count == 0 || filtered.All(x => !x.IsSelected))
+                nextState = false;
+            else if (filtered.All(x => x.IsSelected))
+                nextState = true;
+            else
+                nextState = null;
+
+            _syncingSelection = true;
+            try
+            {
+                IsAllSelected = nextState;
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+
+            NotifySelectionProperties();
+        }
+
+        private void NotifySelectionProperties()
+        {
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelectedItems));
+            OnPropertyChanged(nameof(DeleteSelectedButtonText));
         }
 
         partial void OnSearchTextChanged(string value)
@@ -257,6 +346,7 @@ namespace WpfApp3.ViewModels.Allotment
             OnPropertyChanged(nameof(TotalRecords));
             OnPropertyChanged(nameof(TotalPages));
             OnPropertyChanged(nameof(FoundText));
+            UpdateSelectionState();
         }
 
         private void ValidateForm()
@@ -468,8 +558,29 @@ namespace WpfApp3.ViewModels.Allotment
             if (row is null)
                 return;
 
-            _deleteId = row.Id;
+            _deleteIds.Clear();
+            _deleteIds.Add(row.Id);
+
+            DeleteTitle = "Delete Allotment";
             DeleteMessage = $"Are you sure you want to delete allotment, {row.ProjectName}? This action cannot be undone.";
+            IsDeleteOpen = true;
+        }
+
+        [RelayCommand]
+        private void OpenDeleteSelected()
+        {
+            var selected = _all.Where(x => x.IsSelected).ToList();
+            if (selected.Count == 0)
+                return;
+
+            _deleteIds.Clear();
+            _deleteIds.AddRange(selected.Select(x => x.Id));
+
+            DeleteTitle = "Delete Selected Allotments";
+            DeleteMessage = selected.Count == 1
+                ? $"Are you sure you want to delete the selected allotment, {selected[0].ProjectName}? This action cannot be undone."
+                : $"Are you sure you want to delete all {selected.Count} selected allotments? This action cannot be undone.";
+
             IsDeleteOpen = true;
         }
 
@@ -477,22 +588,27 @@ namespace WpfApp3.ViewModels.Allotment
         private void CancelDelete()
         {
             IsDeleteOpen = false;
-            _deleteId = null;
+            _deleteIds.Clear();
         }
 
         [RelayCommand]
         private async Task ConfirmDelete()
         {
-            if (_deleteId is null)
+            var ids = _deleteIds.Distinct().ToList();
+            if (ids.Count == 0)
                 return;
 
             IsLoading = true;
             try
             {
-                await Task.Run(() => Repo.Delete(_deleteId.Value));
+                await Task.Run(() =>
+                {
+                    foreach (var id in ids)
+                        Repo.Delete(id);
+                });
 
                 IsDeleteOpen = false;
-                _deleteId = null;
+                _deleteIds.Clear();
             }
             finally
             {

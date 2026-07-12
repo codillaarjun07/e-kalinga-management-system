@@ -197,10 +197,21 @@
                         Foreground="#1F2A44"
                         Content="≡"/>
 
-                <Button Grid.Column="4"
-                        Style="{StaticResource PrimaryButton}"
-                        Command="{Binding AddUserCommand}"
-                        Content="＋  Add User"/>
+                <StackPanel Grid.Column="4"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Width="176"
+                            Height="40"
+                            Margin="0,0,10,0"
+                            Style="{StaticResource RoundedDangerConfirm}"
+                            Content="{Binding DeleteSelectedText}"
+                            Command="{Binding DeleteSelectedCommand}"
+                            Visibility="{Binding HasSelectedUsers, Converter={StaticResource BoolToVis}}"/>
+
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Command="{Binding AddUserCommand}"
+                            Content="＋  Add User"/>
+                </StackPanel>
             </Grid>
 
             <TextBlock Grid.Row="2"
@@ -304,13 +315,32 @@
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="48">
                             <DataGridTemplateColumn.Header>
-                                <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          IsThreeState="True"
+                                          IsChecked="{Binding DataContext.IsAllSelected,
+                                                              RelativeSource={RelativeSource AncestorType=DataGrid},
+                                                              Mode=TwoWay,
+                                                              UpdateSourceTrigger=PropertyChanged}"/>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected}"
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center"
+                                              Focusable="False">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox">
+                                                <Setter Property="IsEnabled" Value="True"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCurrentSessionUser}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                        <Setter Property="Opacity" Value="0.40"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -655,7 +685,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Delete User"
+                        <TextBlock Text="{Binding DeleteTitle}"
                                    Foreground="#E11D48"
                                    FontSize="20"
                                    FontWeight="Bold"/>

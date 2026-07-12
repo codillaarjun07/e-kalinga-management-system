@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
-using System.Globalization;
+using System.ComponentModel;using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,6 +23,7 @@ namespace WpfApp3.ViewModels.Users
         [ObservableProperty] private string searchText = "";
         [ObservableProperty] private int currentPage = 1;
         [ObservableProperty] private bool isLoading;
+        [ObservableProperty] private bool? isAllSelected = false;
 
         [ObservableProperty] private bool isToastVisible;
         [ObservableProperty] private string toastMessage = "";
@@ -37,13 +38,24 @@ namespace WpfApp3.ViewModels.Users
         public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalRecords / (double)PageSize));
         public string FoundText => $"Found {TotalRecords} records";
 
+        public int SelectedCount =>
+            _all.Count(x => x.IsSelected && !x.IsCurrentSessionUser);
+
+        public bool HasSelectedUsers => SelectedCount > 0;
+
+        public string DeleteSelectedText =>
+            $"Delete Selected ({SelectedCount})";
+
         [ObservableProperty] private bool isFormOpen;
         [ObservableProperty] private bool isDeleteOpen;
         [ObservableProperty] private string formTitle = "Add User";
 
         private UserRecord? _editingTarget;
         private UserRecord? _deleteTarget;
+        private readonly List<UserRecord> _deleteTargets = new();
+        private bool _syncingSelection;
 
+        [ObservableProperty] private string deleteTitle = "Delete User";
         [ObservableProperty] private string deleteMessage = "";
 
         [ObservableProperty] private string firstNameInput = "";
@@ -129,10 +141,14 @@ namespace WpfApp3.ViewModels.Users
                 foreach (var role in roles)
                     Roles.Add(role);
 
+                foreach (var existing in _all)
+                    existing.PropertyChanged -= UserRecord_PropertyChanged;
+
                 _all.Clear();
+
                 foreach (var r in rows)
                 {
-                    _all.Add(new UserRecord
+                    var record = new UserRecord
                     {
                         Id = r.Id,
                         FirstName = r.FirstName,
@@ -145,7 +161,10 @@ namespace WpfApp3.ViewModels.Users
                             r.Username?.Trim(),
                             SessionService.Username?.Trim(),
                             StringComparison.OrdinalIgnoreCase)
-                    });
+                    };
+
+                    record.PropertyChanged += UserRecord_PropertyChanged;
+                    _all.Add(record);
                 }
 
                 CurrentPage = 1;
@@ -155,6 +174,96 @@ namespace WpfApp3.ViewModels.Users
             {
                 IsLoading = false;
             }
+        }
+
+        partial void OnIsAllSelectedChanged(bool? value)
+        {
+            if (_syncingSelection || value is null)
+                return;
+
+            var eligibleUsers = Filtered()
+                .Where(x => !x.IsCurrentSessionUser)
+                .ToList();
+
+            _syncingSelection = true;
+
+            try
+            {
+                foreach (var user in eligibleUsers)
+                    user.IsSelected = value.Value;
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+
+            UpdateSelectionState();
+        }
+
+        private void UserRecord_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(UserRecord.IsSelected))
+                return;
+
+            if (sender is UserRecord user &&
+                user.IsCurrentSessionUser &&
+                user.IsSelected)
+            {
+                _syncingSelection = true;
+
+                try
+                {
+                    user.IsSelected = false;
+                }
+                finally
+                {
+                    _syncingSelection = false;
+                }
+            }
+
+            if (!_syncingSelection)
+                UpdateSelectionState();
+        }
+
+        private void UpdateSelectionState()
+        {
+            var eligibleUsers = Filtered()
+                .Where(x => !x.IsCurrentSessionUser)
+                .ToList();
+
+            bool? nextValue;
+
+            if (eligibleUsers.Count == 0)
+            {
+                nextValue = false;
+            }
+            else if (eligibleUsers.All(x => x.IsSelected))
+            {
+                nextValue = true;
+            }
+            else if (eligibleUsers.Any(x => x.IsSelected))
+            {
+                nextValue = null;
+            }
+            else
+            {
+                nextValue = false;
+            }
+
+            _syncingSelection = true;
+
+            try
+            {
+                IsAllSelected = nextValue;
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelectedUsers));
+            OnPropertyChanged(nameof(DeleteSelectedText));
         }
 
         partial void OnSearchTextChanged(string value)
@@ -212,6 +321,7 @@ namespace WpfApp3.ViewModels.Users
             OnPropertyChanged(nameof(TotalPages));
             OnPropertyChanged(nameof(FoundText));
             OnPropertyChanged(nameof(IsSuperAdmin));
+            UpdateSelectionState();
         }
 
         [RelayCommand]
@@ -364,6 +474,33 @@ namespace WpfApp3.ViewModels.Users
         }
 
         [RelayCommand]
+        private void DeleteSelected()
+        {
+            if (!EnsureSuperAdminOrToast("delete selected users"))
+                return;
+
+            var selectedUsers = _all
+                .Where(x => x.IsSelected && !x.IsCurrentSessionUser)
+                .ToList();
+
+            if (selectedUsers.Count == 0)
+            {
+                ShowToast("Select at least one user to delete.", "warning");
+                return;
+            }
+
+            _deleteTarget = null;
+            _deleteTargets.Clear();
+            _deleteTargets.AddRange(selectedUsers);
+
+            DeleteTitle = "Delete Selected Users";
+            DeleteMessage =
+                $"Are you sure you want to delete {selectedUsers.Count} selected users? This action cannot be undone.";
+
+            IsDeleteOpen = true;
+        }
+
+        [RelayCommand]
         private void Delete(UserRecord? row)
         {
             if (!EnsureSuperAdminOrToast("delete a user"))
@@ -377,7 +514,9 @@ namespace WpfApp3.ViewModels.Users
                 return;
             }
 
+            _deleteTargets.Clear();
             _deleteTarget = row;
+            DeleteTitle = "Delete User";
             DeleteMessage = $"Are you sure you want to delete user, {row.Username}? This action cannot be undone.";
             IsDeleteOpen = true;
         }
@@ -387,6 +526,8 @@ namespace WpfApp3.ViewModels.Users
         {
             IsDeleteOpen = false;
             _deleteTarget = null;
+            _deleteTargets.Clear();
+            DeleteTitle = "Delete User";
         }
 
         [RelayCommand]
@@ -395,34 +536,64 @@ namespace WpfApp3.ViewModels.Users
             if (!EnsureSuperAdminOrToast("delete a user"))
                 return;
 
-            if (_deleteTarget is not null && IsSelf(_deleteTarget))
+            var targets = _deleteTargets.Count > 0
+                ? _deleteTargets.ToList()
+                : _deleteTarget is null
+                    ? new List<UserRecord>()
+                    : new List<UserRecord> { _deleteTarget };
+
+            targets = targets
+                .Where(x => !IsSelf(x))
+                .GroupBy(x => x.Id)
+                .Select(x => x.First())
+                .ToList();
+
+            if (targets.Count == 0)
             {
-                ShowToast("You cannot delete your own logged-in account.", "warning");
+                ShowToast("Your logged-in account cannot be deleted.", "warning");
                 IsDeleteOpen = false;
                 _deleteTarget = null;
+                _deleteTargets.Clear();
+                DeleteTitle = "Delete User";
                 return;
             }
+
+            var deletedCount = targets.Count;
 
             try
             {
                 IsLoading = true;
 
-                if (_deleteTarget is not null)
+                var ids = targets
+                    .Select(x => x.Id)
+                    .ToList();
+
+                await Task.Run(() =>
                 {
-                    var deleteId = _deleteTarget.Id;
-                    await Task.Run(() => _repo.Delete(deleteId));
-                }
+                    foreach (var id in ids)
+                        _repo.Delete(id);
+                });
 
                 await RefreshDataAsync();
 
                 IsDeleteOpen = false;
                 _deleteTarget = null;
+                _deleteTargets.Clear();
+                DeleteTitle = "Delete User";
 
-                ShowToast("User deleted successfully.", "success");
+                ShowToast(
+                    deletedCount == 1
+                        ? "User deleted successfully."
+                        : $"{deletedCount} users deleted successfully.",
+                    "success");
             }
             catch
             {
-                ShowToast("Failed to delete user.", "error");
+                ShowToast(
+                    deletedCount == 1
+                        ? "Failed to delete user."
+                        : "Failed to delete all selected users.",
+                    "error");
             }
             finally
             {
