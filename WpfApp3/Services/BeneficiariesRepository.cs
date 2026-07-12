@@ -378,7 +378,8 @@ SELECT
   classification,
   barangay,
   present_address,
-  profile_image
+  profile_image,
+    date_of_birth
 FROM beneficiaries
 WHERE id = @id
 LIMIT 1;";
