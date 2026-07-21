@@ -1,4 +1,5 @@
-﻿<UserControl x:Class="WpfApp3.Views.Allotment.AllotmentView"
+﻿<!-- EKALINGA_EXACT_LIGHT_DARK_V1 -->
+<UserControl x:Class="WpfApp3.Views.Allotment.AllotmentView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:WpfApp3.ViewModels.Allotment"
@@ -14,41 +15,41 @@
         <local:EqualsToBoolConverter x:Key="EqualsToBoolConverter"/>
 
         <!-- Brushes -->
-        <SolidColorBrush x:Key="PageBackgroundBrush" Color="#F6F8FC"/>
-        <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#1F2A44"/>
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#4338CA"/>
-        <SolidColorBrush x:Key="AccentSoftBrush" Color="#EEF2FF"/>
-        <SolidColorBrush x:Key="BorderBrushSoft" Color="#E7ECF5"/>
-        <SolidColorBrush x:Key="BorderBrushLighter" Color="#F1F5F9"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B"/>
-        <SolidColorBrush x:Key="DangerBrush" Color="#E11D48"/>
-        <SolidColorBrush x:Key="DangerHoverBrush" Color="#BE123C"/>
-        <SolidColorBrush x:Key="InputBackgroundBrush" Color="#FCFDFE"/>
+        <SolidColorBrush x:Key="PageBackgroundBrush" Color="{DynamicResource ThemeColor_Page_F6F8FC}"/>
+        <SolidColorBrush x:Key="CardBrush" Color="{DynamicResource ThemeColor_Surface_FFFFFF}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource ThemeColor_Accent_1F2A44}"/>
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="{DynamicResource ThemeColor_AccentHover_4338CA}"/>
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="{DynamicResource ThemeColor_Accent_EEF2FF}"/>
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="{DynamicResource ThemeColor_Border_E7ECF5}"/>
+        <SolidColorBrush x:Key="BorderBrushLighter" Color="{DynamicResource ThemeColor_Border_F1F5F9}"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{DynamicResource ThemeColor_Accent_0F172A}"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{DynamicResource ThemeColor_TextSecondary_64748B}"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="{DynamicResource ThemeColor_DangerSoft_E11D48}"/>
+        <SolidColorBrush x:Key="DangerHoverBrush" Color="{DynamicResource ThemeColor_DangerHover_BE123C}"/>
+        <SolidColorBrush x:Key="InputBackgroundBrush" Color="{DynamicResource ThemeColor_Input_FCFDFE}"/>
 
         <!-- Shadows -->
         <DropShadowEffect x:Key="SoftShadow"
-                          Color="#1E293B"
+                          Color="{DynamicResource ThemeColor_Shadow_1E293B}"
                           BlurRadius="24"
                           ShadowDepth="0"
                           Opacity="0.10"/>
 
         <DropShadowEffect x:Key="ModalShadow"
-                          Color="#0F172A"
+                          Color="{DynamicResource ThemeColor_Shadow_0F172A}"
                           BlurRadius="32"
                           ShadowDepth="0"
                           Opacity="0.16"/>
 
         <!-- Text -->
         <Style x:Key="SectionTitleText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
 
         <Style x:Key="FieldLabelText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextSecondary_64748B}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
@@ -56,10 +57,10 @@
 
         <!-- Card -->
         <Style x:Key="CardBorder" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
             <Setter Property="CornerRadius" Value="20"/>
             <Setter Property="Padding" Value="20"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_F1F5F9}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Effect" Value="{StaticResource SoftShadow}"/>
         </Style>
@@ -86,8 +87,8 @@
             <Setter Property="Width" Value="42"/>
             <Setter Property="Height" Value="42"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -102,7 +103,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_AccentHover_4338CA}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.92"/>
@@ -114,14 +115,14 @@
         </Style>
 
         <Style x:Key="SoftIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
-                                BorderBrush="{StaticResource BorderBrushSoft}"
+                                BorderBrush="{DynamicResource ThemeBrush_Border_E7ECF5}"
                                 BorderThickness="1"
                                 CornerRadius="12">
                             <ContentPresenter HorizontalAlignment="Center"
@@ -129,7 +130,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#F1F5F9"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F1F5F9}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.92"/>
@@ -141,8 +142,8 @@
         </Style>
 
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="Padding" Value="18,11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -161,7 +162,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentHoverBrush}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_AccentHover_4338CA}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.92"/>
@@ -176,9 +177,9 @@
         </Style>
 
         <Style x:Key="LightButton" TargetType="Button">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E7ECF5}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="16,10"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -198,7 +199,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#F1F5F9"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F1F5F9}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -207,8 +208,8 @@
         </Style>
 
         <Style x:Key="DangerButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_DangerSoft_E11D48}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -224,7 +225,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource DangerHoverBrush}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_DangerHover_BE123C}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.92"/>
@@ -242,7 +243,7 @@
             <Setter Property="Padding" Value="10,4"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextSecondary_64748B}"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
@@ -259,8 +260,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentSoftBrush}"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentSoftBrush}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_Accent_EEF2FF}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource ThemeBrush_Accent_EEF2FF}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -287,7 +288,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#F8FAFC"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -300,12 +301,12 @@
             <Setter Property="Height" Value="42"/>
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E7ECF5}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Style.Triggers>
                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -313,9 +314,9 @@
         <Style x:Key="PlainInputTextBox" TargetType="TextBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="CaretBrush" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="SelectionBrush" Value="#C7D2FE"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource ThemeBrush_InfoSoft_C7D2FE}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -326,10 +327,10 @@
         <Style x:Key="ModernComboBox" TargetType="ComboBox">
             <Setter Property="Height" Value="42"/>
             <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E7ECF5}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
 
@@ -366,7 +367,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#F1F5F9"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F1F5F9}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -376,23 +377,23 @@
 
         <!-- Remove default selection highlight -->
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#0F172A"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{DynamicResource ThemeColor_TextPrimary_0F172A}"/>
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent"/>
-        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0F172A"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{DynamicResource ThemeColor_TextPrimary_0F172A}"/>
         <!-- ALLOTMENT REGISTRY REVAMP STYLES -->
-        <SolidColorBrush x:Key="RegistrySuccessBrush" Color="#16A34A"/>
-        <SolidColorBrush x:Key="RegistrySuccessSoftBrush" Color="#ECFDF3"/>
-        <SolidColorBrush x:Key="RegistryWarningBrush" Color="#D97706"/>
-        <SolidColorBrush x:Key="RegistryWarningSoftBrush" Color="#FFF7E8"/>
-        <SolidColorBrush x:Key="RegistryInfoBrush" Color="#2563EB"/>
-        <SolidColorBrush x:Key="RegistryInfoSoftBrush" Color="#EFF6FF"/>
-        <SolidColorBrush x:Key="RegistryPurpleBrush" Color="#7C3AED"/>
-        <SolidColorBrush x:Key="RegistryPurpleSoftBrush" Color="#F5F3FF"/>
+        <SolidColorBrush x:Key="RegistrySuccessBrush" Color="{DynamicResource ThemeColor_SuccessSoft_16A34A}"/>
+        <SolidColorBrush x:Key="RegistrySuccessSoftBrush" Color="{DynamicResource ThemeColor_SuccessSoft_ECFDF3}"/>
+        <SolidColorBrush x:Key="RegistryWarningBrush" Color="{DynamicResource ThemeColor_WarningSoft_D97706}"/>
+        <SolidColorBrush x:Key="RegistryWarningSoftBrush" Color="{DynamicResource ThemeColor_WarningSoft_FFF7E8}"/>
+        <SolidColorBrush x:Key="RegistryInfoBrush" Color="{DynamicResource ThemeColor_InfoSoft_2563EB}"/>
+        <SolidColorBrush x:Key="RegistryInfoSoftBrush" Color="{DynamicResource ThemeColor_InfoSoft_EFF6FF}"/>
+        <SolidColorBrush x:Key="RegistryPurpleBrush" Color="{DynamicResource ThemeColor_PurpleSoft_7C3AED}"/>
+        <SolidColorBrush x:Key="RegistryPurpleSoftBrush" Color="{DynamicResource ThemeColor_PurpleSoft_F5F3FF}"/>
 
         <Style x:Key="RegistryMetricCardStyle"
                TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_F1F5F9}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="18"/>
             <Setter Property="Padding" Value="16"/>
@@ -404,13 +405,13 @@
                TargetType="Border">
             <Setter Property="Height" Value="42"/>
             <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Background" Value="#FCFDFE"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_FCFDFE}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E7ECF5}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="12,0"/>
             <Style.Triggers>
                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -419,8 +420,8 @@
                TargetType="Border">
             <Setter Property="Height" Value="42"/>
             <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Background" Value="#FCFDFE"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_FCFDFE}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E7ECF5}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
@@ -428,9 +429,9 @@
                TargetType="{x:Type DataGridColumnHeader}">
             <Setter Property="Height" Value="48"/>
             <Setter Property="MinHeight" Value="48"/>
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="Foreground" Value="#64748B"/>
-            <Setter Property="BorderBrush" Value="#E8EEF6"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextSecondary_64748B}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_E8EEF6}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="FontSize" Value="11"/>
@@ -458,14 +459,14 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="HeaderBorder"
                                         Property="Background"
-                                        Value="#F8FAFC"/>
+                                        Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
                                 <Setter Property="Foreground"
-                                        Value="#334155"/>
+                                        Value="{DynamicResource ThemeBrush_TextPrimary_334155}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="HeaderBorder"
                                         Property="Background"
-                                        Value="#F1F5F9"/>
+                                        Value="{DynamicResource ThemeBrush_InfoSoft_F1F5F9}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -485,12 +486,12 @@
             <Setter Property="Padding" Value="12,0"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
                     <Setter Property="BorderBrush" Value="Transparent"/>
                 </Trigger>
             </Style.Triggers>
@@ -499,16 +500,16 @@
         <Style x:Key="AllotmentRowStyle"
                TargetType="DataGridRow">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_F1F5F9}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F8FAFF"/>
+                    <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFF}"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrushLighter}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_F1F5F9}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -524,8 +525,8 @@
                     <ControlTemplate TargetType="CheckBox">
                         <Grid Width="20" Height="20">
                             <Border x:Name="Box"
-                                    Background="White"
-                                    BorderBrush="#CBD5E1"
+                                    Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                                    BorderBrush="{DynamicResource ThemeBrush_Border_CBD5E1}"
                                     BorderThickness="1.5"
                                     CornerRadius="6"/>
                             <TextBlock x:Name="CheckGlyph"
@@ -533,7 +534,7 @@
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="11"
                                        FontWeight="Bold"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Visibility="Collapsed"/>
@@ -542,7 +543,7 @@
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="10"
                                        FontWeight="Bold"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Visibility="Collapsed"/>
@@ -551,18 +552,18 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Box"
                                         Property="BorderBrush"
-                                        Value="{StaticResource AccentBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                                 <Setter TargetName="Box"
                                         Property="Background"
-                                        Value="{StaticResource AccentSoftBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_EEF2FF}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="Box"
                                         Property="Background"
-                                        Value="{StaticResource AccentBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                                 <Setter TargetName="Box"
                                         Property="BorderBrush"
-                                        Value="{StaticResource AccentBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                                 <Setter TargetName="CheckGlyph"
                                         Property="Visibility"
                                         Value="Visible"/>
@@ -570,10 +571,10 @@
                             <Trigger Property="IsChecked" Value="{x:Null}">
                                 <Setter TargetName="Box"
                                         Property="Background"
-                                        Value="{StaticResource AccentBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                                 <Setter TargetName="Box"
                                         Property="BorderBrush"
-                                        Value="{StaticResource AccentBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
                                 <Setter TargetName="PartialGlyph"
                                         Property="Visibility"
                                         Value="Visible"/>
@@ -607,7 +608,7 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bd"
                                         Property="Background"
-                                        Value="{StaticResource AccentSoftBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_Accent_EEF2FF}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd"
@@ -625,7 +626,7 @@
                BasedOn="{StaticResource AllotmentActionButton}">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFF1F2"/>
+                    <Setter Property="Background" Value="{DynamicResource ThemeBrush_DangerSoft_FFF1F2}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -654,21 +655,21 @@
                         <Border Width="38"
                                 Height="38"
                                 CornerRadius="12"
-                                Background="{StaticResource RegistryInfoSoftBrush}">
+                                Background="{DynamicResource ThemeBrush_InfoSoft_EFF6FF}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE8FD;"
-                                       Foreground="{StaticResource RegistryInfoBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Info_2563EB}"
                                        FontSize="17"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="TOTAL ALLOTMENTS"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                        FontSize="10"
                                        FontWeight="Bold"/>
                             <TextBlock Text="{Binding TotalAllotments, Mode=OneWay}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                        FontSize="23"
                                        FontWeight="Bold"
                                        Margin="0,3,0,0"/>
@@ -685,21 +686,21 @@
                         <Border Width="38"
                                 Height="38"
                                 CornerRadius="12"
-                                Background="{StaticResource RegistrySuccessSoftBrush}">
+                                Background="{DynamicResource ThemeBrush_SuccessSoft_ECFDF3}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE716;"
-                                       Foreground="{StaticResource RegistrySuccessBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Success_16A34A}"
                                        FontSize="17"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="PLANNED BENEFICIARIES"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                        FontSize="10"
                                        FontWeight="Bold"/>
                             <TextBlock Text="{Binding PlannedBeneficiaries, Mode=OneWay}"
-                                       Foreground="{StaticResource RegistrySuccessBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Success_16A34A}"
                                        FontSize="23"
                                        FontWeight="Bold"
                                        Margin="0,3,0,0"/>
@@ -716,21 +717,21 @@
                         <Border Width="38"
                                 Height="38"
                                 CornerRadius="12"
-                                Background="{StaticResource RegistryWarningSoftBrush}">
+                                Background="{DynamicResource ThemeBrush_WarningSoft_FFF7E8}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE8C7;"
-                                       Foreground="{StaticResource RegistryWarningBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Warning_D97706}"
                                        FontSize="17"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="MONETARY BUDGET"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                        FontSize="10"
                                        FontWeight="Bold"/>
                             <TextBlock Text="{Binding MoneyBudgetText, Mode=OneWay}"
-                                       Foreground="{StaticResource RegistryWarningBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Warning_D97706}"
                                        FontSize="20"
                                        FontWeight="Bold"
                                        Margin="0,4,0,0"
@@ -749,21 +750,21 @@
                         <Border Width="38"
                                 Height="38"
                                 CornerRadius="12"
-                                Background="{StaticResource RegistryPurpleSoftBrush}">
+                                Background="{DynamicResource ThemeBrush_PurpleSoft_F5F3FF}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE8EC;"
-                                       Foreground="{StaticResource RegistryPurpleBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Purple_7C3AED}"
                                        FontSize="17"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="IN-KIND ALLOTMENTS"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                        FontSize="10"
                                        FontWeight="Bold"/>
                             <TextBlock Text="{Binding InKindAllotments, Mode=OneWay}"
-                                       Foreground="{StaticResource RegistryPurpleBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Purple_7C3AED}"
                                        FontSize="23"
                                        FontWeight="Bold"
                                        Margin="0,3,0,0"/>
@@ -774,8 +775,8 @@
 
             <!-- ALLOTMENT REGISTRY -->
             <Border Grid.Row="2"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrushLighter}"
+                    Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                    BorderBrush="{DynamicResource ThemeBrush_Border_F1F5F9}"
                     BorderThickness="1"
                     CornerRadius="22"
                     Padding="18"
@@ -806,11 +807,11 @@
 
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Allotment Registry"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                        FontSize="18"
                                        FontWeight="Bold"/>
                             <TextBlock Text="{Binding FoundText, Mode=OneWay}"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
                         </StackPanel>
@@ -825,14 +826,14 @@
                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                            Text="&#xE721;"
                                            FontSize="13"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                            VerticalAlignment="Center"/>
                                 <Grid Grid.Column="1">
                                     <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource PlainInputTextBox}"
                                              FontSize="12"/>
                                     <TextBlock Text="Search project, company, ID..."
-                                               Foreground="#94A3B8"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_94A3B8}"
                                                FontSize="12"
                                                VerticalAlignment="Center"
                                                IsHitTestVisible="False">
@@ -888,7 +889,7 @@
 
                     <Border Grid.Row="1"
                             Height="1"
-                            Background="{StaticResource BorderBrushLighter}"
+                            Background="{DynamicResource ThemeBrush_Border_F1F5F9}"
                             Margin="0,14,0,8"/>
 
                     <!-- BULK ACTION -->
@@ -896,23 +897,23 @@
                             Margin="0,0,0,8"
                             Padding="12,8"
                             CornerRadius="12"
-                            Background="{StaticResource AccentSoftBrush}"
+                            Background="{DynamicResource ThemeBrush_Accent_EEF2FF}"
                             Visibility="{Binding HasSelectedItems, Converter={StaticResource BoolToVis}}">
                         <Grid>
                             <StackPanel Orientation="Horizontal"
                                         VerticalAlignment="Center">
                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                            Text="&#xE73E;"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
                                            FontSize="12"
                                            VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding SelectedCount, Mode=OneWay}"
-                                           Foreground="{StaticResource AccentBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
                                            FontWeight="Bold"
                                            Margin="8,0,0,0"
                                            VerticalAlignment="Center"/>
                                 <TextBlock Text=" allotment(s) selected"
-                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                            Margin="4,0,0,0"
                                            VerticalAlignment="Center"/>
                             </StackPanel>
@@ -941,7 +942,7 @@
                               Background="Transparent"
                               BorderThickness="0"
                               FontSize="12"
-                              Foreground="{StaticResource TextPrimaryBrush}"
+                              Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                               ColumnHeaderHeight="48"
                               RowHeight="56"
                               IsReadOnly="True"
@@ -990,11 +991,11 @@
                                             <Border Width="32"
                                                     Height="32"
                                                     CornerRadius="10"
-                                                    Background="{StaticResource AccentSoftBrush}"
+                                                    Background="{DynamicResource ThemeBrush_Accent_EEF2FF}"
                                                     VerticalAlignment="Center">
                                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                                            Text="&#xE8F1;"
-                                                           Foreground="{StaticResource AccentBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
                                                            FontSize="15"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"/>
@@ -1003,10 +1004,10 @@
                                             <StackPanel Grid.Column="1"
                                                         VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding ProjectName}"
-                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Foreground="{StaticResource TextSecondaryBrush}"
+                                                <TextBlock Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                                            FontSize="10"
                                                            Margin="0,2,0,0"
                                                            TextTrimming="CharacterEllipsis">
@@ -1046,8 +1047,8 @@
                                                 Padding="10,0"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
-                                                Background="{StaticResource RegistryInfoSoftBrush}"
-                                                BorderBrush="#BFDBFE"
+                                                Background="{DynamicResource ThemeBrush_InfoSoft_EFF6FF}"
+                                                BorderBrush="{DynamicResource ThemeBrush_InfoBorder_BFDBFE}"
                                                 BorderThickness="1"
                                                 CornerRadius="13">
                                             <StackPanel Orientation="Horizontal"
@@ -1055,10 +1056,10 @@
                                                         VerticalAlignment="Center">
                                                 <Ellipse Width="6"
                                                          Height="6"
-                                                         Fill="{StaticResource RegistryInfoBrush}"
+                                                         Fill="{DynamicResource ThemeBrush_InfoSoft_2563EB}"
                                                          Margin="0,0,7,0"/>
                                                 <TextBlock Text="{Binding SourceOfFund, TargetNullValue=None}"
-                                                           Foreground="#1D4ED8"
+                                                           Foreground="{DynamicResource ThemeBrush_Info_1D4ED8}"
                                                            FontSize="11"
                                                            FontWeight="SemiBold"
                                                            TextTrimming="CharacterEllipsis"
@@ -1078,12 +1079,12 @@
                                                 Padding="10,0"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
-                                                Background="#F8FAFC"
-                                                BorderBrush="{StaticResource BorderBrushSoft}"
+                                                Background="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"
+                                                BorderBrush="{DynamicResource ThemeBrush_Border_E7ECF5}"
                                                 BorderThickness="1"
                                                 CornerRadius="14">
                                             <TextBlock Text="{Binding BeneficiariesCount}"
-                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                                        FontSize="11"
                                                        FontWeight="Bold"
                                                        HorizontalAlignment="Center"
@@ -1106,12 +1107,12 @@
                                                 CornerRadius="13">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="{StaticResource RegistryWarningSoftBrush}"/>
-                                                    <Setter Property="BorderBrush" Value="#FED7AA"/>
+                                                    <Setter Property="Background" Value="{DynamicResource ThemeBrush_WarningSoft_FFF7E8}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_WarningBorder_FED7AA}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding BudgetType}" Value="InKind">
-                                                            <Setter Property="Background" Value="{StaticResource RegistryPurpleSoftBrush}"/>
-                                                            <Setter Property="BorderBrush" Value="#DDD6FE"/>
+                                                            <Setter Property="Background" Value="{DynamicResource ThemeBrush_PurpleSoft_F5F3FF}"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_DDD6FE}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -1124,10 +1125,10 @@
                                                          Margin="0,0,7,0">
                                                     <Ellipse.Style>
                                                         <Style TargetType="Ellipse">
-                                                            <Setter Property="Fill" Value="{StaticResource RegistryWarningBrush}"/>
+                                                            <Setter Property="Fill" Value="{DynamicResource ThemeBrush_WarningSoft_D97706}"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding BudgetType}" Value="InKind">
-                                                                    <Setter Property="Fill" Value="{StaticResource RegistryPurpleBrush}"/>
+                                                                    <Setter Property="Fill" Value="{DynamicResource ThemeBrush_PurpleSoft_7C3AED}"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -1139,10 +1140,10 @@
                                                            VerticalAlignment="Center">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="#B45309"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_Warning_B45309}"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding BudgetType}" Value="InKind">
-                                                                    <Setter Property="Foreground" Value="{StaticResource RegistryPurpleBrush}"/>
+                                                                    <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_Purple_7C3AED}"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -1182,7 +1183,7 @@
                                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                                            Text="&#xE70F;"
                                                            FontSize="14"
-                                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                           Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
                                             </Button>
 
                                             <Button Style="{StaticResource AllotmentDangerActionButton}"
@@ -1192,7 +1193,7 @@
                                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                                            Text="&#xE74D;"
                                                            FontSize="14"
-                                                           Foreground="{StaticResource DangerBrush}"/>
+                                                           Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"/>
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -1235,9 +1236,9 @@
                                                                          RelativeSource="{RelativeSource AncestorType=UserControl}"/>
                                                             </MultiBinding>
                                                         </DataTrigger.Binding>
-                                                        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="Background" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -1259,7 +1260,7 @@
               Visibility="{Binding IsFormOpen, Converter={StaticResource BoolToVis}}"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
-            <Border Background="#800F172A"/>
+            <Border Background="{DynamicResource ThemeBrush_Overlay_800F172A}"/>
 
             <Border Background="Transparent">
                 <Border.InputBindings>
@@ -1271,8 +1272,8 @@
             <Border Width="980"
                     MaxHeight="760"
                     CornerRadius="24"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrushLighter}"
+                    Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                    BorderBrush="{DynamicResource ThemeBrush_Border_F1F5F9}"
                     BorderThickness="1"
                     Padding="26"
                     HorizontalAlignment="Center"
@@ -1299,10 +1300,10 @@
                         <Border Width="44"
                                 Height="44"
                                 CornerRadius="13"
-                                Background="{StaticResource AccentSoftBrush}">
+                                Background="{DynamicResource ThemeBrush_Accent_EEF2FF}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE8F1;"
-                                       Foreground="{StaticResource AccentBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
                                        FontSize="18"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
@@ -1313,9 +1314,9 @@
                             <TextBlock Text="{Binding FormTitle}"
                                        FontSize="21"
                                        FontWeight="Bold"
-                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"/>
                             <TextBlock Text="Configure project information, beneficiary capacity, and budget allocation."
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
                         </StackPanel>
@@ -1326,7 +1327,7 @@
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE8BB;"
                                        FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"/>
                         </Button>
                     </Grid>
 
@@ -1344,16 +1345,16 @@
                             <Border Grid.Column="0"
                                     Padding="20"
                                     CornerRadius="18"
-                                    Background="#F8FAFC"
-                                    BorderBrush="{StaticResource BorderBrushSoft}"
+                                    Background="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"
+                                    BorderBrush="{DynamicResource ThemeBrush_Border_E7ECF5}"
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="Project Information"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                                FontSize="16"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="Basic identity and ownership of the allotment."
-                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                                FontSize="11"
                                                Margin="0,4,0,18"/>
 
@@ -1364,7 +1365,7 @@
                                                  Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                     <TextBlock Text="{Binding ProjectNameError}"
-                                               Foreground="{StaticResource DangerBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                FontSize="11"
                                                Margin="2,6,0,0"
                                                Visibility="{Binding HasProjectNameError, Converter={StaticResource BoolToVis}}"/>
@@ -1377,7 +1378,7 @@
                                                  Style="{StaticResource PlainInputTextBox}"/>
                                     </Border>
                                     <TextBlock Text="{Binding CompanyError}"
-                                               Foreground="{StaticResource DangerBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                FontSize="11"
                                                Margin="2,6,0,0"
                                                Visibility="{Binding HasCompanyError, Converter={StaticResource BoolToVis}}"/>
@@ -1389,7 +1390,7 @@
                                               SelectedItem="{Binding DepartmentInput}"
                                               Style="{StaticResource ModernComboBox}"/>
                                     <TextBlock Text="{Binding DepartmentError}"
-                                               Foreground="{StaticResource DangerBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                FontSize="11"
                                                Margin="2,6,0,0"
                                                Visibility="{Binding HasDepartmentError, Converter={StaticResource BoolToVis}}"/>
@@ -1401,7 +1402,7 @@
                                               SelectedItem="{Binding SourceOfFundInput}"
                                               Style="{StaticResource ModernComboBox}"/>
                                     <TextBlock Text="{Binding SourceOfFundError}"
-                                               Foreground="{StaticResource DangerBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                FontSize="11"
                                                Margin="2,6,0,0"
                                                Visibility="{Binding HasSourceOfFundError, Converter={StaticResource BoolToVis}}"/>
@@ -1412,16 +1413,16 @@
                             <Border Grid.Column="2"
                                     Padding="20"
                                     CornerRadius="18"
-                                    Background="White"
-                                    BorderBrush="{StaticResource BorderBrushSoft}"
+                                    Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                                    BorderBrush="{DynamicResource ThemeBrush_Border_E7ECF5}"
                                     BorderThickness="1">
                                 <StackPanel>
                                     <TextBlock Text="Capacity and Budget"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                                FontSize="16"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="Set the planned beneficiary count and allocation type."
-                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                                FontSize="11"
                                                Margin="0,4,0,18"/>
 
@@ -1435,7 +1436,7 @@
                                                  Tag="digits"/>
                                     </Border>
                                     <TextBlock Text="{Binding BeneficiariesError}"
-                                               Foreground="{StaticResource DangerBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                FontSize="11"
                                                Margin="2,6,0,0"
                                                Visibility="{Binding HasBeneficiariesError, Converter={StaticResource BoolToVis}}"/>
@@ -1462,15 +1463,15 @@
 
                                         <Border Padding="14"
                                                 CornerRadius="14"
-                                                Background="{StaticResource RegistryWarningSoftBrush}"
-                                                BorderBrush="#FED7AA"
+                                                Background="{DynamicResource ThemeBrush_WarningSoft_FFF7E8}"
+                                                BorderBrush="{DynamicResource ThemeBrush_WarningBorder_FED7AA}"
                                                 BorderThickness="1">
                                             <StackPanel>
                                                 <TextBlock Text="Monetary Allocation"
-                                                           Foreground="#B45309"
+                                                           Foreground="{DynamicResource ThemeBrush_Warning_B45309}"
                                                            FontWeight="SemiBold"/>
                                                 <TextBlock Text="Enter the total approved amount."
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                                            FontSize="11"
                                                            Margin="0,3,0,12"/>
 
@@ -1484,7 +1485,7 @@
                                                              Tag="money"/>
                                                 </Border>
                                                 <TextBlock Text="{Binding BudgetAmountError}"
-                                                           Foreground="{StaticResource DangerBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                            FontSize="11"
                                                            Margin="2,6,0,0"
                                                            Visibility="{Binding HasBudgetAmountError, Converter={StaticResource BoolToVis}}"/>
@@ -1507,15 +1508,15 @@
 
                                         <Border Padding="14"
                                                 CornerRadius="14"
-                                                Background="{StaticResource RegistryPurpleSoftBrush}"
-                                                BorderBrush="#DDD6FE"
+                                                Background="{DynamicResource ThemeBrush_PurpleSoft_F5F3FF}"
+                                                BorderBrush="{DynamicResource ThemeBrush_InfoBorder_DDD6FE}"
                                                 BorderThickness="1">
                                             <StackPanel>
                                                 <TextBlock Text="In-Kind Allocation"
-                                                           Foreground="{StaticResource RegistryPurpleBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_Purple_7C3AED}"
                                                            FontWeight="SemiBold"/>
                                                 <TextBlock Text="Enter the quantity and item or unit."
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                                            FontSize="11"
                                                            Margin="0,3,0,12"/>
 
@@ -1543,7 +1544,7 @@
                                                     <TextBlock Grid.Row="1"
                                                                Grid.Column="0"
                                                                Text="{Binding BudgetQtyError}"
-                                                               Foreground="{StaticResource DangerBrush}"
+                                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                                FontSize="11"
                                                                Margin="2,6,0,0"
                                                                Visibility="{Binding HasBudgetQtyError, Converter={StaticResource BoolToVis}}"/>
@@ -1558,14 +1559,14 @@
                                                     <TextBlock Grid.Row="1"
                                                                Grid.Column="2"
                                                                Text="{Binding BudgetUnitError}"
-                                                               Foreground="{StaticResource DangerBrush}"
+                                                               Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                                                FontSize="11"
                                                                Margin="2,6,0,0"
                                                                Visibility="{Binding HasBudgetUnitError, Converter={StaticResource BoolToVis}}"/>
                                                 </Grid>
 
                                                 <TextBlock Text="Example: 100 | sacks of rice"
-                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                                            FontSize="11"
                                                            Margin="0,8,0,0"/>
                                             </StackPanel>
@@ -1579,7 +1580,7 @@
                     <!-- FOOTER -->
                     <Grid Grid.Row="4">
                         <TextBlock Text="Complete all required fields before saving."
-                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"
                                    FontSize="11"
                                    VerticalAlignment="Center"/>
 
@@ -1608,7 +1609,7 @@
               Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVis}}"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
-            <Border Background="#800F172A"/>
+            <Border Background="{DynamicResource ThemeBrush_Overlay_800F172A}"/>
 
             <Border Background="Transparent">
                 <Border.InputBindings>
@@ -1619,8 +1620,8 @@
 
             <Border Width="560"
                     CornerRadius="24"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrushLighter}"
+                    Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                    BorderBrush="{DynamicResource ThemeBrush_Border_F1F5F9}"
                     BorderThickness="1"
                     Padding="24"
                     HorizontalAlignment="Center"
@@ -1646,10 +1647,10 @@
                         <Border Width="44"
                                 Height="44"
                                 CornerRadius="14"
-                                Background="#FFF1F2">
+                                Background="{DynamicResource ThemeBrush_DangerSoft_FFF1F2}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE74D;"
-                                       Foreground="{StaticResource DangerBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                        FontSize="18"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
@@ -1658,11 +1659,11 @@
                         <StackPanel Grid.Column="2"
                                     VerticalAlignment="Center">
                             <TextBlock Text="{Binding DeleteTitle}"
-                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                        FontSize="20"
                                        FontWeight="Bold"/>
                             <TextBlock Text="This operation cannot be undone."
-                                       Foreground="{StaticResource DangerBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_Danger_E11D48}"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
                         </StackPanel>
@@ -1673,18 +1674,18 @@
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE8BB;"
                                        FontSize="12"
-                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"/>
                         </Button>
                     </Grid>
 
                     <Border Grid.Row="2"
                             Padding="16"
                             CornerRadius="14"
-                            Background="#F8FAFC"
-                            BorderBrush="{StaticResource BorderBrushSoft}"
+                            Background="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"
+                            BorderBrush="{DynamicResource ThemeBrush_Border_E7ECF5}"
                             BorderThickness="1">
                         <TextBlock Text="{Binding DeleteMessage}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}"
                                    TextWrapping="Wrap"
                                    LineHeight="20"/>
                     </Border>
@@ -1710,30 +1711,30 @@
         </Grid>
         <!-- LOADING OVERLAY -->
         <Grid Panel.ZIndex="950"
-      Background="#66FFFFFF"
+      Background="{DynamicResource ThemeBrush_Glass_66FFFFFF}"
       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
             <Border Width="260"
             Padding="20"
             CornerRadius="18"
-            Background="White"
+            Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
                 <StackPanel>
                     <TextBlock Text="Loading allotments..."
                        FontSize="16"
                        FontWeight="SemiBold"
-                       Foreground="#2E3A59"
+                       Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                        HorizontalAlignment="Center"/>
 
                     <ProgressBar IsIndeterminate="True"
                          Height="8"
                          Margin="0,16,0,0"
-                         Foreground="#1F2A44"
-                         Background="#E9EEF7"/>
+                         Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
+                         Background="{DynamicResource ThemeBrush_InfoSoft_E9EEF7}"/>
 
                     <TextBlock Text="Please wait while data is being fetched."
                        FontSize="12"
-                       Foreground="#8A94A6"
+                       Foreground="{DynamicResource ThemeBrush_TextSecondary_8A94A6}"
                        Margin="0,12,0,0"
                        TextAlignment="Center"/>
                 </StackPanel>

@@ -1,4 +1,5 @@
-﻿<Window x:Class="WpfApp3.Views.ConnectionSettingsWindow"
+﻿<!-- EKALINGA_EXACT_LIGHT_DARK_V1 -->
+<Window x:Class="WpfApp3.Views.ConnectionSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,7 +11,7 @@
         Width="420"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Background="#F3F5F9">
+        Background="{DynamicResource ThemeBrush_InfoSoft_F3F5F9}">
 
     <Window.DataContext>
         <vm:ConnectionSettingsViewModel/>
@@ -18,10 +19,10 @@
 
     <Window.Resources>
         <Style x:Key="CardBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
             
             <Setter Property="Padding" Value="26"/>
-            <Setter Property="BorderBrush" Value="#EEF2FF"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_EEF2FF}"/>
            
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Effect">
@@ -33,7 +34,7 @@
 
         <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextSecondary_475569}"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
 
@@ -41,10 +42,10 @@
             <Setter Property="Height" Value="48"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="14,0"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D9E2F2"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_D9E2F2}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_Info_1E293B}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -64,10 +65,10 @@
             <Setter Property="Height" Value="48"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="14,0"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D9E2F2"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_D9E2F2}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_Info_1E293B}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -86,8 +87,8 @@
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="48"/>
             <Setter Property="Padding" Value="18,0"/>
-            <Setter Property="Background" Value="#2E3A59"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Accent_2E3A59}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="14"/>
@@ -105,14 +106,14 @@
         </Style>
 
         <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#2E3A59"/>
-            <Setter Property="BorderBrush" Value="#D9E2F2"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_2E3A59}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_D9E2F2}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
         <Style x:Key="ModeButtonStyle" TargetType="RadioButton">
-            <Setter Property="Foreground" Value="#2E3A59"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_2E3A59}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,0,12,0"/>
@@ -121,17 +122,17 @@
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="Bd"
                                 Padding="18,10"
-                                Background="White"
-                                BorderBrush="#D9E2F2"
+                                Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                                BorderBrush="{DynamicResource ThemeBrush_InfoBorder_D9E2F2}"
                                 BorderThickness="1"
                                 CornerRadius="14">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2E3A59"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#2E3A59"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ThemeBrush_Accent_2E3A59}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource ThemeBrush_InfoBorder_2E3A59}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -163,8 +164,8 @@
                     <Button Grid.Column="0"
                             Width="44"
                             Height="44"
-                            Background="White"
-                            BorderBrush="#D9E2F2"
+                            Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                            BorderBrush="{DynamicResource ThemeBrush_InfoBorder_D9E2F2}"
                             BorderThickness="1"
                             Command="{Binding BackCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
@@ -178,7 +179,7 @@
                                     <TextBlock Text="←"
                                                FontSize="20"
                                                FontWeight="Bold"
-                                               Foreground="#2E3A59"
+                                               Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"/>
                                 </Border>
@@ -190,11 +191,11 @@
                         <TextBlock Text="Connection Settings"
                                    FontSize="24"
                                    FontWeight="Bold"
-                                   Foreground="#223A8F"/>
+                                   Foreground="{DynamicResource ThemeBrush_Info_223A8F}"/>
                         <TextBlock Text="Configure local or server database connection"
                                    Margin="0,6,0,0"
                                    FontSize="12"
-                                   Foreground="#64748B"/>
+                                   Foreground="{DynamicResource ThemeBrush_TextSecondary_64748B}"/>
                     </StackPanel>
                 </Grid>
 
@@ -269,7 +270,7 @@
                 <StackPanel Grid.Row="6">
                     <CheckBox Content="Use SSL"
                               IsChecked="{Binding UseSsl}"
-                              Foreground="#475569"
+                              Foreground="{DynamicResource ThemeBrush_TextSecondary_475569}"
                               FontSize="13"
                               Margin="0,0,0,16"/>
 

@@ -144,7 +144,14 @@
     </Window.Resources>
 
     <Grid>
-        <Border Margin="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="0" ClipToBounds="True">
+        <Border Margin="0" BorderBrush="#31405A" BorderThickness="1" CornerRadius="0" ClipToBounds="True">
+                <!-- EKALINGA_FULL_WINDOW_LOGIN_BACKGROUND_V1 -->
+                <Border.Background>
+                    <ImageBrush ImageSource="/Views/Login/sulop_bg.jpg"
+                                Stretch="UniformToFill"
+                                AlignmentX="Center"
+                                AlignmentY="Center" />
+                </Border.Background>
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -152,13 +159,20 @@
                     <ColumnDefinition Width="1.14*" />
                 </Grid.ColumnDefinitions>
 
+                <!-- Full-window image readability overlay -->
+                <Rectangle Grid.ColumnSpan="2" IsHitTestVisible="False">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#78101A2B" Offset="0" />
+                            <GradientStop Color="#62101A2B" Offset="0.55" />
+                            <GradientStop Color="#76101A2B" Offset="1" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+
                 <!-- LEFT BRAND EXPERIENCE -->
                 <Grid Grid.Column="0">
-                    <Grid.Background>
-                        <ImageBrush ImageSource="/Views/Login/sulop_bg.jpg" Stretch="UniformToFill" />
-                    </Grid.Background>
-
-                    <Rectangle>
+<Rectangle>
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                 <GradientStop Color="#F01A2744" Offset="0" />
@@ -239,13 +253,8 @@
                 </Grid>
 
                 <!-- RIGHT SIGN-IN EXPERIENCE -->
-                <Grid Grid.Column="1" Background="#FBFCFE">
-
-                    <Ellipse Width="320" Height="320" Fill="#60EEF2FF" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-145,-130,0" />
-
-                    <Ellipse Width="230" Height="230" Fill="#45EFF6FF" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-100,0,0,-120" />
-
-                    <Grid Margin="54,34">
+                <Grid Grid.Column="1" Background="Transparent">
+<Grid Margin="54,34">
                         <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
 
                         
@@ -433,7 +442,7 @@
                             </StackPanel>
                         </Border>
 
-                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,15,0,0"><TextBlock Text="© 2026 Municipality of Sulop" Foreground="#64748B" FontSize="9" TextAlignment="Center" /><StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0"><TextBlock Text="Powered by ArjunCode Technologies" Foreground="#1F2A44" FontSize="9" FontWeight="SemiBold" VerticalAlignment="Center" /><Ellipse Width="3" Height="3" Fill="#CBD5E1" Margin="8,0" VerticalAlignment="Center" /><TextBlock Text="EKMS-2026-001" Foreground="#94A3B8" FontSize="9" VerticalAlignment="Center" /></StackPanel></StackPanel>
+                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,15,0,0"><TextBlock Text="© 2026 Municipality of Sulop" Foreground="#E2E8F0" FontSize="9" TextAlignment="Center" /><StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0"><TextBlock Text="Powered by ArjunCode Technologies" Foreground="#FFFFFF" FontSize="9" FontWeight="SemiBold" VerticalAlignment="Center" /><Ellipse Width="3" Height="3" Fill="#CBD5E1" Margin="8,0" VerticalAlignment="Center" /><TextBlock Text="EKMS-2026-001" Foreground="#CBD5E1" FontSize="9" VerticalAlignment="Center" /></StackPanel></StackPanel>
                     </Grid>
                 </Grid>
             </Grid>
@@ -471,5 +480,5 @@
                 </StackPanel>
             </Border>
         </Grid>
-    <Button x:Name="LoginCloseButton" Panel.ZIndex="90" Width="36" Height="36" Margin="0,12,12,0" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" Cursor="Hand" FocusVisualStyle="{x:Null}" Click="CloseButton_Click" ToolTip="Close"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="CloseChrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="11"><TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CloseChrome" Property="Background" Value="#FFF1F2" /><Setter TargetName="CloseChrome" Property="BorderBrush" Value="#FECDD3" /></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="CloseChrome" Property="Opacity" Value="0.82" /></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button></Grid>
+    <Button x:Name="LoginCloseButton" Panel.ZIndex="90" Width="36" Height="36" Margin="0,12,12,0" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#24FFFFFF" BorderBrush="#55FFFFFF" BorderThickness="1" Cursor="Hand" FocusVisualStyle="{x:Null}" Click="CloseButton_Click" ToolTip="Close"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="CloseChrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="11"><TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CloseChrome" Property="Background" Value="#3AFFFFFF" /><Setter TargetName="CloseChrome" Property="BorderBrush" Value="#78FFFFFF" /></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="CloseChrome" Property="Opacity" Value="0.82" /></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button></Grid>
 </Window>

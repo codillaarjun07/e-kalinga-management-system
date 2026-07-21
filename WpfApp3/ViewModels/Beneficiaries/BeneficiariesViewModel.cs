@@ -77,6 +77,8 @@ namespace WpfApp3.ViewModels.Beneficiaries
 public string TotalBudgetText =>
             SelectedProject is null ? "Total Budget: ₱ 0.00" : $"Total Budget: {SelectedProject.TotalBudgetText}";
 
+        public bool HasSelectedProject => SelectedProject is not null;
+
         public string AddBeneficiariesTitle =>
             SelectedProject is null
                 ? "Add Beneficiaries"
@@ -181,7 +183,7 @@ public string TotalBudgetText =>
 
         private async Task InitializeAsync()
         {
-            await LoadDataAsync(selectFirstProject: true);
+            await LoadDataAsync();
         }
 
         partial void OnSelectedClassificationChanged(string? value)
@@ -205,9 +207,24 @@ partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
         partial void OnSelectedProjectChanged(AllotmentProjectOption? value)
         {
             SyncProjectSearchTextToSelection();
-
+            OnPropertyChanged(nameof(HasSelectedProject));
             OnPropertyChanged(nameof(TotalBudgetText));
             OnPropertyChanged(nameof(AddBeneficiariesTitle));
+            OnPropertyChanged(nameof(BudgetValueText));
+            OnPropertyChanged(nameof(SelectedProjectSummary));
+
+            if (value is null)
+            {
+                IsProjectDetailsOpen = false;
+                IsAddBeneficiariesOpen = false;
+                IsEditShareOpen = false;
+                IsRemoveOpen = false;
+                _assignedCache.Clear();
+                AddItems.Clear();
+                AddPagedItems.Clear();
+                AddPageNumbers.Clear();
+                Apply();
+            }
 
             if (!_ready) return;
             CurrentPage = 1;
@@ -259,11 +276,12 @@ partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
             ApplyAddPaging();
         }
 
-        private async Task LoadDataAsync(bool selectFirstProject = false)
+        private async Task LoadDataAsync()
         {
             if (IsLoading)
                 return;
 
+            var selectedProjectId = SelectedProject?.Id;
             IsLoading = true;
 
             try
@@ -271,20 +289,31 @@ partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
                 var projects = await Task.Run(() => _allotmentRepo.GetAllProjects());
 
                 Projects.Clear();
-                foreach (var p in projects)
-                    Projects.Add(p);
+                foreach (var project in projects)
+                    Projects.Add(project);
 
-                ApplyProjectFilter(ProjectSearchText);
+                ApplyProjectFilter("");
 
-                if (selectFirstProject || SelectedProject is null || Projects.All(x => x.Id != SelectedProject.Id))
-                    SelectedProject = Projects.FirstOrDefault();
-                else
-                    SyncProjectSearchTextToSelection();
+                AllotmentProjectOption? preservedSelection = null;
+                if (selectedProjectId is not null)
+                {
+                    foreach (var project in Projects)
+                    {
+                        if (project.Id != selectedProjectId.Value)
+                            continue;
 
+                        preservedSelection = project;
+                        break;
+                    }
+                }
+
+                SelectedProject = preservedSelection;
+                SyncProjectSearchTextToSelection();
                 await ReloadEverythingCoreAsync();
             }
             catch
             {
+                SelectedProject = null;
                 Projects.Clear();
                 FilteredProjects.Clear();
                 _assignedCache.Clear();
@@ -587,6 +616,9 @@ partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
         [RelayCommand]
         private async Task OpenAddBeneficiaries()
         {
+            // EKALINGA_PROJECT_SELECTION_GUARD
+            if (SelectedProject is null) return;
+
             AddSearchText = "";
             AddCurrentPage = 1;
             OnPropertyChanged(nameof(AddBeneficiariesTitle));
@@ -804,6 +836,11 @@ partial void OnSearchTextChanged(string value) { CurrentPage = 1; Apply(); }
             OnPropertyChanged(nameof(AddSelectedCount));
             OnPropertyChanged(nameof(AddButtonText));
             OnPropertyChanged(nameof(AddFoundText));
+        }
+        [RelayCommand]
+        private async Task Refresh()
+        {
+            await LoadDataAsync();
         }
 
         // paging

@@ -1,4 +1,5 @@
-﻿<UserControl x:Class="WpfApp3.Views.Analytics.AnalyticsView"
+﻿<!-- EKALINGA_EXACT_LIGHT_DARK_V1 -->
+<UserControl x:Class="WpfApp3.Views.Analytics.AnalyticsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:WpfApp3.ViewModels.Analytics"
@@ -11,24 +12,24 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <SolidColorBrush x:Key="AnalyticsPrimaryBrush" Color="#1F2A44"/>
-        <SolidColorBrush x:Key="AnalyticsPrimaryHoverBrush" Color="#162038"/>
-        <SolidColorBrush x:Key="AnalyticsPageBrush" Color="#F3F5F9"/>
-        <SolidColorBrush x:Key="AnalyticsCardBrush" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="AnalyticsTextBrush" Color="#2E3A59"/>
-        <SolidColorBrush x:Key="AnalyticsMutedBrush" Color="#6B778C"/>
-        <SolidColorBrush x:Key="AnalyticsBorderBrush" Color="#E8EEF6"/>
-        <SolidColorBrush x:Key="AnalyticsSoftBrush" Color="#EEF2FF"/>
-        <SolidColorBrush x:Key="AnalyticsBlueBrush" Color="#2563EB"/>
-        <SolidColorBrush x:Key="AnalyticsBlueSoftBrush" Color="#EFF6FF"/>
-        <SolidColorBrush x:Key="AnalyticsGreenBrush" Color="#16A34A"/>
-        <SolidColorBrush x:Key="AnalyticsGreenSoftBrush" Color="#ECFDF3"/>
-        <SolidColorBrush x:Key="AnalyticsAmberBrush" Color="#D97706"/>
-        <SolidColorBrush x:Key="AnalyticsAmberSoftBrush" Color="#FFF7E8"/>
-        <SolidColorBrush x:Key="AnalyticsPurpleBrush" Color="#7C3AED"/>
-        <SolidColorBrush x:Key="AnalyticsPurpleSoftBrush" Color="#F5F3FF"/>
-        <SolidColorBrush x:Key="AnalyticsRoseBrush" Color="#E11D48"/>
-        <SolidColorBrush x:Key="AnalyticsRoseSoftBrush" Color="#FFF1F2"/>
+        <SolidColorBrush x:Key="AnalyticsPrimaryBrush" Color="{DynamicResource ThemeColor_Accent_1F2A44}"/>
+        <SolidColorBrush x:Key="AnalyticsPrimaryHoverBrush" Color="{DynamicResource ThemeColor_AccentHover_162038}"/>
+        <SolidColorBrush x:Key="AnalyticsPageBrush" Color="{DynamicResource ThemeColor_InfoSoft_F3F5F9}"/>
+        <SolidColorBrush x:Key="AnalyticsCardBrush" Color="{DynamicResource ThemeColor_Surface_FFFFFF}"/>
+        <SolidColorBrush x:Key="AnalyticsTextBrush" Color="{DynamicResource ThemeColor_Accent_2E3A59}"/>
+        <SolidColorBrush x:Key="AnalyticsMutedBrush" Color="{DynamicResource ThemeColor_TextSecondary_6B778C}"/>
+        <SolidColorBrush x:Key="AnalyticsBorderBrush" Color="{DynamicResource ThemeColor_Border_E8EEF6}"/>
+        <SolidColorBrush x:Key="AnalyticsSoftBrush" Color="{DynamicResource ThemeColor_InfoSoft_EEF2FF}"/>
+        <SolidColorBrush x:Key="AnalyticsBlueBrush" Color="{DynamicResource ThemeColor_InfoSoft_2563EB}"/>
+        <SolidColorBrush x:Key="AnalyticsBlueSoftBrush" Color="{DynamicResource ThemeColor_InfoSoft_EFF6FF}"/>
+        <SolidColorBrush x:Key="AnalyticsGreenBrush" Color="{DynamicResource ThemeColor_SuccessSoft_16A34A}"/>
+        <SolidColorBrush x:Key="AnalyticsGreenSoftBrush" Color="{DynamicResource ThemeColor_SuccessSoft_ECFDF3}"/>
+        <SolidColorBrush x:Key="AnalyticsAmberBrush" Color="{DynamicResource ThemeColor_Warning_D97706}"/>
+        <SolidColorBrush x:Key="AnalyticsAmberSoftBrush" Color="{DynamicResource ThemeColor_WarningSoft_FFF7E8}"/>
+        <SolidColorBrush x:Key="AnalyticsPurpleBrush" Color="{DynamicResource ThemeColor_PurpleSoft_7C3AED}"/>
+        <SolidColorBrush x:Key="AnalyticsPurpleSoftBrush" Color="{DynamicResource ThemeColor_PurpleSoft_F5F3FF}"/>
+        <SolidColorBrush x:Key="AnalyticsRoseBrush" Color="{DynamicResource ThemeColor_Danger_E11D48}"/>
+        <SolidColorBrush x:Key="AnalyticsRoseSoftBrush" Color="{DynamicResource ThemeColor_DangerSoft_FFF1F2}"/>
 
         <DropShadowEffect x:Key="AnalyticsCardShadow"
                           BlurRadius="18"
@@ -42,8 +43,8 @@
 
         <Style x:Key="AnalyticsCardStyle"
                TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource AnalyticsCardBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E8EEF6}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="20"/>
             <Setter Property="Padding" Value="18"/>
@@ -59,8 +60,8 @@
 
         <Style x:Key="AnalyticsInsightCardStyle"
                TargetType="Border">
-            <Setter Property="Background" Value="#F8FAFC"/>
-            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E8EEF6}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="14"/>
             <Setter Property="Padding" Value="14,11"/>
@@ -72,9 +73,9 @@
             <Setter Property="Height" Value="40"/>
             <Setter Property="MinWidth" Value="112"/>
             <Setter Property="Padding" Value="15,0"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="{StaticResource AnalyticsTextBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Surface_FFFFFF}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_2E3A59}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Border_E8EEF6}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -96,15 +97,15 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="ButtonBorder"
                                         Property="Background"
-                                        Value="#F8FAFC"/>
+                                        Value="{DynamicResource ThemeBrush_InfoSoft_F8FAFC}"/>
                                 <Setter TargetName="ButtonBorder"
                                         Property="BorderBrush"
-                                        Value="#CBD5E1"/>
+                                        Value="{DynamicResource ThemeBrush_Border_CBD5E1}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="ButtonBorder"
                                         Property="Background"
-                                        Value="#F1F5F9"/>
+                                        Value="{DynamicResource ThemeBrush_InfoSoft_F1F5F9}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.55"/>
@@ -119,9 +120,9 @@
                TargetType="Button"
                BasedOn="{StaticResource AnalyticsSecondaryButtonStyle}">
             <Setter Property="MinWidth" Value="132"/>
-            <Setter Property="Background" Value="{StaticResource AnalyticsPrimaryBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource AnalyticsPrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextPrimary_FFFFFF}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush_Accent_1F2A44}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -138,10 +139,10 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="ButtonBorder"
                                         Property="Background"
-                                        Value="{StaticResource AnalyticsPrimaryHoverBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_AccentHover_162038}"/>
                                 <Setter TargetName="ButtonBorder"
                                         Property="BorderBrush"
-                                        Value="{StaticResource AnalyticsPrimaryHoverBrush}"/>
+                                        Value="{DynamicResource ThemeBrush_AccentHover_162038}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="ButtonBorder"
@@ -159,20 +160,20 @@
 
         <Style x:Key="AnalyticsSectionTitleStyle"
                TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource AnalyticsTextBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_AccentText_2E3A59}"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
 
         <Style x:Key="AnalyticsSectionDescriptionStyle"
                TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource AnalyticsMutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush_TextSecondary_6B778C}"/>
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource AnalyticsPageBrush}">
+    <Grid Background="{DynamicResource ThemeBrush_InfoSoft_F3F5F9}">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,18">
@@ -192,10 +193,10 @@
                         <Border Width="42"
                                 Height="42"
                                 CornerRadius="13"
-                                Background="{StaticResource AnalyticsSoftBrush}">
+                                Background="{DynamicResource ThemeBrush_InfoSoft_EEF2FF}">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE9D2;"
-                                       Foreground="{StaticResource AnalyticsPrimaryBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
                                        FontSize="18"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
@@ -204,17 +205,17 @@
                         <StackPanel Grid.Column="2"
                                     VerticalAlignment="Center">
                             <TextBlock Text="Reports, KPIs, and operational insights"
-                                       Foreground="{StaticResource AnalyticsTextBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                        FontSize="17"
                                        FontWeight="Bold"/>
                             <StackPanel Orientation="Horizontal"
                                         Margin="0,4,0,0">
                                 <TextBlock Text="{Binding LastUpdatedText, Mode=OneWay}"
-                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                            FontSize="11"
                                            VerticalAlignment="Center"/>
                                 <TextBlock Text="Refreshing analytics..."
-                                           Foreground="{StaticResource AnalyticsBlueBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_Info_2563EB}"
                                            FontSize="11"
                                            FontWeight="SemiBold"
                                            Margin="12,0,0,0"
@@ -268,9 +269,9 @@
                             <Border Width="40"
                                     Height="40"
                                     CornerRadius="13"
-                                    Background="{StaticResource AnalyticsGreenSoftBrush}">
+                                    Background="{DynamicResource ThemeBrush_SuccessSoft_ECFDF3}">
                                 <TextBlock Text="₱"
-                                           Foreground="{StaticResource AnalyticsGreenBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_Success_16A34A}"
                                            FontSize="18"
                                            FontWeight="Bold"
                                            HorizontalAlignment="Center"
@@ -279,11 +280,11 @@
                             <StackPanel Grid.Column="1"
                                         VerticalAlignment="Center">
                                 <TextBlock Text="MONETARY ALLOTMENT"
-                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                            FontSize="9"
                                            FontWeight="Bold"/>
                                 <TextBlock Text="{Binding TotalAllotmentAmount, Mode=OneWay}"
-                                           Foreground="{StaticResource AnalyticsTextBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                            FontSize="19"
                                            FontWeight="Bold"
                                            Margin="0,4,0,0"
@@ -301,10 +302,10 @@
                             <Border Width="40"
                                     Height="40"
                                     CornerRadius="13"
-                                    Background="{StaticResource AnalyticsBlueSoftBrush}">
+                                    Background="{DynamicResource ThemeBrush_InfoSoft_EFF6FF}">
                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                            Text="&#xE716;"
-                                           Foreground="{StaticResource AnalyticsBlueBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_Info_2563EB}"
                                            FontSize="17"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
@@ -312,11 +313,11 @@
                             <StackPanel Grid.Column="1"
                                         VerticalAlignment="Center">
                                 <TextBlock Text="TOTAL BENEFICIARIES"
-                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                            FontSize="9"
                                            FontWeight="Bold"/>
                                 <TextBlock Text="{Binding BeneficiariesCount, Mode=OneWay}"
-                                           Foreground="{StaticResource AnalyticsBlueBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_Info_2563EB}"
                                            FontSize="22"
                                            FontWeight="Bold"
                                            Margin="0,3,0,0"/>
@@ -333,10 +334,10 @@
                             <Border Width="40"
                                     Height="40"
                                     CornerRadius="13"
-                                    Background="{StaticResource AnalyticsPurpleSoftBrush}">
+                                    Background="{DynamicResource ThemeBrush_PurpleSoft_F5F3FF}">
                                 <TextBlock FontFamily="Segoe MDL2 Assets"
                                            Text="&#xE8F1;"
-                                           Foreground="{StaticResource AnalyticsPurpleBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_Purple_7C3AED}"
                                            FontSize="17"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
@@ -344,11 +345,11 @@
                             <StackPanel Grid.Column="1"
                                         VerticalAlignment="Center">
                                 <TextBlock Text="TOTAL PROJECTS"
-                                           Foreground="{StaticResource AnalyticsMutedBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                            FontSize="9"
                                            FontWeight="Bold"/>
                                 <TextBlock Text="{Binding ProjectsCount, Mode=OneWay}"
-                                           Foreground="{StaticResource AnalyticsPurpleBrush}"
+                                           Foreground="{DynamicResource ThemeBrush_Purple_7C3AED}"
                                            FontSize="22"
                                            FontWeight="Bold"
                                            Margin="0,3,0,0"/>
@@ -374,10 +375,10 @@
                                 <Border Width="40"
                                         Height="40"
                                         CornerRadius="13"
-                                        Background="{StaticResource AnalyticsAmberSoftBrush}">
+                                        Background="{DynamicResource ThemeBrush_WarningSoft_FFF7E8}">
                                     <TextBlock FontFamily="Segoe MDL2 Assets"
                                                Text="&#xE73E;"
-                                               Foreground="{StaticResource AnalyticsAmberBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Warning_D97706}"
                                                FontSize="17"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"/>
@@ -385,11 +386,11 @@
                                 <StackPanel Grid.Column="1"
                                             VerticalAlignment="Center">
                                     <TextBlock Text="RELEASE COMPLETION"
-                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                                FontSize="9"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="{Binding ReleaseRateText, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsTextBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                                FontSize="20"
                                                FontWeight="Bold"
                                                Margin="0,3,0,0"/>
@@ -397,12 +398,12 @@
                                 <StackPanel Grid.Column="2"
                                             VerticalAlignment="Center">
                                     <TextBlock Text="{Binding ReleasedSummaryText, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsGreenBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Success_16A34A}"
                                                FontSize="10"
                                                FontWeight="SemiBold"
                                                HorizontalAlignment="Right"/>
                                     <TextBlock Text="{Binding PendingSummaryText, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsAmberBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Warning_D97706}"
                                                FontSize="10"
                                                FontWeight="SemiBold"
                                                Margin="0,3,0,0"
@@ -415,8 +416,8 @@
                                          Minimum="0"
                                          Maximum="100"
                                          Value="{Binding ReleaseRateValue, Mode=OneWay}"
-                                         Foreground="{StaticResource AnalyticsGreenBrush}"
-                                         Background="#E8EEF6"
+                                         Foreground="{DynamicResource ThemeBrush_Success_16A34A}"
+                                         Background="{DynamicResource ThemeBrush_InfoSoft_E8EEF6}"
                                          BorderThickness="0"/>
                         </Grid>
                     </Border>
@@ -435,11 +436,11 @@
 
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Operational Snapshot"
-                                       Foreground="{StaticResource AnalyticsTextBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                        FontSize="14"
                                        FontWeight="Bold"/>
                             <TextBlock Text="Quick indicators derived from the current report."
-                                       Foreground="{StaticResource AnalyticsMutedBrush}"
+                                       Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                        FontSize="10"
                                        Margin="0,3,0,0"/>
                         </StackPanel>
@@ -449,11 +450,11 @@
                             <Border Style="{StaticResource AnalyticsInsightCardStyle}">
                                 <StackPanel>
                                     <TextBlock Text="AVERAGE PER PROJECT"
-                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                                FontSize="9"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="{Binding AverageAllocationText, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsTextBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                                FontSize="15"
                                                FontWeight="Bold"
                                                Margin="0,4,0,0"
@@ -464,11 +465,11 @@
                             <Border Style="{StaticResource AnalyticsInsightCardStyle}">
                                 <StackPanel>
                                     <TextBlock Text="BENEFICIARIES / PROJECT"
-                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                                FontSize="9"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="{Binding BeneficiariesPerProjectText, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsBlueBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Info_2563EB}"
                                                FontSize="15"
                                                FontWeight="Bold"
                                                Margin="0,4,0,0"/>
@@ -478,11 +479,11 @@
                             <Border Style="{StaticResource AnalyticsInsightCardStyle}">
                                 <StackPanel>
                                     <TextBlock Text="RELEASED ASSISTANCE"
-                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                                FontSize="9"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="{Binding ReleasedCount, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsGreenBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Success_16A34A}"
                                                FontSize="15"
                                                FontWeight="Bold"
                                                Margin="0,4,0,0"/>
@@ -493,11 +494,11 @@
                                     Margin="0">
                                 <StackPanel>
                                     <TextBlock Text="PENDING ASSISTANCE"
-                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                                FontSize="9"
                                                FontWeight="Bold"/>
                                     <TextBlock Text="{Binding PendingReleaseCount, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsAmberBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_Warning_D97706}"
                                                FontSize="15"
                                                FontWeight="Bold"
                                                Margin="0,4,0,0"/>
@@ -544,12 +545,12 @@
                                             Margin="0,-28,0,0"
                                             IsHitTestVisible="False">
                                     <TextBlock Text="{Binding BeneficiariesCount, Mode=OneWay}"
-                                               Foreground="{StaticResource AnalyticsTextBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                                FontSize="24"
                                                FontWeight="Bold"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="beneficiaries"
-                                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                                FontSize="9"
                                                HorizontalAlignment="Center"/>
                                 </StackPanel>
@@ -581,13 +582,13 @@
                                                 Margin="0,12,0,0">
                                 <lvc:CartesianChart.AxisX>
                                     <lvc:Axis Labels="{Binding YearlyLabels}"
-                                              Foreground="{StaticResource AnalyticsMutedBrush}"
+                                              Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                               FontSize="10"
                                               Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
                                 </lvc:CartesianChart.AxisX>
                                 <lvc:CartesianChart.AxisY>
                                     <lvc:Axis LabelFormatter="{Binding MoneyFormatter}"
-                                              Foreground="{StaticResource AnalyticsMutedBrush}"
+                                              Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                               FontSize="10"
                                               MinValue="0"/>
                                 </lvc:CartesianChart.AxisY>
@@ -617,18 +618,18 @@
                                     Height="28"
                                     Padding="10,0"
                                     CornerRadius="14"
-                                    Background="{StaticResource AnalyticsBlueSoftBrush}"
-                                    BorderBrush="#BFDBFE"
+                                    Background="{DynamicResource ThemeBrush_InfoSoft_EFF6FF}"
+                                    BorderBrush="{DynamicResource ThemeBrush_InfoBorder_BFDBFE}"
                                     BorderThickness="1"
                                     VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
                                     <Ellipse Width="6"
                                              Height="6"
-                                             Fill="{StaticResource AnalyticsBlueBrush}"
+                                             Fill="{DynamicResource ThemeBrush_InfoSoft_2563EB}"
                                              Margin="0,0,7,0"
                                              VerticalAlignment="Center"/>
                                     <TextBlock Text="Project creation trend"
-                                               Foreground="#1D4ED8"
+                                               Foreground="{DynamicResource ThemeBrush_Info_1D4ED8}"
                                                FontSize="10"
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center"/>
@@ -644,13 +645,13 @@
                                             Margin="0,12,0,0">
                             <lvc:CartesianChart.AxisX>
                                 <lvc:Axis Labels="{Binding MonthLabels}"
-                                          Foreground="{StaticResource AnalyticsMutedBrush}"
+                                          Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                           FontSize="10"
                                           Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
                             </lvc:CartesianChart.AxisX>
                             <lvc:CartesianChart.AxisY>
                                 <lvc:Axis LabelFormatter="{Binding CountFormatter}"
-                                          Foreground="{StaticResource AnalyticsMutedBrush}"
+                                          Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                           FontSize="10"
                                           MinValue="0"/>
                             </lvc:CartesianChart.AxisY>
@@ -662,13 +663,13 @@
 
         <!-- LOADING OVERLAY -->
         <Grid Panel.ZIndex="50"
-              Background="#660F172A"
+              Background="{DynamicResource ThemeBrush_Overlay_660F172A}"
               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
             <Border Width="330"
                     Padding="24"
                     CornerRadius="22"
-                    Background="White"
-                    BorderBrush="{StaticResource AnalyticsBorderBrush}"
+                    Background="{DynamicResource ThemeBrush_Surface_FFFFFF}"
+                    BorderBrush="{DynamicResource ThemeBrush_Border_E8EEF6}"
                     BorderThickness="1"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -677,25 +678,25 @@
                     <Border Width="48"
                             Height="48"
                             CornerRadius="15"
-                            Background="{StaticResource AnalyticsSoftBrush}"
+                            Background="{DynamicResource ThemeBrush_InfoSoft_EEF2FF}"
                             HorizontalAlignment="Center">
                         <TextBlock FontFamily="Segoe MDL2 Assets"
                                    Text="&#xE9D2;"
-                                   Foreground="{StaticResource AnalyticsPrimaryBrush}"
+                                   Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
                                    FontSize="21"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>
 
                     <TextBlock Text="Refreshing analytics"
-                               Foreground="{StaticResource AnalyticsTextBrush}"
+                               Foreground="{DynamicResource ThemeBrush_AccentText_2E3A59}"
                                FontSize="17"
                                FontWeight="Bold"
                                Margin="0,14,0,0"
                                HorizontalAlignment="Center"/>
 
                     <TextBlock Text="Please wait while the latest report data is loaded."
-                               Foreground="{StaticResource AnalyticsMutedBrush}"
+                               Foreground="{DynamicResource ThemeBrush_TextSecondary_6B778C}"
                                FontSize="11"
                                Margin="0,6,0,0"
                                TextAlignment="Center"
@@ -704,8 +705,8 @@
                     <ProgressBar IsIndeterminate="True"
                                  Height="7"
                                  Margin="0,18,0,0"
-                                 Foreground="{StaticResource AnalyticsPrimaryBrush}"
-                                 Background="{StaticResource AnalyticsSoftBrush}"
+                                 Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
+                                 Background="{DynamicResource ThemeBrush_InfoSoft_EEF2FF}"
                                  BorderThickness="0"/>
                 </StackPanel>
             </Border>

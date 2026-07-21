@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WpfApp3.Models;
 using WpfApp3.Services;
@@ -79,10 +80,12 @@ namespace WpfApp3.ViewModels.Distribution
         public string TotalBudgetText =>
             SelectedProject is null ? "Total Budget: -" : $"Total Budget: {SelectedProject.TotalBudgetText}";
 
+        public bool HasSelectedProject => SelectedProject is not null;
+
         // ===== Toast =====
         [ObservableProperty] private bool isToastVisible;
         [ObservableProperty] private string toastMessage = "";
-        [ObservableProperty] private string toastBackground = "#2E3A59";
+        [ObservableProperty] private Brush toastBackground = GetThemeBrush("ThemePrimaryBrush");
         private CancellationTokenSource? _toastCts;
 
         // ===== Release session modal =====
@@ -200,7 +203,7 @@ namespace WpfApp3.ViewModels.Distribution
 
         private async Task InitializeAsync()
         {
-            await LoadDataAsync(selectFirstProject: true);
+            await LoadDataAsync();
         }
 
         partial void OnSelectedClassificationChanged(string? value)
@@ -259,10 +262,23 @@ namespace WpfApp3.ViewModels.Distribution
         partial void OnSelectedProjectChanged(AllotmentProjectOption? value)
         {
             SyncProjectSearchTextToSelection();
+            OnPropertyChanged(nameof(HasSelectedProject));
             OnPropertyChanged(nameof(TotalBudgetText));
             OnPropertyChanged(nameof(ReleaseProjectText));
             OnPropertyChanged(nameof(ReleaseBudgetText));
             OnPropertyChanged(nameof(SelectedProjectSummary));
+
+            if (value is null)
+            {
+                IsReleaseSessionOpen = false;
+                IsConfirmReleaseOpen = false;
+                IsReportPreviewOpen = false;
+                ReleaseItems.Clear();
+                ReleasePagedItems.Clear();
+                ScanInput = "";
+                _cache.Clear();
+                ApplyPaging();
+            }
 
             if (!_ready) return;
             CurrentPage = 1;
@@ -282,35 +298,44 @@ namespace WpfApp3.ViewModels.Distribution
 
         partial void OnCurrentPageChanged(int value) => ApplyPaging();
 
-        private async Task LoadDataAsync(bool selectFirstProject = false)
+        private async Task LoadDataAsync()
         {
             if (IsLoading)
                 return;
 
+            var selectedProjectId = SelectedProject?.Id;
             IsLoading = true;
 
             try
             {
-                var result = await Task.Run(() => new
-                {
-                    Projects = _allotmentRepo.GetAllProjects()
-                });
+                var projects = await Task.Run(() => _allotmentRepo.GetAllProjects());
 
                 Projects.Clear();
-                foreach (var p in result.Projects)
-                    Projects.Add(p);
+                foreach (var project in projects)
+                    Projects.Add(project);
 
-                ApplyProjectFilter(ProjectSearchText);
+                ApplyProjectFilter("");
 
-                if (selectFirstProject || SelectedProject is null || Projects.All(x => x.Id != SelectedProject.Id))
-                    SelectedProject = Projects.FirstOrDefault();
-                else
-                    SyncProjectSearchTextToSelection();
+                AllotmentProjectOption? preservedSelection = null;
+                if (selectedProjectId is not null)
+                {
+                    foreach (var project in Projects)
+                    {
+                        if (project.Id != selectedProjectId.Value)
+                            continue;
 
+                        preservedSelection = project;
+                        break;
+                    }
+                }
+
+                SelectedProject = preservedSelection;
+                SyncProjectSearchTextToSelection();
                 await LoadBeneficiariesCoreAsync();
             }
             catch
             {
+                SelectedProject = null;
                 Projects.Clear();
                 FilteredProjects.Clear();
                 _cache.Clear();
@@ -522,7 +547,13 @@ namespace WpfApp3.ViewModels.Distribution
             NotifyCommandCenterState();
         }
 
-        private async void ShowToast(string msg, string kind)
+                private static Brush GetThemeBrush(string key)
+        {
+            return Application.Current?.TryFindResource(key) as Brush
+                ?? Brushes.SlateGray;
+        }
+
+private async void ShowToast(string msg, string kind)
         {
             _toastCts?.Cancel();
             _toastCts = new CancellationTokenSource();
@@ -531,10 +562,10 @@ namespace WpfApp3.ViewModels.Distribution
             ToastMessage = msg;
             ToastBackground = kind switch
             {
-                "success" => "#16A34A",
-                "error" => "#E11D48",
-                "warning" => "#F59E0B",
-                _ => "#2E3A59"
+                "success" => GetThemeBrush("ThemeSuccessBrush"),
+                "error" => GetThemeBrush("ThemeDangerBrush"),
+                "warning" => GetThemeBrush("ThemeWarningBrush"),
+                _ => GetThemeBrush("ThemePrimaryBrush")
             };
 
             IsToastVisible = true;
@@ -853,6 +884,12 @@ namespace WpfApp3.ViewModels.Distribution
 
 
         // paging (main page)
+        [RelayCommand]
+        private async Task Refresh()
+        {
+            await LoadDataAsync();
+        }
+
         [RelayCommand] private void PreviousPage() { if (CurrentPage > 1) CurrentPage--; }
         [RelayCommand] private void NextPage() { if (CurrentPage < TotalPages) CurrentPage++; }
         [RelayCommand] private void GoToPage(int page) { CurrentPage = page; }
