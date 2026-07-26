@@ -4,6 +4,7 @@ using WpfApp3.Models;
 
 namespace WpfApp3.Services
 {
+    // EKALINGA_DISTRIBUTION_SEARCH_PROFILE_V2
     public class AllotmentBeneficiariesRepository
     {
         private readonly AuditLogsService _auditLogsService = new();
@@ -23,6 +24,7 @@ SELECT
     b.gender,
     b.barangay,
     IFNULL(b.classification,'None') AS classification,
+    b.profile_image,
     ab.share_amount,
     ab.share_qty,
     ab.share_unit,
@@ -44,6 +46,7 @@ ORDER BY b.last_name, b.first_name;";
             var oGender = rd.GetOrdinal("gender");
             var oBarangay = rd.GetOrdinal("barangay");
             var oClass = rd.GetOrdinal("classification");
+            var oProfileImage = rd.GetOrdinal("profile_image");
             var oShareAmt = rd.GetOrdinal("share_amount");
             var oShareQty = rd.GetOrdinal("share_qty");
             var oShareUnit = rd.GetOrdinal("share_unit");
@@ -60,6 +63,7 @@ ORDER BY b.last_name, b.first_name;";
                     Gender = rd.IsDBNull(oGender) ? "" : rd.GetString(oGender),
                     Barangay = rd.IsDBNull(oBarangay) ? "" : rd.GetString(oBarangay),
                     Classification = rd.IsDBNull(oClass) ? "None" : rd.GetString(oClass),
+                    ProfileImage = rd.IsDBNull(oProfileImage) ? null : (byte[])rd.GetValue(oProfileImage),
                     ShareAmount = rd.IsDBNull(oShareAmt) ? (decimal?)null : rd.GetDecimal(oShareAmt),
                     ShareQty = rd.IsDBNull(oShareQty) ? (int?)null : rd.GetInt32(oShareQty),
                     ShareUnit = rd.IsDBNull(oShareUnit) ? null : rd.GetString(oShareUnit),
@@ -84,7 +88,8 @@ SELECT
     b.last_name,
     b.gender,
     b.barangay,
-    IFNULL(b.classification,'None') AS classification
+    IFNULL(b.classification,'None') AS classification,
+    b.profile_image
 FROM beneficiaries b
 LEFT JOIN allotment_beneficiaries ab
     ON ab.beneficiary_id = b.id
@@ -118,6 +123,9 @@ ORDER BY b.last_name, b.first_name;";
                     Gender = rd.GetString("gender"),
                     Barangay = rd.GetString("barangay"),
                     Classification = rd.GetString("classification"),
+                    ProfileImage = rd.IsDBNull(rd.GetOrdinal("profile_image"))
+                        ? null
+                        : (byte[])rd["profile_image"],
                 });
             }
 

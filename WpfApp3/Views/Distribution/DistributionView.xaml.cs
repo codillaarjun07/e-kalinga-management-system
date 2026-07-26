@@ -12,6 +12,8 @@ using WpfApp3.ViewModels.Distribution;
 
 namespace WpfApp3.Views.Distribution
 {
+    // EKALINGA_DISTRIBUTION_RELEASE_SPLIT_V1
+    // EKALINGA_DISTRIBUTION_SEARCH_PROFILE_V2
     public partial class DistributionView : UserControl
     {
         private readonly StringBuilder _scanBuffer = new();
@@ -204,6 +206,21 @@ namespace WpfApp3.Views.Distribution
             return false;
         }
 
+        private void ManualReleaseIdTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter && e.Key != Key.Return)
+                return;
+
+            if (DataContext is DistributionViewModel vm)
+            {
+                var value = (vm.ScanInput ?? "").Trim();
+                if (!string.IsNullOrWhiteSpace(value) && vm.ScanCommand.CanExecute(value))
+                    vm.ScanCommand.Execute(value);
+            }
+
+            e.Handled = true;
+        }
+
         private void HookVm()
         {
             if (_observedVm is not null)
@@ -318,6 +335,11 @@ namespace WpfApp3.Views.Distribution
                 return;
             }
 
+            // Allow normal keyboard typing while the manual ID field is focused.
+            if (ManualReleaseIdTextBox?.IsKeyboardFocusWithin == true ||
+                ReleaseQueueSearchTextBox?.IsKeyboardFocusWithin == true)
+                return;
+
             _scanBuffer.Append(e.Text);
             vm.ScanInput = _scanBuffer.ToString();
             e.Handled = true;
@@ -335,6 +357,11 @@ namespace WpfApp3.Views.Distribution
 
                 return;
             }
+
+            // The TextBox handles manual entry and Enter itself.
+            if (ManualReleaseIdTextBox?.IsKeyboardFocusWithin == true ||
+                ReleaseQueueSearchTextBox?.IsKeyboardFocusWithin == true)
+                return;
 
             if (e.Key == Key.Enter || e.Key == Key.Return || e.Key == Key.Tab)
             {

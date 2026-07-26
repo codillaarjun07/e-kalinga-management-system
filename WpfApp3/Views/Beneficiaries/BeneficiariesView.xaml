@@ -1,4 +1,5 @@
-﻿<UserControl x:Class="WpfApp3.Views.Beneficiaries.BeneficiariesView" x:Name="Root" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="clr-namespace:WpfApp3.ViewModels.Beneficiaries" xmlns:conv="clr-namespace:WpfApp3.Views.Allotment">
+﻿<!-- EKALINGA_DISTRIBUTION_SEARCH_PROFILE_V2 -->
+<UserControl x:Class="WpfApp3.Views.Beneficiaries.BeneficiariesView" x:Name="Root" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="clr-namespace:WpfApp3.ViewModels.Beneficiaries" xmlns:conv="clr-namespace:WpfApp3.Views.Allotment">
 
     <UserControl.DataContext>
         <vm:BeneficiariesViewModel />
@@ -888,9 +889,41 @@
                                                     <ColumnDefinition Width="40" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <Border Width="32" Height="32" CornerRadius="16" Background="{DynamicResource ThemeBrush_Accent_EEF2FF}" VerticalAlignment="Center">
-                                                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="" Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
+<Grid Width="32" Height="32" VerticalAlignment="Center">
+                                                        <Ellipse Fill="{DynamicResource ThemeBrush_Accent_EEF2FF}" />
+                                                        <Ellipse>
+                                                            <Ellipse.Fill>
+                                                                <ImageBrush ImageSource="{Binding ProfileImagePreview}" Stretch="UniformToFill" />
+                                                            </Ellipse.Fill>
+                                                            <Ellipse.Style>
+                                                                <Style TargetType="Ellipse">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasProfileImage}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Ellipse.Style>
+                                                        </Ellipse>
+                                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                                   Text=""
+                                                                   Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
+                                                                   FontSize="15"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasProfileImage}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                     <TextBlock Foreground="{DynamicResource ThemeBrush_AccentText_0F172A}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
                                                         <TextBlock.Text>
@@ -1453,9 +1486,41 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <CheckBox Grid.Column="0" Style="{StaticResource AddSelectionCheckBoxStyle}" VerticalAlignment="Center" IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False" />
-                        <Border Grid.Column="1" Width="30" Height="30" CornerRadius="15" Background="{DynamicResource ThemeBrush_Accent_EEF2FF}" VerticalAlignment="Center">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="" Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
+<Grid Grid.Column="1" Width="30" Height="30" VerticalAlignment="Center">
+                                                        <Ellipse Fill="{DynamicResource ThemeBrush_Accent_EEF2FF}" />
+                                                        <Ellipse>
+                                                            <Ellipse.Fill>
+                                                                <ImageBrush ImageSource="{Binding ProfileImagePreview}" Stretch="UniformToFill" />
+                                                            </Ellipse.Fill>
+                                                            <Ellipse.Style>
+                                                                <Style TargetType="Ellipse">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasProfileImage}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Ellipse.Style>
+                                                        </Ellipse>
+                                                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                                   Text=""
+                                                                   Foreground="{DynamicResource ThemeBrush_AccentText_1F2A44}"
+                                                                   FontSize="14"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding HasProfileImage}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Grid>
                     </Grid>
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>

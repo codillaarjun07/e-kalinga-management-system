@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace WpfApp3.Models
 {
+    // EKALINGA_DISTRIBUTION_SEARCH_PROFILE_V2
     public partial class BeneficiaryRecord : ObservableObject
     {
         [ObservableProperty] private bool isSelected;
@@ -27,6 +30,10 @@ namespace WpfApp3.Models
         [ObservableProperty] private string civilRegistryId = "";
         [ObservableProperty] private string middleName = "";
         [ObservableProperty] private string presentAddress = "";
+        [ObservableProperty] private byte[]? profileImage;
+        [ObservableProperty] private BitmapImage? profileImagePreview;
+
+        public bool HasProfileImage => ProfileImagePreview != null;
 
         // ✅ display text used by XAML binding ShareText
         public string ShareText
@@ -49,5 +56,33 @@ namespace WpfApp3.Models
         partial void OnShareAmountChanged(decimal? value) => OnPropertyChanged(nameof(ShareText));
         partial void OnShareQtyChanged(int? value) => OnPropertyChanged(nameof(ShareText));
         partial void OnShareUnitChanged(string? value) => OnPropertyChanged(nameof(ShareText));
+
+        partial void OnProfileImageChanged(byte[]? value)
+        {
+            ProfileImagePreview = ToBitmap(value);
+            OnPropertyChanged(nameof(HasProfileImage));
+        }
+
+        private static BitmapImage? ToBitmap(byte[]? bytes)
+        {
+            if (bytes is null || bytes.Length == 0)
+                return null;
+
+            try
+            {
+                using var stream = new MemoryStream(bytes);
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = stream;
+                image.EndInit();
+                image.Freeze();
+                return image;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

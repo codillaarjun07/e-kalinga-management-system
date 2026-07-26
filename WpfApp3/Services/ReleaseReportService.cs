@@ -8,6 +8,7 @@ using System.IO;
 
 namespace WpfApp3.Services
 {
+    // EKALINGA_DISTRIBUTION_RELEASE_SPLIT_V1
     public sealed class ReleaseReportService
     {
         private const string Primary = "#4F46E5";
@@ -133,7 +134,7 @@ namespace WpfApp3.Services
                 row.RelativeItem().Column(col =>
                 {
                     col.Spacing(4);
-                    col.Item().Text("Release Session Report").FontSize(20).Bold();
+                    col.Item().Text("Released Beneficiaries Report").FontSize(20).Bold();
                     col.Item().Text(data.ProjectName).FontSize(14).SemiBold();
                     col.Item().Text($"Generated: {data.GeneratedAt:MMMM dd, yyyy hh:mm tt}")
                         .FontColor(TextSecondary);
@@ -210,16 +211,16 @@ namespace WpfApp3.Services
                 row.RelativeItem().Element(c => ComposeCard(c, "Total Budget", data.TotalBudgetText));
                 row.RelativeItem().Element(c => ComposeCard(
                     c,
-                    "Beneficiaries",
-                    data.TotalBeneficiaries.ToString("N0", CultureInfo.InvariantCulture)));
+                    "Released Beneficiaries",
+                    data.ReleasedCount.ToString("N0", CultureInfo.InvariantCulture)));
                 row.RelativeItem().Element(c => ComposeCard(
                     c,
-                    "Released",
-                    $"{data.ReleasedCount:N0} ({data.ReleaseRate:0.0}%)"));
+                    "Released Allocation",
+                    data.ReleasedAmountText));
                 row.RelativeItem().Element(c => ComposeCard(
                     c,
-                    "Outstanding",
-                    $"{data.PendingCount:N0} ({100 - data.ReleaseRate:0.0}%)"));
+                    "Generated",
+                    data.GeneratedAt.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)));
             });
         }
 
@@ -248,45 +249,14 @@ namespace WpfApp3.Services
                 .Column(col =>
                 {
                     col.Spacing(8);
-                    col.Item().Text("Release Status Overview").FontSize(12).SemiBold();
+                    col.Item().Text("Released Beneficiary Summary").FontSize(12).SemiBold();
                     col.Item().Text(
-                            $"Released amount: {data.ReleasedAmountText}    Pending amount: {data.PendingAmountText}")
+                            $"This report contains only released beneficiaries. Total released: {data.ReleasedCount:N0}.")
                         .FontColor(TextSecondary)
                         .FontSize(9);
-
-                    col.Item().Row(row =>
-                    {
-                        row.ConstantItem(430).Height(18).Layers(layers =>
-                        {
-                            var totalWidth = 430f;
-                            var releasedWidth = data.TotalBeneficiaries == 0
-                                ? 0
-                                : totalWidth * data.ReleasedCount / (float)data.TotalBeneficiaries;
-
-                            layers.PrimaryLayer()
-                                .Background("#E2E8F0")
-                                .CornerRadius(9);
-
-                            if (releasedWidth > 0)
-                            {
-                                layers.Layer()
-                                    .AlignLeft()
-                                    .Width(releasedWidth)
-                                    .Background(Primary)
-                                    .CornerRadius(9);
-                            }
-                        });
-
-                        row.ConstantItem(12);
-
-                        row.RelativeItem().Column(inner =>
-                        {
-                            inner.Item().Text($"{data.ReleasedCount} released").SemiBold();
-                            inner.Item().Text($"{data.PendingCount} pending")
-                                .FontColor(TextSecondary)
-                                .FontSize(9);
-                        });
-                    });
+                    col.Item().Text($"Released allocation: {data.ReleasedAmountText}")
+                        .FontSize(11)
+                        .SemiBold();
                 });
         }
 

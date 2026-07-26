@@ -13,6 +13,8 @@ using static WpfApp3.ViewModels.Validators.ValidatorsViewModel;
 
 namespace WpfApp3.ViewModels.Distribution
 {
+    // EKALINGA_DISTRIBUTION_SEARCH_PROFILE_V2
+    // EKALINGA_DISTRIBUTION_RELEASE_SPLIT_V1
     public partial class DistributionViewModel : ObservableObject
     {
         private readonly AllotmentsRepository _allotmentRepo = new();
@@ -25,12 +27,22 @@ namespace WpfApp3.ViewModels.Distribution
         {
             SelectedDistributionStatus =
                 string.IsNullOrWhiteSpace(status)
-                    ? "All"
+                    ? "Waiting"
+                    : status.Trim();
+        }
+
+        [RelayCommand]
+        private void SetReleaseStatus(string? status)
+        {
+            ReleaseSelectedStatus =
+                string.IsNullOrWhiteSpace(status)
+                    ? "Waiting"
                     : status.Trim();
         }
         // paging (main page)
         [ObservableProperty] private int currentPage = 1;
         [ObservableProperty] private bool isLoading;
+        [ObservableProperty] private string distributionSearchText = "";
         public int PageSize { get; } = 8;
 
         public ObservableCollection<AllotmentProjectOption> Projects { get; } = new();
@@ -93,8 +105,9 @@ namespace WpfApp3.ViewModels.Distribution
         public ObservableCollection<BeneficiaryRecord> ReleaseItems { get; } = new();
         [ObservableProperty] private BeneficiaryRecord? selectedReleaseRow;
 
-        // shows scanned text in UI textbox
+        // shows scanned or manually entered beneficiary ID
         [ObservableProperty] private string scanInput = "";
+        [ObservableProperty] private string releaseSearchText = "";
 
         public string ReleaseProjectText => SelectedProject is null ? "" : $"Project: {SelectedProject.ProjectName}";
         public string ReleaseBudgetText => SelectedProject is null ? "" : $"Budget: {SelectedProject.TotalBudgetText}";
@@ -119,12 +132,11 @@ namespace WpfApp3.ViewModels.Distribution
 
         public ObservableCollection<string> DistributionStatusOptions { get; } = new()
         {
-            "All",
             "Waiting",
             "Released"
         };
 
-        [ObservableProperty] private string? selectedDistributionStatus = "All";
+        [ObservableProperty] private string? selectedDistributionStatus = "Waiting";
 
         // ===== Release modal paging =====
         [ObservableProperty] private int releaseCurrentPage = 1;
@@ -136,7 +148,17 @@ namespace WpfApp3.ViewModels.Distribution
         public int ReleaseTotalRecords => ReleaseFiltered().Count();
         public int ReleaseTotalPages => Math.Max(1, (int)Math.Ceiling(ReleaseTotalRecords / (double)ReleasePageSize));
 
+        public ObservableCollection<string> ReleaseStatusOptions { get; } = new()
+        {
+            "Waiting",
+            "Released"
+        };
+
+        [ObservableProperty] private string? releaseSelectedStatus = "Waiting";
         [ObservableProperty] private string? releaseSelectedClassification = "All";
+
+        public string ReleaseWaitingTabText => $"Waiting ({ReleaseItems.Count(x => !x.IsReleased)})";
+        public string ReleaseReleasedTabText => $"Released ({ReleaseItems.Count(x => x.IsReleased)})";
 
         [ObservableProperty] private BeneficiaryRecord? pendingRelease;
 
@@ -213,6 +235,13 @@ namespace WpfApp3.ViewModels.Distribution
             ApplyPaging();
         }
 
+        partial void OnDistributionSearchTextChanged(string value)
+        {
+            if (!_ready) return;
+            CurrentPage = 1;
+            ApplyPaging();
+        }
+
         private List<BeneficiaryRecord> Filtered()
         {
             IEnumerable<BeneficiaryRecord> src = _cache;
@@ -246,6 +275,16 @@ namespace WpfApp3.ViewModels.Distribution
                 src = src.Where(x => x.IsReleased);
             else if (status.Equals("Waiting", StringComparison.OrdinalIgnoreCase))
                 src = src.Where(x => !x.IsReleased);
+
+            var search = (DistributionSearchText ?? "").Trim();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                src = src.Where(x =>
+                    ContainsIgnoreCase(x.FirstName, search) ||
+                    ContainsIgnoreCase(x.LastName, search) ||
+                    ContainsIgnoreCase($"{x.FirstName} {x.LastName}", search) ||
+                    ContainsIgnoreCase(x.BeneficiaryId, search));
+            }
 
             return src.ToList();
         }
@@ -445,6 +484,8 @@ namespace WpfApp3.ViewModels.Distribution
             OnPropertyChanged(nameof(ReleaseCompletionPercentage));
             OnPropertyChanged(nameof(ReleaseCompletionText));
             OnPropertyChanged(nameof(ReleaseProgressText));
+            OnPropertyChanged(nameof(ReleaseWaitingTabText));
+            OnPropertyChanged(nameof(ReleaseReleasedTabText));
         }
 
         private void ApplyProjectFilter(string? query)
@@ -601,17 +642,23 @@ private async void ShowToast(string msg, string kind)
                     ReloadReleaseItems();
 
                 activeFilter = NormalizeLabel(ReleaseSelectedClassification, "All");
-                reportRows = ReleaseFiltered().ToList();
+                reportRows = ReleaseItems
+                    .Where(x => x.IsReleased)
+                    .Where(x => MatchesClassification(x, ReleaseSelectedClassification))
+                    .ToList();
             }
             else
             {
                 activeFilter = NormalizeLabel(SelectedClassification, "All");
-                reportRows = Filtered().ToList();
+                reportRows = _cache
+                    .Where(x => x.IsReleased)
+                    .Where(x => MatchesClassification(x, SelectedClassification))
+                    .ToList();
             }
 
             if (reportRows.Count == 0)
             {
-                ShowToast("No release records found for the current filter.", "warning");
+                ShowToast("No released beneficiaries are available for this report.", "warning");
                 return;
             }
 
@@ -717,8 +764,10 @@ private async void ShowToast(string msg, string kind)
 
             ScanInput = "";
 
-            ReleaseCurrentPage = 1;     // ✅ start at page 1
+            ReleaseCurrentPage = 1;
+            ReleaseSelectedStatus = "Waiting";
             ReleaseSelectedClassification = SelectedClassification ?? "All";
+            ReleaseSearchText = "";
             ReloadReleaseItems();
 
             IsReleaseSessionOpen = true;
@@ -741,9 +790,10 @@ private async void ShowToast(string msg, string kind)
             // ✅ always show scanned value in textbox
             ScanInput = raw;
 
-            // ✅ compare as-is (case-insensitive)
+            // Match either the public beneficiary ID/barcode or the internal numeric record ID.
             var hit = ReleaseItems.FirstOrDefault(x =>
-                string.Equals((x.BeneficiaryId ?? "").Trim(), raw, StringComparison.OrdinalIgnoreCase));
+                string.Equals((x.BeneficiaryId ?? "").Trim(), raw, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(x.Id.ToString(CultureInfo.InvariantCulture), raw, StringComparison.OrdinalIgnoreCase));
 
             var idx = ReleaseItems.IndexOf(hit);
             if (idx >= 0)
@@ -754,7 +804,7 @@ private async void ShowToast(string msg, string kind)
 
             if (hit is null)
             {
-                ShowToast($"Scan not found: {raw}", "error");
+                ShowToast($"Beneficiary ID not found: {raw}", "error");
                 return;
             }
 
@@ -779,7 +829,7 @@ private async void ShowToast(string msg, string kind)
             ConfirmShare = hit.ShareText;
 
             IsConfirmReleaseOpen = true;
-            ShowToast($"Scan success: {raw}", "success");
+            ShowToast($"Beneficiary found: {raw}", "success");
         }
 
         [RelayCommand]
@@ -857,9 +907,28 @@ private async void ShowToast(string msg, string kind)
             ApplyReleasePaging();
         }
 
+        partial void OnReleaseSelectedStatusChanged(string? value)
+        {
+            if (!_ready) return;
+            ReleaseCurrentPage = 1;
+            ApplyReleasePaging();
+        }
+
+        partial void OnReleaseSearchTextChanged(string value)
+        {
+            if (!_ready) return;
+            ReleaseCurrentPage = 1;
+            ApplyReleasePaging();
+        }
+
         private IEnumerable<BeneficiaryRecord> ReleaseFiltered()
         {
             IEnumerable<BeneficiaryRecord> src = ReleaseItems;
+
+            var status = (ReleaseSelectedStatus ?? "Waiting").Trim();
+            src = status.Equals("Released", StringComparison.OrdinalIgnoreCase)
+                ? src.Where(x => x.IsReleased)
+                : src.Where(x => !x.IsReleased);
 
             var cls = (ReleaseSelectedClassification ?? "").Trim();
             if (!string.IsNullOrWhiteSpace(cls) && !cls.Equals("All", StringComparison.OrdinalIgnoreCase))
@@ -877,6 +946,16 @@ private async void ShowToast(string msg, string kind)
                     src = src.Where(x =>
                         string.Equals((x.Classification ?? "").Trim(), cls, StringComparison.OrdinalIgnoreCase));
                 }
+            }
+
+            var search = (ReleaseSearchText ?? "").Trim();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                src = src.Where(x =>
+                    ContainsIgnoreCase(x.FirstName, search) ||
+                    ContainsIgnoreCase(x.LastName, search) ||
+                    ContainsIgnoreCase($"{x.FirstName} {x.LastName}", search) ||
+                    ContainsIgnoreCase(x.BeneficiaryId, search));
             }
 
             return src;
@@ -1009,6 +1088,19 @@ private async void ShowToast(string msg, string kind)
             }
 
             OnPropertyChanged(nameof(HasConfirmReleaseHistory));
+        }
+
+        private static bool MatchesClassification(BeneficiaryRecord row, string? selectedClassification)
+        {
+            var selected = (selectedClassification ?? "All").Trim();
+            if (string.IsNullOrWhiteSpace(selected) || selected.Equals("All", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            var actual = (row.Classification ?? "").Trim();
+            if (selected.Equals("None", StringComparison.OrdinalIgnoreCase))
+                return string.IsNullOrWhiteSpace(actual) || actual.Equals("None", StringComparison.OrdinalIgnoreCase);
+
+            return actual.Equals(selected, StringComparison.OrdinalIgnoreCase);
         }
 
         private ReleaseReportData BuildReleaseReportData(List<BeneficiaryRecord> rows, string classificationFilter)
